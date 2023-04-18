@@ -245,6 +245,12 @@
   '((sequence "TODO(!)" "INPROGRESS(!)" "WAIT(w@/!)" "|" "DONE" "CANCELLED")
     ;("WOEng(e/!) WOUps(u/!) WOCus(c/!) WOOps(o/!) WOSup(s/!) | RESOLVED DEESCLATED REASSIGNED")
     ))
+  ;(setq org-log-into-drawer 't) ;;TODO: Check if this breaks clock logging
+  ;(add-to-list org-todo-keyword-faces `("WOCUS" . +org-todo-onhold))
+  ;(add-to-list org-todo-keyword-faces '("WOSUP" . +org-todo-onhold))
+  ;(add-to-list org-todo-keyword-faces '("WOOPS" . +org-todo-onhold))
+  ;(add-to-list org-todo-keyword-faces '("WOUPS" . +org-todo-onhold))
+  (setq org-log-done 't)
   (setq org-todo-keywords-for-agenda org-todo-keywords)
   (setq org-table-duration-custom-format 'minutes)
   (setq org-clock-persist 't)

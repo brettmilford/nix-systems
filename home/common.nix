@@ -31,12 +31,12 @@
       k = "kubectl ";
       kx = "f() { [ \"$1\" ] && kubectl config use-context $1 || kubectl config current-context ; } ; f";
       kn = "f() { [ \"$1\" ] && kubectl config set-context --current --namespace $1 || kubectl config view --minify | grep namespace | cut -d\" \" -f6 ; } ; f";
-      knl = "kubectl get ns";
+      kns = "kubectl get ns";
       ls = "ls -G ";
       http_serve = "python3 -m http.server 8080";
       j = "juju ";
       jw = "watch -tc juju status --color";
-      mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd !$; } ; f";
+      mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
       segmaassh = "f() { hostname=$1; shift; ssh ubuntu@`maas segmaas machines read hostname=\${hostname} | jq -r '.[].ip_addresses | .[]'` $@ ; } ; f";
   };
 

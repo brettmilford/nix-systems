@@ -33,7 +33,9 @@ cmd - m : open "/Applications/Utilities/Activity Monitor.app"
 cmd + shift - return : open /Applications/Firefox.app
 
 # close focused window
-alt - w : yabai -m window --close
+# alt - w : yabai -m window --close
+# minimize focused window
+alt - w : yabai -m window --minimize
 
 # focus window
 alt - h : yabai -m window --focus west
@@ -45,7 +47,7 @@ alt - p : yabai -m window --focus prev
 alt - n : yabai -m window --focus next
 
 # equalize size of windows
-shift + alt - 0 : yabai -m space --equalize
+shift + alt - 0 : yabai -m space --balance
 
 # swap window
 shift + alt - h : yabai -m window --swap west
@@ -53,20 +55,26 @@ shift + alt - j : yabai -m window --swap south
 shift + alt - k : yabai -m window --swap north
 shift + alt - l : yabai -m window --swap east
 
-# move window
-shift + cmd - h : yabai -m window --warp west
-shift + cmd - j : yabai -m window --warp south
-shift + cmd - k : yabai -m window --warp north
-shift + cmd - l : yabai -m window --warp east
+# "warp" window
+#shift + cmd - h : yabai -m window --warp west
+#shift + cmd - j : yabai -m window --warp south
+#shift + cmd - k : yabai -m window --warp north
+#shift + cmd - l : yabai -m window --warp east
 
 # make floating window fill screen
-shift + alt - up     : yabai -m window --grid-layout 1:1:0:0:1:1
+# shift + alt - up : yabai -m window --grid 1:1:0:0:1:1
 
-# make floating window fill left-half of screen
-shift + alt - left   : yabai -m window --grid-layout 1:2:0:0:1:1
+# float left
+shift + alt - left : yabai -m window --toggle float; \
+      yabai -m window --grid 1:2:0:0:1:1
 
-# make floating window fill right-half of screen
-shift + alt - right  : yabai -m window --grid-layout 1:2:1:0:1:1
+# float right
+shift + alt - right : yabai -m window --toggle float; \
+      yabai -m window --grid 1:2:1:0:1:1
+
+# float center
+#alt + shift - t : yabai -m window --toggle float; \
+#          yabai -m window --grid 4:4:1:1:2:2
 
 # fast focus desktop
 cmd + alt - l : yabai -m space --focus recent
@@ -105,7 +113,7 @@ ctrl + cmd - 2  : yabai -m window --send-to-monitor 2; yabai -m display -f 2
 ctrl + cmd - 3  : yabai -m window --send-to-monitor 3; yabai -m display -f 3
 
 # increase + decrease region size
-# use mouse...
+# NOTE: use mouse...
 #shift + alt - a : yabai -m window --use-temporary-ratio 0.05 --adjust-window-edge west; yabai -m window --use-temporary-ratio -0.05 --adjust-window-edge east
 #shift + alt - s : yabai -m window --use-temporary-ratio 0.05 --adjust-window-edge south; yabai -m window --use-temporary-ratio -0.05 --adjust-window-edge north
 #shift + alt - w : yabai -m window --use-temporary-ratio 0.05 --adjust-window-edge north; yabai -m window --use-temporary-ratio -0.05 --adjust-window-edge south
@@ -122,13 +130,14 @@ ctrl + alt - l : yabai -m window --use-insertion-point east
 alt - r : yabai -m space --rotate 90
 
 # mirror tree y-axis
-alt - m : yabai -m space --mirror vertical
+alt - m : yabai -m space --mirror y-axis
 
 # mirror tree x-axis
-shift + alt - m : yabai -m space --mirror horizontal
+shift + alt - m : yabai -m space --mirror x-axis
 
 # toggle desktop offset
-alt - a : yabai -m space --toggle offset
+# NOTE: no longer exists?
+#alt - a : yabai -m space --toggle offset
 
 # toggle window fullscreen
 alt - f : yabai -m window --toggle zoom-fullscreen
@@ -137,28 +146,28 @@ alt - f : yabai -m window --toggle zoom-fullscreen
 shift + alt - f : yabai -m window --toggle native-fullscreen
 
 # toggle window parent zoom
-alt - d : yabai -m window --toggle parent
+alt - z : yabai -m window --toggle zoom-parent
 
 # toggle window split type
 alt - e : yabai -m window --toggle split
 
 # toggle window fade
-alt - q : yabai -m window --toggle fade
-
-# float / unfloat window and center on screen
-alt + shift - t : yabai -m window --toggle float;\
-          yabai -m window --grid-layout 4:4:1:1:2:2
+# NOTE: no longer exists?
+# alt - q : yabai -m window --toggle fade
 
 # toggle sticky, float and resize to picture-in-picture size
-alt - s : yabai -m window --toggle sticky;\
-          yabai -m window --grid-layout 5:5:4:0:1:1
+# NOTE: requires SIP partially disabled
+# alt - s : yabai -m window --toggle sticky;\
+#          yabai -m window --grid 5:5:4:0:1:1
 
 # float next window to be tiled
-shift + alt - t : yabai set window_float_next 1
+# NOTE: Doesn't work anymore? no equiv?
+# shift + alt - t : yabai set window_float_next 1
 
 # change layout of desktop
 ctrl + alt - a : yabai -m space --layout bsp
-ctrl + alt - s : yabai -m space --layout monocle
+# ctrl + alt - s : yabai -m space --layout monocle
+ctrl + alt - s : yabai -m space --layout stack
 ctrl + alt - d : yabai -m space --layout float
 ctrl + alt - r : lctlrs org.nixos.yabai
 '';

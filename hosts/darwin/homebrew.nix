@@ -21,6 +21,8 @@
       "xquartz"
       "gimp"
       #"tunnelblick"
+      "krita"
+      "inkscape"
     ];
   };
 }

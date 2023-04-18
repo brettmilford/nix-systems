@@ -5,8 +5,9 @@
       env.COLORTERM = "truecolor";
       font.normal.family = "Ubuntu Mono";
       font.size = 16;
+      window.option_as_alt = "OnlyLeft";
       key_bindings = [
-        { key="N";         mods="Command";    action="CreateNewWindow";            }
+        { key="N";         mods="Command";    action="CreateNewWindow";             }
         { key="A";         mods="Alt";        chars="\\x1ba";                       }
         { key="B";         mods="Alt";        chars="\\x1bb";                       }
         { key="C";         mods="Alt";        chars="\\x1bc";                       }
@@ -80,7 +81,7 @@
         { key="Minus";     mods="Alt|Shift";  chars="\\x1b_";                       } # Alt + _
         { key="Key5";      mods="Alt|Shift";  chars="\\x1b%";                       } # Alt + %
         { key="Key6";      mods="Alt|Shift";  chars="\\x1b^";                       } # Alt + ^
-        { key="Backslash"; mods="Alt";        chars="\\x1b\\\\";                      } # Alt + \
+        { key="Backslash"; mods="Alt";        chars="\\x1b\\\\";                    } # Alt + \
         { key="Backslash"; mods="Alt|Shift";  chars="\\x1b|";                       } # Alt + |
       ];
     };
