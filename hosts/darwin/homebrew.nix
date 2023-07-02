@@ -20,9 +20,10 @@
       "anki"
       "xquartz"
       "gimp"
-      #"tunnelblick"
       "krita"
       "inkscape"
+      "obsidian"
+      "iTerm2"
     ];
   };
 }

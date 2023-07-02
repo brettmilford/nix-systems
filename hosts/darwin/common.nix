@@ -4,7 +4,8 @@
   environment.shellAliases = {
     lctlrl = "f() { [ \"$1\" ] && launchctl unload $1 && launchctl load $1 ; } ; f";
     lctlrs = "f() { [ \"$1\" ] && launchctl stop $1 && launchctl start $1 ; } ; f";
-    nrl = "darwin-rebuild switch --flake ~/nix-systems#thamrys";
+    nrl = "darwin-rebuild switch --flake ~/nix-systems#";
+    nup = "nix flake update ~/nix-systems && nrl";
   };
 
   fonts.fonts = with pkgs; [ ubuntu_font_family ];

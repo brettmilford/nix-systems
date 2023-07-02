@@ -3,8 +3,7 @@
     ../common.nix
     ../libvirt.nix
     ../homebrew.nix
-    ../yabai.nix
-    ./node-exporter.nix
+    #../yabai.nix
   ];
 
   networking = {
