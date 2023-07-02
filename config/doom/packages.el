@@ -1,8 +1,6 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; .doom.d/packages.el
 
-;; See: https://github.com/hlissner/doom-emacs/blob/develop/docs/getting_started.org#installing-packages
-
 (package! org-ql)
 (package! org-ref)
 (package! org-roam-ui)

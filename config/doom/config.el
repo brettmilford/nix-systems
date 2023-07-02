@@ -398,7 +398,8 @@
          ":DATE: ${date}\n"
          ":YEAR: ${year}\n"
          ":DOI: ${doi}\n"
-         ":END:\n\n")))
+         ":END:\n\n"))
+  (add-hook 'bibtex-completion-notes-mode-hook #'org-id-get-create))
 
 (use-package! org-ref
   :after bibtex-completion)
@@ -410,9 +411,7 @@
         bibtex-autokey-titleword-separator ""
         bibtex-autokey-titlewords 1
         bibtex-autokey-titlewords-stretch 1
-        bibtex-autokey-titleword-length nil
-        )
-  )
+        bibtex-autokey-titleword-length nil))
 
 (after! org-noter
   (setq org-noter-notes-search-path "~/notes/annotations/"))
@@ -465,8 +464,19 @@
 
 (after! company
   (setq company-idle-delay nil))
-; load scripts into daemon
 
+(after! projectile
+  (projectile-register-project-type 'nixosflake '("flake.nix")
+                                  :project-file "flake.nix"
+                                  :compile "darwin-rebuild switch --flake ~/nix-systems#"
+                                  :test "npm test"
+                                  :run "nix develop"
+                                  :test-suffix ".spec"))
+(setq-hook! 'nix-mode-hook
+  counsel-compile-history '("darwin-rebuild switch --flake ~/nix-systems#"))
+
+;; Load workspaces
 ;(add-hook 'doom-init-ui-hook (lambda () (+workspace-load "org")))
 
+;; Load scripts into daemon
 (load! "lisp/org-notification")

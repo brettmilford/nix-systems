@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    nixfmt
     ripgrep
     fd
     (aspellWithDicts (d: [d.en]))
@@ -16,7 +17,7 @@
     source = ../config/doom;
     recursive = true;
     target = ".config/doom";
-    onChange = ".emacs.d/bin/doom sync";
+    #onChange = ".emacs.d/bin/doom sync";
   };
 
   ## TODO: how to use nix-darwin's services.emacs here?
