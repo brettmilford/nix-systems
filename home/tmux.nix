@@ -1,5 +1,13 @@
 {
   programs.tmux = {
+    enable = true;
+    aggressiveResize = true;
+    baseIndex = 1;
+    customPaneNavigationAndResize = true;
+    escapeTime = 0;
+    historyLimit = 20000;
+    keyMode = "vi";
+    newSession = true;
     extraConfig = ''
 if-shell "test \$TERM = \'linux\'" "set -g default-terminal \'screen.linux\'" \
     "set -g default-terminal \'tmux-256color\'"
@@ -24,6 +32,7 @@ set -g set-titles on
 set -g set-titles-string "#T - #W"
 set -g display-time 1000
 set -g display-panes-time 1500
+set -gw mouse on
 set -sg escape-time 0
 set -wg monitor-activity off
 set -wg pane-base-index 1
@@ -52,77 +61,58 @@ if-shell -b '[ "$(echo "$tmux_version < 3.0" | bc)" = 1 ]' \
 if-shell -b '[ "$(echo "$tmux_version >= 3.0" | bc)" = 1 ]' \
     "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
 
-#Theme
-Red=colour1 #base08
-Green=colour2 #base0B
-Yellow=colour3 #base0A
-Blue=colour4 #base
-Magenta=colour5
-Cyan=colour6
-Orange=colour16 #base09
-Red_Orange=colour17
-#shades of grey
-base00=colour0
-colour_bg=colour0 #Black
-base01=colour10
-base02=colour2
-base03=colour8 #Bright Black
-#shades of white
-base04=colour20
-base05=colour7
-colour_fg=colour7 #White
-base06=colour21
-base07=colour15 #BrightWhite
-
-#colour combinations
-red_line="#[fg=$base00,bg=$Red]"
-pl_red_green="#[fg=$Red,bg=$Green]"
-green_line="#[fg=$base01,bg=$Green]"
-pl_green_grey="#[fg=$Green,bg=$base01]"
-pl_red_blue="#[fg=$Red,bg=$Blue]"
-blue_line="#[fg=$base01,bg=$Blue]"
-pl_blue_grey="#[fg=$Blue,bg=$base01]"
-light_grey_line="#[fg=$colour_fg,bg=$base03]"
-pl_dark_grey="#[fg=$base01,bg=$colour_bg]"
+## colours
+colour_fg=colour15
+colour_bg=colour235
+Silver=colour7
 
 # Basic status bar colors
-if-shell "test \$(uname) = \'Darwin\'" {
-  dark_grey_line="#[fg=$colour_fg,bg=$base01]"
-  set -g status-fg $colour_fg
-  set -g status-left " #[fg=$base03]#P |"
-  set -g status-right "%H:%M $blue_line %a %d-%b-%y $red_line"
-  set -g window-status-separator "#[fg=$base03]|"
-} {
-  dark_grey_line="#[fg=$colour_fg,nobold,bg=$base01]"
-  set -g status-fg $base03
-  set -g status-left "#[fg=$base03,bg=$base01] #P |"
-  set -g status-right "#(cat ~/.thyme-tmux) $dark_grey_line %H:%M $blue_line %d-%b-%y $red_line"
-  set -g window-status-separator "|"
-}
-set -g status-bg $base01 #shade above terminal background
+set -g status-fg $colour_fg
+set -g status-bg $colour_bg #shade above terminal background
+
+# Left status bar
+if-shell 'test "$(uname)" = "Darwin"' \
+    'set -g status-left " #[fg=$colour_fg]#P |"' \
+    'set -g status-left "#[fg=$colour_fg,bg=$colour_bg] #P |"'
+
+# Right side of status bar
+if-shell 'test "$(uname)" = "Darwin"' \
+    'set -g status-right "%H:%M %a %d-%b-%y "' \
+    'set -g status-right "#(cat ~/.thyme-tmux) %H:%M %d-%b-%y "'
+
+# Window status
 set -g status-justify left
-set -g window-status-format " #[fg=$Red]#I:#W#F "
+if-shell 'test "$(uname)" = "Darwin"' 'set -g window-status-separator "#[fg=$Silver]|"' 'set -g window-status-separator "|"'
+
+set -g window-status-format " #[fg=$colour_fg]#I:#W#F "
+# format when window is in focus
 set -g window-status-current-format " [#W]#F "
-set -g window-status-current-style fg=$Green,bg=$base01
-set -g window-status-current-style bg=$base01,fg=$Red
-set -g pane-border-style fg=$base02,bg=$base01
-set -g pane-active-border-style fg=$base03,bg=$base01
-set -g display-panes-colour $base02
-set -g display-panes-active-colour $Green
-set -g clock-mode-colour $Blue
+
+# Current window status
+set -g window-status-current-style fg=$colour_bg,bg=$colour_fg
+# Window with activity status
+set -g window-status-activity-style fg=$colour_bg,bg=$Silver
+
+# Pane border
+set -g pane-border-style fg=$Silver
+set -g pane-active-border-style fg=$Silver
+
+# Pane number indicator (:display-panes)
+set -g display-panes-colour $Silver
+set -g display-panes-active-colour $colour_fg
+
+# Clock mode - (bind-t)
+set -g clock-mode-colour $colour_fg
 set -g clock-mode-style 24
-set -g message-style fg=$base01,bg=$Green
-set -g message-command-style fg=$base01,bg=$Green
-set -g mode-style fg=$base01,bg=$Blue
+
+# Message - effects the message line that covers the status bar on a change
+set -g message-style fg=$colour_fg,bg=$colour_bg
+
+# Command message - changes when typing a command into the message line ':'
+set -g message-command-style fg=$colour_fg,bg=$colour_bg
+
+# Mode - effects the colours in copy mode (bind esc) 
+set -g mode-style fg=$colour_fg,bg=$colour_bg
 '';
-    enable = true;
-    aggressiveResize = true;
-    baseIndex = 1;
-    customPaneNavigationAndResize = true;
-    escapeTime = 0;
-    historyLimit = 20000;
-    keyMode = "vi";
-    mouse = true;
-    newSession = true;
   };
 }
