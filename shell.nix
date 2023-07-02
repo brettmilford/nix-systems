@@ -9,6 +9,8 @@ in mkShell {
   buildInputs = [
     git
     nix-zsh-completions
+    yubikey-manager
+    age-plugin-yubikey
   ];
   shellHook = ''
     export FLAKE="$(pwd)"

@@ -7,7 +7,7 @@
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-22.11-darwin";
       darwin.url = "github:lnl7/nix-darwin";
       darwin.inputs.nixpkgs.follows = "nixpkgs";
-      home-manager.url = "github:nix-community/home-manager";
+      home-manager.url = "github:nix-community/home-manager/release-22.11";
       home-manager.inputs.nixpkgs.follows = "nixpkgs";
       flake-utils.url = "github:numtide/flake-utils";
       agenix.url = "github:ryantm/agenix";
