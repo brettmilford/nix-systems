@@ -34,9 +34,9 @@
       kns = "kubectl get ns";
       ls = "ls -G ";
       http_serve = "python3 -m http.server 8080";
+      mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
       j = "juju ";
       jw = "watch -tc juju status --color";
-      mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
       segmaassh = "f() { hostname=$1; shift; ssh ubuntu@`maas segmaas machines read hostname=\${hostname} | jq -r '.[].ip_addresses | .[]'` $@ ; } ; f";
   };
 
@@ -185,7 +185,6 @@
 
   programs.vim = {
       enable = true;
-      defaultEditor = true;
       packageConfigurable = pkgs.vim;
       settings = {
         background = "dark";
@@ -199,8 +198,11 @@
       extraConfig = ''
 "set go+=c
 "set showmatch
+set clipboard^=unnamed,unnamedplus
 '';
   };
+
+  home.sessionVariables = { EDITOR = "vim"; };
 
   programs.zsh.enable = true;
 
