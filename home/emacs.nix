@@ -14,7 +14,7 @@
   };
 
   home.file.doom-emacs = {
-    source = ../config/doom;
+    source = ../config/doom/.config/doom;
     recursive = true;
     target = ".config/doom";
     #onChange = ".emacs.d/bin/doom sync";

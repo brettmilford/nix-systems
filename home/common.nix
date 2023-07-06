@@ -138,13 +138,6 @@
 
   programs.gpg = {
       enable = true;
-      publicKeys = [
-        {
-          source = ../config/gpg/pubkey.txt;
-          trust = "ultimate";
-        }
-      ];
-
       settings = {
           require-cross-certification = true;
           keyserver = "https://keyserver.ubuntu.com";
