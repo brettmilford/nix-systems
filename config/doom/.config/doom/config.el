@@ -25,7 +25,8 @@
 ;; needs to happen before markdown mode?
 ;(remove-hook 'markdown-mode-hook #'auto-fill-mode)
 (remove-hook 'text-mode-hook #'auto-fill-mode)
-(defun merge-init () (interactive)(ediff-merge-files "~/.config/doom/init.el" "~/.emacs.d/init.example.el"))
+(defvar config-directory "~/nix-systems/config")
+(defun merge-init () (interactive) (ediff-merge-files (concat config-directory "/doom/.config/doom/init.el") "~/.emacs.d/init.example.el"))
 (setq vc-follow-symlinks t)
 (setq frame-resize-pixelwise t)
 (setq confirm-kill-emacs nil)
@@ -73,7 +74,8 @@
                        (evil-tmux-navigate "right"))))))
 
 (map! "C-x ?" 'help-command) ;; NOTE: 'SPC h .' does the same
-(map! "C-x /" '(lambda() (interactive) (find-file "~/nix-systems/config/doom/.config/doom/config.el")))
+(map! "C-x ," '(lambda() (interactive)
+                 (find-file (concat config-directory "/doom/.config/doom/config.el"))))
 
 (if (and IS-MAC (display-graphic-p))
          (map! "s-n" #'make-frame
@@ -127,6 +129,7 @@
 (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 
+(setq org-directory "~/org")
 (after! org
   (map! "C-x S" 'org-save-all-org-buffers) ;; NOTE: 'SPC h .' does the same
   (map!
@@ -201,12 +204,12 @@
          "* %U %? :health:\n  %i\n" :unnarrowed t))))
 
 (after! deft
-  (setq deft-directory "~/notes")
+  (setq deft-directory org-directory)
   (setq deft-recursive t)
   (setq deft-default-extension "org")
   (setq deft-use-filter-string-for-filename t))
 
-(setq org-roam-directory  org-directory)
+(setq org-roam-directory org-directory)
 (after! org-roam
   ;; makes id links work, if org-mode hasn't cached them
   (org-id-update-id-locations (org-roam-list-files) 't)
@@ -282,14 +285,14 @@
 ;;           :unnarrowed t))
 ;)
 
-(setq reftex-default-bibliography '("~/org/references.bib"))
+(setq reftex-default-bibliography (concat org-directory "/references.bib"))
 
 (after! bibtex-completion
   ;(advice-add 'bibtex-completion-candidates
   ;            :filter-return 'reverse)
-  (setq bibtex-completion-notes-path "~/org/annotations"
-        bibtex-completion-library-path "~/org/fulltext"
-        bibtex-completion-bibliography '("~/org/references.bib"))
+  (setq bibtex-completion-notes-path (concat org-directory "/annotations")
+        bibtex-completion-library-path (concat org-directory "/fulltext")
+        bibtex-completion-bibliography (concat org-directory "/references.bib")))
   (setq bibtex-completion-notes-template-multiple-files
         (concat
          ":PROPERTIES:\n"
