@@ -156,4 +156,4 @@
 (setq-hook! 'nix-mode-hook
   counsel-compile-history '("darwin-rebuild switch --flake ~/nix-systems#"))
 
-(load! "lisp/pkm")
+(load! "+pkm")

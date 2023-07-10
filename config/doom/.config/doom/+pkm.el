@@ -1,10 +1,8 @@
-;;; pkm.el --- Personal Knowledge Management Config -*- lexical-binding: t; -*-
-
-;; org-mode
+;;; +pkm.el --- Personal Knowledge Management config -*- lexical-binding: t; -*-
+(setq org-directory "~/org")
 (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 
-(setq org-directory "~/org")
 (after! org
   (map! "C-x S" 'org-save-all-org-buffers) ;; NOTE: 'SPC h .' does the same
   (map!
@@ -17,7 +15,7 @@
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-default-notes-file (expand-file-name "01-inbox.org" org-directory))
   (setq org-columns-default-format "%25ITEM %3PRIORITY %TODO %SCHEDULED %DEADLINE %TAGS")
-  (setq org-fontify-done-headline t)
+  (setq org-fontify-done-headline 't)
   (setq org-agenda-view-columns-initially nil)
   (setq org-agenda-custom-commands
         '(("d" "Todo and Due" ((org-ql-block '(or (and (todo) (scheduled :to 0))
@@ -40,7 +38,7 @@
   (setq org-tags-column -77)
   (setq org-cycle-open-archived-trees 't)
   (setq org-adapt-indentation nil)
-  (setq org-startup-indented t)
+  (setq org-startup-indented 't)
   (setq org-pretty-entities 't)
   (setq org-log-done 'time)
   (setq org-enforce-todo-dependencies 't)
@@ -59,24 +57,13 @@
   (setq org-table-duration-custom-format 'minutes)
   (setq org-clock-persist 't)
   (org-clock-persistence-insinuate)
-  (setq org-clock-continuously nil)
+  (setq org-clock-continuously nil) ;; TODO: Check shouldn't be 't
   (setq org-clock-persist-query-resume nil)
-  (setq org-clock-out-when-done t)
-  (setq org-clock-report-include-clocking-task t)
-  (setq org-html-self-link-headlines t)
+  (setq org-clock-out-when-done 't)
+  (setq org-clock-report-include-clocking-task 't)
+  (setq org-html-self-link-headlines 't)
   (setq org-use-tag-inheritance nil)
-  (setq org-crypt-key "brettmilford@gmail.com")
-  (setq org-capture-templates
-      '(("t" "Task" entry (file org-default-notes-file)
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry (file+olp+datetree "~/org/90-journal.org")
-         "* %U %? :crypt:\n  %i\n")
-        ("b" "BA Entry" entry (file+olp+datetree "~/org/90-journal.org")
-         "* %u :BA:crypt:%i\n# List every activity and rate them on a scale of 1 to 10\nMorning\n-%?\n\nAfternoon\n-\n\nEvening\n-")
-        ("r" "BA Reflection" entry (file+olp+datetree "~/org/90-journal.org")
-         "* %u :BA:crypt:\n  %i\n%?")
-        ("h" "Health" entry (file+olp+datetree "~/org/90-journal.org")
-         "* %U %? :health:\n  %i\n" :unnarrowed t))))
+  (setq org-crypt-key "brettmilford@gmail.com"))
 
 (after! deft
   (setq deft-directory org-directory)
@@ -167,7 +154,7 @@
   ;            :filter-return 'reverse)
   (setq bibtex-completion-notes-path (concat org-directory "/annotations")
         bibtex-completion-library-path (concat org-directory "/fulltext")
-        bibtex-completion-bibliography (concat org-directory "/references.bib")))
+        bibtex-completion-bibliography (concat org-directory "/references.bib"))
   (setq bibtex-completion-notes-template-multiple-files
         (concat
          ":PROPERTIES:\n"
@@ -204,7 +191,7 @@
         bibtex-autokey-titleword-length nil))
 
 (after! org-noter
-  (setq org-noter-notes-search-path "~/org/annotations"))
+  (setq org-noter-notes-search-path (concat org-directory "/annotations")))
 
 (use-package! ox-reveal
   :after org-mode)
@@ -233,4 +220,4 @@
                          :file))))
       f)))
 
-(load! "org-notification")
+(load! "lisp/org-notification")
