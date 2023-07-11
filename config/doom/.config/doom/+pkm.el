@@ -4,6 +4,17 @@
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 
 (after! org
+  (setq org-capture-templates
+        '(("t" "Todo" entry
+           (file+headline org-default-notes-file "Inbox")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("c" "Clocked" entry (clock)
+           "* %?\n%i\n%a")
+          ("w" "Work task" entry
+           (file+headline org-default-notes-file "Inbox")
+           "* TODO [[jira://%^{IT}]]\n%i\n%a\n%(org-roam-node-insert %\1 \"w\")")))
+  (pushnew! org-link-abbrev-alist
+            '("jira" . "https://jira/browse/"))
   (map! "C-x S" 'org-save-all-org-buffers) ;; NOTE: 'SPC h .' does the same
   (map!
    :map org-mode-map
@@ -13,7 +24,6 @@
   (remove-hook 'org-mode-hook #'auto-fill-mode)
   (setq org-agenda-files (list org-directory))
   (setq org-agenda-window-setup 'reorganize-frame)
-  (setq org-default-notes-file (expand-file-name "01-inbox.org" org-directory))
   (setq org-columns-default-format "%25ITEM %3PRIORITY %TODO %SCHEDULED %DEADLINE %TAGS")
   (setq org-fontify-done-headline 't)
   (setq org-agenda-view-columns-initially nil)
@@ -49,9 +59,7 @@
           "%latex -interaction nonstopmode -output-directory %o %f"
           "%latex -interaction nonstopmode -output-directory %o %f"))
   (setq org-export-date-timestamp-format "%B %e, %Y")
-  (setq org-todo-keywords
-  '((sequence "TODO(!)" "INPROGRESS(!)" "WAIT(w@/!)" "|" "DONE" "CANCELLED")))
-  ;(setq org-log-into-drawer 't) ;;TODO: Check if this breaks clock logging
+  (setq org-log-into-drawer 't) ;;TODO: Check if this breaks clock logging
   (setq org-log-done 't)
   (setq org-todo-keywords-for-agenda org-todo-keywords)
   (setq org-table-duration-custom-format 'minutes)
@@ -73,10 +81,29 @@
 
 (setq org-roam-directory org-directory)
 (after! org-roam
+  ;; BUG: org-roam/pull/2141
+  (map!
+   :leader
+   :prefix ("n" . "notes")
+   (:prefix ("r" . "org-roam")
+    (:prefix ("d" . "by date")
+    :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
+    :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
+    :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
+    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))))
+   :map org-mode-map
+   :localleader
+   :prefix ("m" . "org-roam")
+   (:prefix ("d" . "by date")
+    :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
+    :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
+    :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
+    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))))
+
   ;; makes id links work, if org-mode hasn't cached them
   (org-id-update-id-locations (org-roam-list-files) 't)
   (setq org-roam-mode-sections
-        '((org-roam-backlinks-section :unique -t)
+        '((org-roam-backlinks-section :unique t)
            org-roam-reflinks-section))
   (setq org-roam-db-location "~/.emacs.d/.local/cache/org-roam.db")
   (setq org-roam-buffer-no-delete-other-windows 't)
@@ -84,14 +111,19 @@
   (setq org-roam-db-gc-threshold most-positive-fixnum)
   (setq org-roam-tag-sources '(prop all-directories))
   (setq org-roam-dailies-capture-templates
-        '(("d" "Daily" entry "* %? \t:crypt:\n%U\n"
+        '(("d" "default" entry "* %? \t:crypt:\n%U\n"
            :if-new (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
   (setq org-roam-capture-templates
         '(("d" "default" plain
           "%?"
           :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+TITLE: ${title}\n#+FILETAGS:\n\n- topics ::")
-          :unnarrowed t))))
+          :jump-to-captured t
+          :unnarrowed t)
+          ("w" "work" plain "-"
+           :target (file+head "./roam/jira/${slug}.org" ":PROPERTIES:\n:ROAM_ALIASES: jira://${title}\n:END:\n#+TITLE: ${title}\n")
+           :kill-buffer t
+           :immediate-finish t))))
 
 (after! org-roam-graph
   (if IS-MAC
@@ -147,14 +179,14 @@
 ;;           :unnarrowed t))
 ;)
 
-(setq reftex-default-bibliography (concat org-directory "/references.bib"))
+(setq reftex-default-bibliography (expand-file-name "references.bib" org-directory))
 
 (after! bibtex-completion
   ;(advice-add 'bibtex-completion-candidates
   ;            :filter-return 'reverse)
-  (setq bibtex-completion-notes-path (concat org-directory "/annotations")
-        bibtex-completion-library-path (concat org-directory "/fulltext")
-        bibtex-completion-bibliography (concat org-directory "/references.bib"))
+  (setq bibtex-completion-notes-path (expand-file-name "annotations" org-directory)
+        bibtex-completion-library-path (expand-file-name "fulltext" org-directory)
+        bibtex-completion-bibliography reftex-default-bibliography)
   (setq bibtex-completion-notes-template-multiple-files
         (concat
          ":PROPERTIES:\n"
@@ -191,7 +223,7 @@
         bibtex-autokey-titleword-length nil))
 
 (after! org-noter
-  (setq org-noter-notes-search-path (concat org-directory "/annotations")))
+  (setq org-noter-notes-search-path bibtex-completion-notes-path))
 
 (use-package! ox-reveal
   :after org-mode)
