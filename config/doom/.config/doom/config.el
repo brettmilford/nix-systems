@@ -76,14 +76,14 @@
 (map! "C-x ?" 'help-command) ;; NOTE: 'SPC h .' does the same
 
 (map! "C-x ," '(lambda() (interactive)
-                 (find-file (expand-file-name "/doom/.config/doom/config.el" config-directory))))
+                 (find-file (expand-file-name "doom/.config/doom/config.el" config-directory))))
 
 (if (and IS-MAC (display-graphic-p))
          (map! "s-n" #'make-frame
                "s-w" #'delete-frame))
 
 (defun merge-init() (interactive)
-       (ediff-merge-files (expand-file-name "/doom/.config/doom/init.el" config-directory) "~/.emacs.d/init.example.el"))
+       (ediff-merge-files (expand-file-name "doom/.config/doom/init.el" config-directory) "~/.emacs.d/init.example.el"))
 
 ;; UI & Theme
 

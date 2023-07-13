@@ -7,14 +7,11 @@
   (setq org-capture-templates
         '(("t" "Todo" entry
            (file+headline org-default-notes-file "Inbox")
-           "* TODO %?\n%i\n%a" :prepend t)
+           "* TODO %?\n%U\n%i\n%a" :prepend t)
           ("c" "Clocked" entry (clock)
-           "* %?\n%i\n%a")
-          ("w" "Work task" entry
-           (file+headline org-default-notes-file "Inbox")
-           "* TODO [[jira://%^{IT}]]\n%i\n%a\n%(org-roam-node-insert %\1 \"w\")")))
+           "* %?\n%i\n%a")))
   (pushnew! org-link-abbrev-alist
-            '("jira" . "https://jira/browse/"))
+            '("case" . "https://jira/browse/"))
   (map! "C-x S" 'org-save-all-org-buffers) ;; NOTE: 'SPC h .' does the same
   (map!
    :map org-mode-map
@@ -59,7 +56,7 @@
           "%latex -interaction nonstopmode -output-directory %o %f"
           "%latex -interaction nonstopmode -output-directory %o %f"))
   (setq org-export-date-timestamp-format "%B %e, %Y")
-  (setq org-log-into-drawer 't) ;;TODO: Check if this breaks clock logging
+  (setq org-log-into-drawer nil) ;; NOTE: beorg compat
   (setq org-log-done 't)
   (setq org-todo-keywords-for-agenda org-todo-keywords)
   (setq org-table-duration-custom-format 'minutes)
@@ -117,13 +114,26 @@
   (setq org-roam-capture-templates
         '(("d" "default" plain
           "%?"
-          :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+TITLE: ${title}\n#+FILETAGS:\n\n- topics ::")
-          :jump-to-captured t
-          :unnarrowed t)
-          ("w" "work" plain "-"
-           :target (file+head "./roam/jira/${slug}.org" ":PROPERTIES:\n:ROAM_ALIASES: jira://${title}\n:END:\n#+TITLE: ${title}\n")
-           :kill-buffer t
-           :immediate-finish t))))
+          :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:\n\n- topics ::")
+          :unnarrowed t)))
+
+  (defun org-roam-capture-case-notes (title)
+    (interactive)
+    (org-roam-capture- :node (org-roam-node-create :title title)
+                       :templates '(("c" "case" plain "* %?"
+                                    :immediate-finish t
+                                    :if-new (file+head "./roam/case/${slug}.org"
+                                                       ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")))))
+  (add-to-list 'org-capture-tempaltes
+               '("w" "case" entry
+                 (file+headline org-default-notes-file "Inbox")
+                 (lambda ()
+                   (interactive)
+                   (let ((it (read-string "IT: ")))
+                         (org-roam-capture-case-notes it)
+                         (let ((node (org-roam-node-find nil it)))
+                          (format "* TODO [[case://%s]]\n " it node))))))
+  )
 
 (after! org-roam-graph
   (if IS-MAC
