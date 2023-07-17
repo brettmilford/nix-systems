@@ -75,13 +75,6 @@
   (setq org-use-tag-inheritance nil)
   (setq org-crypt-key "brettmilford@gmail.com"))
 
-(after! deft
-  (setq deft-strip-title-regexp "\\(?:^%+\\|^#\\+TITLE: *\\|^[#* ]+\\|-\\*-[[:alpha:]]+-\\*-\\|^Title:[	 ]*\\|#+$\\|:PROPERTIES:\n(?:.|\n)*:END:\\)")
-  (setq deft-directory org-directory)
-  (setq deft-recursive t)
-  (setq deft-default-extension "org")
-  (setq deft-use-filter-string-for-filename t))
-
 (setq org-roam-directory org-directory)
 (after! org-roam
   ;; BUG: org-roam/pull/2141
