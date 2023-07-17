@@ -4,25 +4,31 @@
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 
 (after! org
+  (org-clock-persistence-insinuate)
+  (add-hook! 'org-mode-hook #'+word-wrap-mode)
+  (remove-hook 'org-mode-hook #'auto-fill-mode)
+  (pushnew! org-link-abbrev-alist
+            '("case" . "https://jira/browse/"))
+  (defun org-capture-clocked ()
+    (interactive)
+    (let ((org-capture-templates '(("c" "clocked" entry (clock) "* %?\n%i\n%a"))))
+      (+org-capture/open-frame nil "c")))
+  (map!
+   "C-x S" 'org-save-all-org-buffers ;; NOTE: 'SPC h .' does the same
+   :map org-mode-map
+   :localleader
+     "TAB" #'org-insert-structure-template
+     :prefix ("c" . "+clock")
+       :desc "Capture clocked" "x" #'org-capture-clocked)
+
   (setq org-capture-templates
         '(("t" "Todo" entry
            (file+headline org-default-notes-file "Inbox")
-           "* TODO %?\n%U\n%i\n%a" :prepend t)
-          ("c" "Clocked" entry (clock)
-           "* %?\n%i\n%a")))
-  (pushnew! org-link-abbrev-alist
-            '("case" . "https://jira/browse/"))
-  (map! "C-x S" 'org-save-all-org-buffers) ;; NOTE: 'SPC h .' does the same
-  (map!
-   :map org-mode-map
-   :localleader
-        "TAB" #'org-insert-structure-template)
-  (add-hook! 'org-mode-hook #'+word-wrap-mode)
-  (remove-hook 'org-mode-hook #'auto-fill-mode)
+           "* TODO %?\n%U\n%i\n%a" :prepend t)))
   (setq org-agenda-files (list org-directory))
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-columns-default-format "%25ITEM %3PRIORITY %TODO %SCHEDULED %DEADLINE %TAGS")
-  (setq org-fontify-done-headline 't)
+  (setq org-fontify-done-headline t)
   (setq org-agenda-view-columns-initially nil)
   (setq org-agenda-custom-commands
         '(("d" "Todo and Due" ((org-ql-block '(or (and (todo) (scheduled :to 0))
@@ -41,14 +47,14 @@
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
-  (setq org-startup-folded 't)
+  (setq org-startup-folded t)
   (setq org-tags-column -77)
-  (setq org-cycle-open-archived-trees 't)
+  (setq org-cycle-open-archived-trees t)
   (setq org-adapt-indentation nil)
-  (setq org-startup-indented 't)
-  (setq org-pretty-entities 't)
+  (setq org-startup-indented t)
+  (setq org-pretty-entities t)
   (setq org-log-done 'time)
-  (setq org-enforce-todo-dependencies 't)
+  (setq org-enforce-todo-dependencies t)
   (setq org-latex-bib-compiler "biber")
   (setq org-latex-pdf-process
         '("%latex -interaction nonstopmode -output-directory %o %f"
@@ -57,20 +63,20 @@
           "%latex -interaction nonstopmode -output-directory %o %f"))
   (setq org-export-date-timestamp-format "%B %e, %Y")
   (setq org-log-into-drawer nil) ;; NOTE: beorg compat
-  (setq org-log-done 't)
+  (setq org-log-done t)
   (setq org-todo-keywords-for-agenda org-todo-keywords)
   (setq org-table-duration-custom-format 'minutes)
-  (setq org-clock-persist 't)
-  (org-clock-persistence-insinuate)
+  (setq org-clock-persist t)
   (setq org-clock-continuously nil) ;; TODO: Check shouldn't be 't
   (setq org-clock-persist-query-resume nil)
-  (setq org-clock-out-when-done 't)
-  (setq org-clock-report-include-clocking-task 't)
-  (setq org-html-self-link-headlines 't)
+  (setq org-clock-out-when-done t)
+  (setq org-clock-report-include-clocking-task t)
+  (setq org-html-self-link-headlines t)
   (setq org-use-tag-inheritance nil)
   (setq org-crypt-key "brettmilford@gmail.com"))
 
 (after! deft
+  (setq deft-strip-title-regexp "\\(?:^%+\\|^#\\+TITLE: *\\|^[#* ]+\\|-\\*-[[:alpha:]]+-\\*-\\|^Title:[	 ]*\\|#+$\\|:PROPERTIES:\n(?:.|\n)*:END:\\)")
   (setq deft-directory org-directory)
   (setq deft-recursive t)
   (setq deft-default-extension "org")
@@ -87,7 +93,8 @@
     :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
     :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
     :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
-    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))))
+    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))
+    :desc "Capture template today" "x" #'org-roam-dailies-capture-today-w-tmpl))
    :map org-mode-map
    :localleader
    :prefix ("m" . "org-roam")
@@ -95,7 +102,8 @@
     :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
     :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
     :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
-    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))))
+    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))
+    :desc "Capture template today" "x" #'org-roam-dailies-capture-today-w-tmpl))
 
   ;; makes id links work, if org-mode hasn't cached them
   (org-id-update-id-locations (org-roam-list-files) 't)
@@ -107,33 +115,63 @@
   (setq org-roam-completion-system 'ivy)
   (setq org-roam-db-gc-threshold most-positive-fixnum)
   (setq org-roam-tag-sources '(prop all-directories))
-  (setq org-roam-dailies-capture-templates
-        '(("d" "default" entry "* %? \t:crypt:\n%U\n"
-           :if-new (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
   (setq org-roam-capture-templates
         '(("d" "default" plain
           "%?"
           :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:\n\n- topics ::")
-          :unnarrowed t)))
+          :unnarrowed t)))  (setq org-roam-dailies-capture-templates
 
-  (defun org-roam-capture-case-notes (title)
+        '(("d" "default" entry "* %? \t:crypt:\n%U\n"
+           :if-new (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
+
+  (defun org-roam-dailies-capture-today-w-tmpl ()
     (interactive)
-    (org-roam-capture- :node (org-roam-node-create :title title)
-                       :templates '(("c" "case" plain "* %?"
-                                    :immediate-finish t
+    (let* ((tmpl-dir "./daily/tmpl")
+           (files (directory-files (expand-file-name tmpl-dir org-roam-directory) nil "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)"))
+           (key-desc (mapcar (lambda (file)
+                               (let ((key (replace-regexp-in-string "_.*" "" file))
+                                     (desc (replace-regexp-in-string "\\(^.*_\\|\.org$\\)" "" file)))
+                                 (cons key desc)))
+                             files))
+           (org-roam-dailies-capture-templates (mapcar (lambda (a)
+                                                         (let ((key (car a))
+                                                               (desc (cdr a)))
+                                                           (key desc entry
+                                                             (file (format "%s/%s_%s.org" tmpl-dir key desc))
+                                                             :if-new (file+head "%<%Y-%m-%d>.org"
+                                                                                "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
+                                                       key-desc))
+           )
+      (message "%s" key-desc)
+      ;(org-roam-dailies-capture-today)
+      ))
+)
+
+(after! (org org-roam)
+
+ (defun org-roam-capture-case-notes (title)
+   (let ((id (org-id-new)))
+    (org-roam-capture- :node (org-roam-node-create :title title :id id)
+                       :templates '(("c" "case" plain "* ${title} %?"
                                     :if-new (file+head "./roam/case/${slug}.org"
-                                                       ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")))))
-  (add-to-list 'org-capture-tempaltes
-               '("w" "case" entry
-                 (file+headline org-default-notes-file "Inbox")
-                 (lambda ()
-                   (interactive)
-                   (let ((it (read-string "IT: ")))
-                         (org-roam-capture-case-notes it)
-                         (let ((node (org-roam-node-find nil it)))
-                          (format "* TODO [[case://%s]]\n " it node))))))
-  )
+                                                       ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")
+                                    :immediate-finish t)))
+    id))
+ (defun org-capture-case-notes (title)
+   (let* ((id (org-roam-capture-case-notes title))
+          (link (org-link-make-string (concat "id:" id) title))
+          (tmpl (format "* TODO [[case://%s]] %%?\n%%U\n%s\n" title link)))
+     tmpl))
+
+ (defun org-capture-case-notes-prompt ()
+   (interactive)
+   (org-capture-case-notes (read-from-minibuffer "title: ")))
+
+ (add-to-list 'org-capture-templates
+              '("w" "case" entry
+                (file+headline org-default-notes-file "Inbox")
+                (function org-capture-case-notes-prompt))))
 
 (after! org-roam-graph
   (if IS-MAC
