@@ -24,7 +24,7 @@
   (setq org-capture-templates
         '(("t" "Todo" entry
            (file+headline org-default-notes-file "Inbox")
-           "* TODO %?\n%U\n%i\n%a" :prepend t)))
+           "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n%i\n%a")))
   (setq org-agenda-files (list org-directory))
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-columns-default-format "%25ITEM %3PRIORITY %TODO %SCHEDULED %DEADLINE %TAGS")
@@ -149,8 +149,10 @@
                        :templates '(("c" "case" plain "* ${title} %?"
                                     :if-new (file+head "./roam/case/${slug}.org"
                                                        ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")
-                                    :immediate-finish t)))
+                                    ))
+                       :props '(:immediate-finish t))
     id))
+
  (defun org-capture-case-notes (title)
    (let* ((id (org-roam-capture-case-notes title))
           (link (org-link-make-string (concat "id:" id) title))
@@ -225,8 +227,8 @@
 (after! bibtex-completion
   ;(advice-add 'bibtex-completion-candidates
   ;            :filter-return 'reverse)
-  (setq bibtex-completion-notes-path (expand-file-name "annotations" org-directory)
-        bibtex-completion-library-path (expand-file-name "fulltext" org-directory)
+  (setq bibtex-completion-notes-path (file-name-as-directory (expand-file-name "annotations" org-directory))
+        bibtex-completion-library-path (file-name-as-directory (expand-file-name "fulltext" org-directory))
         bibtex-completion-bibliography reftex-default-bibliography)
   (setq bibtex-completion-notes-template-multiple-files
         (concat
@@ -236,7 +238,7 @@
          ":END:\n"
          "#+TITLE: ${title}\n"
          "#+FILETAGS: ${keywords}\n\n"
-         "- topics :: \n"
+         "- keywords :: \n"
          "* ${title}\n"
          ":PROPERTIES:\n"
          ":Custom_ID: ${=key=}\n"
@@ -269,9 +271,9 @@
 (use-package! ox-reveal
   :after org-mode)
 
-;(use-package! nov
-;  :init
-;  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+(use-package! nov
+  :init
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
 (after! anki-editor
        (setq anki-editor-create-decks t))

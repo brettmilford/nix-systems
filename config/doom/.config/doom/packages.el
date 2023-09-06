@@ -6,9 +6,11 @@
 (package! org-roam-ui)
 ;(package! org-roam-bibtex
 ;  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
-;(package! nov
-;  :recipe (:host nil :repo "https://depp.brause.cc/nov.el.git"))
+(package! nov
+  :recipe (:host nil :repo "https://depp.brause.cc/nov.el.git"))
 (package! anki-editor)
 ;(package! org-mode-incremental-reading
 ;  :recipe (:host github :repo "vascoferreira25/org-mode-incremental-reading"))
 (package! ox-reveal)
+(package! salt-mode)
+(package! jsonnet-mode)

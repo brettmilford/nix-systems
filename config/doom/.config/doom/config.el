@@ -97,6 +97,7 @@
 (load-theme 'doom-horizon t)
 ;; Slightly increase contrast
 ;(set-face-attribute 'default nil :foreground "#CFCFCF")
+(set-face-background 'default "undefined") ;;; Sets to terminal background
 
 (after! doom-themes
   (setq
@@ -155,5 +156,15 @@
                                   :test-suffix ".spec"))
 (setq-hook! 'nix-mode-hook
   counsel-compile-history '("darwin-rebuild switch --flake ~/nix-systems#"))
+
+(use-package! jsonnet-mode
+  :defer t
+  :config
+  (set-electric! 'jsonnet-mode :chars '(?\n ?: ?} ?}))
+  (setq jsonnet-use-smie t))
+
+(after! python
+  (add-hook! 'python-mode 'semantic-mode)
+  (add-hook! 'python-mode 'semantic-stickyfun-mode))
 
 (load! "+pkm")

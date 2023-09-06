@@ -17,6 +17,7 @@
 	hard = "reset --hard"
 	hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short"
 	lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+	lgs = "log --stat"
 	lol = "log --graph --decorate --pretty=oneline --abbrev-commit"
 	lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all"
 	p = "push"
