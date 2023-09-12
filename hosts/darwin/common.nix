@@ -8,8 +8,6 @@
     nup = "nix flake update ~/nix-systems && nrl";
   };
 
-  fonts.fonts = with pkgs; [ ubuntu_font_family ];
-
   nix.package = pkgs.nixFlakes;
 
   programs.gnupg.agent = {

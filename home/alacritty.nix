@@ -3,8 +3,8 @@
     enable = true;
     settings = {
       env.COLORTERM = "truecolor";
-      font.normal.family = "Ubuntu Mono";
-      font.size = 16;
+      #font.normal.family = "";
+      #font.size = 16;
       window.option_as_alt = "OnlyLeft";
       # Colors (Horizon Dark)
       colors = {
