@@ -29,6 +29,7 @@
       EMACSDIR = "${config.xdg.configHome}/emacs";
       DOOMDIR = "${config.xdg.configHome}/doom";
       DOOMLOCALDIR = "${config.xdg.configHome}/doom-local";
+      XDG_CONFIG_HOME = "${config.xdg.configHome}";
     };
     sessionPath = [ "${config.xdg.configHome}/emacs/bin"];
   };
@@ -44,6 +45,7 @@
           export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
           export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"
+          export XDG_CONFIG_HOME="${config.home.sessionVariables.XDG_CONFIG_HOME}";
           if [ ! -d "EMACSDIR" ]; then
             git clone --depth 1 https://github.com/doomemacs/doomemacs.git $EMACSDIR
           fi

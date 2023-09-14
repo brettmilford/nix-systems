@@ -6,6 +6,7 @@
   environment.systemPackages = with pkgs; [
      vim
      screen
+     git
   ];
   nix.settings.auto-optimise-store = true;
 }
