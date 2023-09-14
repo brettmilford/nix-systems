@@ -3,10 +3,10 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-22.11-darwin";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-23.05-darwin";
       darwin.url = "github:lnl7/nix-darwin";
       darwin.inputs.nixpkgs.follows = "nixpkgs";
-      home-manager.url = "github:nix-community/home-manager/release-22.11";
+      home-manager.url = "github:nix-community/home-manager/release-23.05";
       home-manager.inputs.nixpkgs.follows = "nixpkgs";
       flake-utils.url = "github:numtide/flake-utils";
       agenix.url = "github:ryantm/agenix";
@@ -32,7 +32,7 @@
       };
     };
     homeManagerCommonConfig = with self.homeManagerModules; {
-      home.stateVersion = "22.11";
+      home.stateVersion = "23.05";
       imports = [
         ./home
       ];
@@ -58,7 +58,7 @@
     nixosCommonModules = { user }: [
       home-manager.nixosModules.home-manager
       {
-        system.stateVersion = "23.11";
+        system.stateVersion = "23.05";
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-darwin x86_64-darwin
