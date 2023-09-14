@@ -88,8 +88,10 @@
       ];
     };
 
-    # nix build .#nixosConfigurations.dev.config.formats.qcow
     nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit nixpkgs;
+      };
       modules = nixosCommonModules { user = "brett"; } ++ [
         {
           imports = [nixos-generators.nixosModules.all-formats];
