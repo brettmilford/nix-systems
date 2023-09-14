@@ -50,7 +50,7 @@
             git clone --depth 1 https://github.com/doomemacs/doomemacs.git $EMACSDIR
           fi
           if [ ! -d "$DOOMLOCALDIR" ]; then
-            ${config.xdg.configHome}/emacs/bin/doom -f install
+            ${config.xdg.configHome}/emacs/bin/doom --force install
           else
             ${config.xdg.configHome}/emacs/bin/doom sync -u
           fi
