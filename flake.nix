@@ -59,6 +59,12 @@
       home-manager.nixosModules.home-manager
       {
         system.stateVersion = "23.11";
+        nix = {
+          extraOptions = ''
+            extra-platforms = aarch64-darwin x86_64-darwin
+            experimental-features = nix-command flakes
+          '';
+        };
         users.users.${user} = {
           home = "/home/${user}";
           isNormalUser = true;
