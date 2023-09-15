@@ -1,9 +1,9 @@
-{ config, lib, pkgs, nixpkgs, ... }:
+{ config, lib, pkgs, modulesPath, ... }:
 
 {
   imports = [
-    (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
-    (nixpkgs + "/nixos/modules/profiles/headless.nix")
+    (modulesPath + "/profiles/qemu-guest.nix")
+    (modulesPath + "/profiles/headless.nix")
     ../common.nix
     ../cloud.nix
   ];

@@ -89,9 +89,7 @@
     };
 
     nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
-      specialArgs = {
-        inherit nixpkgs;
-      };
+      system = system.aarch64-linux;
       modules = nixosCommonModules { user = "brett"; } ++ [
         {
           imports = [nixos-generators.nixosModules.all-formats];
