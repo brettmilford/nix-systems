@@ -199,4 +199,5 @@ set clipboard^=unnamed,unnamedplus
 
   programs.zsh.enable = true;
 
+  programs.bash.enable = true;
 }

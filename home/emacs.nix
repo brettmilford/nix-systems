@@ -16,6 +16,8 @@
     emacs-all-the-icons-fonts
   ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
+  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+    xclip
   ];
 
   programs.emacs = {

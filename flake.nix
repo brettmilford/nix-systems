@@ -61,7 +61,7 @@
         system.stateVersion = "23.05";
         nix = {
           extraOptions = ''
-            extra-platforms = aarch64-darwin x86_64-darwin
+            extra-platforms = aarch64-linux x86_64-linux
             experimental-features = nix-command flakes
           '';
         };
