@@ -21,4 +21,8 @@
 
   networking.useDHCP = true;
   services.openssh.enable = true;
+
+  environment.systemPacakges = with pkgs; [
+    screen
+  ];
 }

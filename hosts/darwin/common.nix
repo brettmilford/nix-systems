@@ -1,6 +1,13 @@
 { pkgs, config, ... }:
 {
 
+  environment.systemPackages = with pkgs; [
+    vim
+    git
+  ];
+
+  environment.variables.EDITOR = "vim";
+
   environment.shellAliases = {
     lctlrl = "f() { [ \"$1\" ] && launchctl unload $1 && launchctl load $1 ; } ; f";
     lctlrs = "f() { [ \"$1\" ] && launchctl stop $1 && launchctl start $1 ; } ; f";
