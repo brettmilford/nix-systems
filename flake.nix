@@ -76,6 +76,7 @@
         home-manager.useUserPackages = true;
         home-manager.sharedModules = [
           ./home/common.nix
+          ./home/git-${user}.nix
         ];
         home-manager.users.${user} = homeManagerCommonConfig;
       }
