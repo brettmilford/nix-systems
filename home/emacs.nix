@@ -13,7 +13,7 @@
     nixfmt
     editorconfig-core-c
     sqlite
-    clang
+    llvm
     (aspellWithDicts (d: [d.en]))
     emacs-all-the-icons-fonts
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
