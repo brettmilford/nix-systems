@@ -33,6 +33,10 @@
     };
     homeManagerCommonConfig = with self.homeManagerModules; {
       home.stateVersion = "23.05";
+      nix.settings = {
+        experimental-features = [ "nix-command" "flakes" ];
+        auto-optimise-store = true;
+      };
       imports = [
         ./home
       ];
@@ -43,7 +47,6 @@
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-darwin x86_64-darwin
-            experimental-features = nix-command flakes
           '';
         };
       }
@@ -62,7 +65,6 @@
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-linux x86_64-linux
-            experimental-features = nix-command flakes
           '';
         };
         users.users.${user} = {

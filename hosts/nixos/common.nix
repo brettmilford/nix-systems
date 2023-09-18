@@ -6,7 +6,6 @@
   environment.systemPackages = with pkgs; [
      git
   ];
-  nix.settings.auto-optimise-store = true;
   programs.vim = {
     defaultEditor = true;
   };

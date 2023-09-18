@@ -15,8 +15,6 @@
     nup = "nix flake update ~/nix-systems && nrl";
   };
 
-  nix.package = pkgs.nixFlakes;
-
   programs.gnupg.agent = {
     enable = true;
   };

@@ -4,7 +4,7 @@
   #  "/opt/homebrew/bin"
   #];
 
-   homebrew = {
+  homebrew = {
     enable = true;
     onActivation.cleanup = "zap";
 
