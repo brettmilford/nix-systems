@@ -199,5 +199,12 @@ set clipboard^=unnamed,unnamedplus
 
   programs.zsh.enable = true;
 
-  programs.bash.enable = true;
+  programs.bash = {
+    enable = true;
+    shellOptions = [
+      "histappend"
+    ];
+    sessionVariables = {
+      PROMPT_COMMAND = "history -a;$PROMPT_COMMAND";
+    };
 }
