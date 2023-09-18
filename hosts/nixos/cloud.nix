@@ -22,7 +22,7 @@
   networking.useDHCP = true;
   services.openssh.enable = true;
 
-  environment.systemPacakges = with pkgs; [
+  environment.systemPackages = with pkgs; [
     screen
   ];
 }
