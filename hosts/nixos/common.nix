@@ -8,7 +8,6 @@
   ];
   nix.settings.auto-optimise-store = true;
   programs.vim = {
-    enable = true;
     defaultEditor = true;
   };
 }
