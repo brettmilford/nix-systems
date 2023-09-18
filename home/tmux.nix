@@ -43,7 +43,7 @@ bind-key v split-window -h -c "#{pane_current_path}"
 bind-key s split-window -v -c "#{pane_current_path}"
 bind-key C new-session
 bind-key S switch-client -l
-bind-key r source-file ~/.tmux.conf \; display "Config Reloaded!"
+bind-key r source-file ~/.config/tmux/tmux.conf \; display "Config Reloaded!"
 
 # Smart pane switching with awareness of Vim splits.
 # See: https://github.com/christoomey/vim-tmux-navigator
@@ -76,9 +76,7 @@ if-shell 'test "$(uname)" = "Darwin"' \
     'set -g status-left "#[fg=$colour_fg,bg=$colour_bg] #P |"'
 
 # Right side of status bar
-if-shell 'test "$(uname)" = "Darwin"' \
-    'set -g status-right "%H:%M %a %d-%b-%y "' \
-    'set -g status-right "#(cat ~/.thyme-tmux) %H:%M %d-%b-%y "'
+set -g status-right "%y-%m-%d %H:%M"
 
 # Window status
 set -g status-justify left
