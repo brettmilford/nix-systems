@@ -1,4 +1,5 @@
-{ pkgs, config, ... }:
+{ config, lib, pkgs, ... }:
+
 {
   home.packages = with pkgs; [
     binutils
@@ -14,9 +15,9 @@
     sqlite
     (aspellWithDicts (d: [d.en]))
     emacs-all-the-icons-fonts
-  ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
-  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
     xclip
   ];
 
@@ -62,7 +63,7 @@
     };
   };
 
-  ## TODO: how to use nix-darwin's services.emacs here?
+  ### TODO: how to use nix-darwin's services.emacs here?
   # services.emacs = {
   #   enable = true;
   # };

@@ -1,4 +1,5 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }:
+
 {
   age.secrets."node_exporter_config" = {
     file = ../../../secrets/node_exporter_config.age;

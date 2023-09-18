@@ -26,17 +26,8 @@
   }@inputs:
   let
     system = flake-utils.lib.system;
-    nixpkgsConfig = with inputs; {
-      config = {
-        #allowUnfree = true;
-      };
-    };
     homeManagerCommonConfig = with self.homeManagerModules; {
       home.stateVersion = "23.05";
-      nix.settings = {
-        experimental-features = [ "nix-command" "flakes" ];
-        auto-optimise-store = true;
-      };
       imports = [
         ./home
       ];
@@ -47,13 +38,20 @@
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-darwin x86_64-darwin
+            experimental-features = nix-command flakes
           '';
+          settings.auto-optimise-store = true;
         };
       }
       home-manager.darwinModules.home-manager
       {
         users.users.${user}.home = "/Users/${user}";
         home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.sharedModules = [
+          ./home/common.nix
+          ./home/git-${user}.nix
+        ];
         home-manager.users.${user} = homeManagerCommonConfig;
       }
       agenix.darwinModules.default
@@ -65,7 +63,9 @@
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-linux x86_64-linux
+            experimental-features = nix-command flakes
           '';
+          settings.auto-optimise-store = true;
         };
         users.users.${user} = {
           home = "/home/${user}";
@@ -73,6 +73,10 @@
           extraGroups = ["wheel" "networkmanager"];
         };
         home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.sharedModules = [
+          ./home/common.nix
+        ];
         home-manager.users.${user} = homeManagerCommonConfig;
       }
       agenix.nixosModules.default
@@ -82,7 +86,6 @@
     darwinConfigurations."thamrys" = darwin.lib.darwinSystem {
       system = system.aarch64-darwin;
       specialArgs = {
-        inherit inputs nixpkgs;
         pkgs_x86 = import nixpkgs { system = system.x86_64-darwin; };
       };
       modules = nixDarwinCommonModules { user = "brett"; } ++ [

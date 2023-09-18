@@ -1,4 +1,5 @@
-{ pkgs, pkgs_x86, ... }:
+{ config, lib, pkgs, pkgs_x86, ... }:
+
 {
   environment.systemPackages = [ pkgs.qemu pkgs_x86.libvirt ];
 
