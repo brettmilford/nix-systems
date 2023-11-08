@@ -1,6 +1,10 @@
 { pkgs, config, ... }:
 {
-  age.secrets.nextcloud.file = ../../../secrets/nextcloud.age;
+  age.secrets.nextcloud = {
+    file = ../../../secrets/nextcloud.age;
+    owner = "nextcloud";
+    group = "nextcloud";
+  };
 
   services.nextcloud = {
     enable = true;
