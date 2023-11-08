@@ -13,9 +13,5 @@
 
   programs.git = {
     enable = true;
-    config = {
-      userEmail = "root@hostname.com";
-      userName = "Root";
-    };
   };
 }

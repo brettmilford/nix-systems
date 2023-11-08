@@ -22,7 +22,6 @@
     extraAppsEnable = true;
     enableImagemagick = true;
     configureRedis = true;
-    caching.redis = false;
     https = true;
     datadir = "/srv/data/nextcloud";
     extraOptions = {
