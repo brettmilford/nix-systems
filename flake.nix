@@ -94,6 +94,13 @@
       ];
     };
 
+    nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
+      system = system.aarch64-linux;
+      modules = nixosCommonModules { user = "brett"; } ++ [
+        ./hosts/nixos/Calliope
+      ];
+    };
+
     nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
       system = system.aarch64-linux;
       modules = nixosCommonModules { user = "brett"; } ++ [

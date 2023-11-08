@@ -164,10 +164,6 @@
 
   programs.pandoc.enable = true;
 
-  programs.ssh = {
-      enable = true;
-  };
-
   programs.vim = {
     enable = true;
     packageConfigurable = pkgs.vim;

@@ -6,4 +6,5 @@ in
   "node_exporter.crt.age".publicKeys = [ thamrys brett ];
   "node_exporter.key.age".publicKeys = [ thamrys brett ];
   "node_exporter_config.age".publicKeys = [thamrys brett ];
+  "nextcloud.age".publicKeys = [thamrys brett ];
 }

@@ -13,9 +13,23 @@
     nixfmt
     editorconfig-core-c
     sqlite
-    llvm
     (aspellWithDicts (d: [d.en]))
     emacs-all-the-icons-fonts
+# development tools
+    gnumake
+    go
+    gopls
+    gotools
+    go-tools
+    python311
+    python311Packages.python-lsp-server
+    python311Packages.python-lsp-ruff
+    python311Packages.python-lsp-jsonrpc
+    python311Packages.python-lsp-black
+    python311Packages.pyls-isort
+    python311Packages.pylsp-mypy
+    python311Packages.pylsp-rope
+    poetry
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
   ] ++ lib.optionals pkgs.stdenv.isLinux [
