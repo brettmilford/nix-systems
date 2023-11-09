@@ -47,7 +47,7 @@
     "darwin_2": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-darwin"
         ]
       },
       "locked": {
@@ -162,11 +162,27 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1694618689,
-        "narHash": "sha256-UQiOf8CTokDuyQgY6NpeXDL1fkeDHyNI5rfJ+wy9rg8=",
+        "lastModified": 1699291058,
+        "narHash": "sha256-5ggduoaAMPHUy4riL+OrlAZE14Kh7JWX4oLEs22ZqfU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e27ca312d56522b907b998c2ff99169bf12639f2",
+        "rev": "41de143fda10e33be0f47eab2bfe08a50f234267",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-23.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-darwin": {
+      "locked": {
+        "lastModified": 1699375123,
+        "narHash": "sha256-ny0+k0LQPVAhntYZo/FMVFxUlejpn4pIQVOo5Vdek/I=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "bceb3bff2ee78424c1073d0b4676858265f926d1",
         "type": "github"
       },
       "original": {
@@ -183,7 +199,8 @@
         "flake-utils": "flake-utils",
         "home-manager": "home-manager_2",
         "nixos-generators": "nixos-generators",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-darwin": "nixpkgs-darwin"
       }
     },
     "systems": {

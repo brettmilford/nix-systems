@@ -8,7 +8,7 @@
     gnutls
     fd
     imagemagick
-    pinentry_emacs
+    pinentry-emacs
     zstd
     nixfmt
     editorconfig-core-c

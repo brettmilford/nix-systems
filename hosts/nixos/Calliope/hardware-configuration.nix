@@ -9,11 +9,17 @@
       (modulesPath + "/profiles/qemu-guest.nix")
     ];
 
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.kernelParams = [ "net.ifnames=0" ];
+  boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
   boot.initrd.availableKernelModules = [ "xhci_pci" "virtio_pci" "virtio_scsi" "usbhid" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ ];
   boot.extraModulePackages = [ ];
 
+  boot.zfs.devNodes = "/dev/disk/by-path";
   fileSystems."/" =
     { device = "tank";
       fsType = "zfs";
@@ -28,6 +34,15 @@
     { device = "/dev/sda1";
       fsType = "vfat";
     };
+
+  boot.zfs.extraPools = [ "dpool" ];
+
+  fileSystems."/srv" = {
+    device = "dpool";
+    fsType = "zfs";
+  };
+
+  services.zfs.autoScrub.enable = true;
 
   swapDevices = [ ];
 

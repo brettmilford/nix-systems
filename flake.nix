@@ -3,9 +3,10 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-23.05-darwin";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+      nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.05-darwin";
       darwin.url = "github:lnl7/nix-darwin";
-      darwin.inputs.nixpkgs.follows = "nixpkgs";
+      darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
       home-manager.url = "github:nix-community/home-manager/release-23.05";
       home-manager.inputs.nixpkgs.follows = "nixpkgs";
       flake-utils.url = "github:numtide/flake-utils";
@@ -18,6 +19,7 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-darwin,
     darwin,
     home-manager,
     flake-utils,
