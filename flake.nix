@@ -81,6 +81,7 @@
           ./home/git-${user}.nix
         ];
         home-manager.users.${user} = homeManagerCommonConfig;
+        systemd.services."home-manager-${user}".serviceConfig.TimeoutSec = 900;
       }
       agenix.nixosModules.default
     ];

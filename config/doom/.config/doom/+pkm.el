@@ -1,4 +1,5 @@
 ;;; +pkm.el --- Personal Knowledge Management config -*- lexical-binding: t; -*-
+(when (file-directory-p "~/org")
 (setq org-directory "~/org")
 (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
@@ -296,3 +297,4 @@
       f)))
 
 (load! "lisp/org-notification")
+) ;; closes (when (file-directory-p "~/org")

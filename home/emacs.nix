@@ -59,7 +59,7 @@
         source = ../config/doom/.config/doom;
         recursive = true;
         onChange = "${pkgs.writeShellScript "doom-change" ''
-          export PATH="$PATH:$HOME/.nix-profile/bin"
+          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin"
           export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
           export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"
@@ -73,7 +73,6 @@
             ${config.xdg.configHome}/emacs/bin/doom sync -u
           fi
         ''}";
-
       };
     };
   };

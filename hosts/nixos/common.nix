@@ -7,6 +7,7 @@
     gcc
     git
   ];
+
   programs.vim = {
     defaultEditor = true;
   };

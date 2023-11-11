@@ -196,4 +196,9 @@
       PROMPT_COMMAND = "history -a;$PROMPT_COMMAND";
     };
   };
+
+  services.gpg-agent = {
+    enable = true;
+  };
+
 }

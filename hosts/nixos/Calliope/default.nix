@@ -9,6 +9,7 @@
       ../cloud.nix
       ./postgresql.nix
       ./nextcloud.nix
+      ./zerotierone.nix
     ];
 
   networking.hostName = "Calliope";
