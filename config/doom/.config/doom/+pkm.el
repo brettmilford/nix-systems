@@ -1,6 +1,6 @@
 ;;; +pkm.el --- Personal Knowledge Management config -*- lexical-binding: t; -*-
-(when (file-directory-p "~/org")
 (setq org-directory "~/org")
+(when (file-directory-p org-directory)
 (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 

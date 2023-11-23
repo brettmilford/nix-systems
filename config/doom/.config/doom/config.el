@@ -13,8 +13,6 @@
   (xterm-mouse-mode 1)
   (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
   (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
-;; TODO: see https://github.com/hlissner/doom-emacs/issues/3398
-(add-hook! 'tty-setup-hook #'xclip-mode)
 
 ;; C-x * (c e k q) (C-x * ? ? for all)
 (setq calc-angle-mode 'rad
