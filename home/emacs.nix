@@ -56,7 +56,7 @@
     enable = true;
     configFile = {
       "doom" = {
-        source = ../config/doom/.config/doom;
+        source = ../config/doom;
         recursive = true;
         onChange = "${pkgs.writeShellScript "doom-change" ''
           export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin"
