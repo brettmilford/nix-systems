@@ -97,6 +97,13 @@
       ];
     };
 
+    nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
+      system = system.x86_64-linux;
+      modules = nixosCommonModules { user = "brett"; } ++ [
+        ./hosts/nixos/orpheus
+      ];
+    };
+
     nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
       system = system.aarch64-linux;
       modules = nixosCommonModules { user = "brett"; } ++ [

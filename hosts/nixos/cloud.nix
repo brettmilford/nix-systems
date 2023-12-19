@@ -19,7 +19,7 @@
     }];
   }];
 
-  networking.useDHCP = true;
+  networking.useDHCP = lib.mkDefault true;
   services.openssh.enable = true;
 
   environment.systemPackages = with pkgs; [

@@ -4,16 +4,14 @@
   imports =
     [
       ./hardware-configuration.nix
-      (modulesPath + "/profiles/headless.nix")
       ../common.nix
       ../cloud.nix
+      ../desktop.nix
       ../zerotierone.nix
-      ./postgresql.nix
-      ./nextcloud.nix
     ];
 
-  networking.hostName = "Calliope";
-  networking.hostId = "25f4937c";
+  networking.hostName = "orpheus";
+  networking.hostId = "19a6d028";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
 

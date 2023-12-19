@@ -7,7 +7,10 @@ curl -L https://nixos.org/nix/install | sh -s -- --daemon
 2) Build Flake
 
 ```
+# darwin from git+https
 nix build "git+https://github.com/brettmilford/nix-systems.git?ref=devel#darwinConfigurations.thamrys.system" --extra-experimental-features "nix-command flakes"
+# nixos from pwd
+nix build '.#nixosConfigurations.orpheus.config.system.build.toplevel'
 ```
 
 3) Switch
