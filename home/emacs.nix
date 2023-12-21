@@ -2,6 +2,7 @@
 
 {
   home.packages = with pkgs; [
+    emacsNativeComp
     binutils
     git
     (ripgrep.override { withPCRE2 = true; })
@@ -35,12 +36,6 @@
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     xclip
   ];
-
-  programs.emacs = {
-    enable = true;
-    package = ((pkgs.emacsPackagesFor pkgs.emacsNativeComp).emacsWithPackages
-        (epkgs: [ epkgs.vterm ]));
-  };
 
   home = {
     sessionVariables = {
