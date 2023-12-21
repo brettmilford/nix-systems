@@ -18,3 +18,9 @@ nix build '.#nixosConfigurations.orpheus.config.system.build.toplevel'
 ```
 ./result/sw/bin/darwin-rebuild switch --flake "git+https://github.com/brettmilford/nix-systems.git?ref=devel#thamrys"
 ```
+
+Build and run vm
+
+```
+nix run '.#nixosConfigurations.orpheus.config.system.build.vm'
+```

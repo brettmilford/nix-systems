@@ -3,11 +3,11 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
-      nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.05-darwin";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+      nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
       darwin.url = "github:lnl7/nix-darwin";
       darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
-      home-manager.url = "github:nix-community/home-manager/release-23.05";
+      home-manager.url = "github:nix-community/home-manager/release-23.11";
       home-manager.inputs.nixpkgs.follows = "nixpkgs";
       flake-utils.url = "github:numtide/flake-utils";
       agenix.url = "github:ryantm/agenix";
@@ -29,7 +29,7 @@
   let
     system = flake-utils.lib.system;
     homeManagerCommonConfig = with self.homeManagerModules; {
-      home.stateVersion = "23.05";
+      home.stateVersion = "23.11";
       imports = [
         ./home
       ];
@@ -58,10 +58,10 @@
       }
       agenix.darwinModules.default
     ];
-    nixosCommonModules = { user }: [
+    nixosCommonModules = { user, desc }: [
       home-manager.nixosModules.home-manager
       {
-        system.stateVersion = "23.05";
+        system.stateVersion = "23.11";
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-linux x86_64-linux
@@ -72,8 +72,11 @@
         users.users.${user} = {
           home = "/home/${user}";
           isNormalUser = true;
+          group = "${user}";
+          description = "${desc}";
           extraGroups = ["wheel" "networkmanager"];
         };
+        users.groups.${user} = {};
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.sharedModules = [
@@ -99,8 +102,16 @@
 
     nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
       system = system.x86_64-linux;
-      modules = nixosCommonModules { user = "brett"; } ++ [
+      modules = nixosCommonModules { user = "brett"; desc = "Brett";  } ++ [
         ./hosts/nixos/orpheus
+      ];
+    };
+
+    nixosConfigurations."orpheus-vm" = nixpkgs.lib.nixosSystem {
+      system = system.x86_64-linux;
+      modules = nixosCommonModules { user = "brett"; desc = "Brett";  } ++ [
+        ./hosts/nixos/orpheus
+        ./hosts/nixos/build-vm.nix
       ];
     };
 

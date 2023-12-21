@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, modulesPath, options, ... }:
 
 {
   imports =
@@ -10,9 +10,9 @@
       ../zerotierone.nix
     ];
 
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
   networking.hostName = "orpheus";
-  networking.hostId = "19a6d028";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
-
 }
