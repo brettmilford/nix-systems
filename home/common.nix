@@ -18,6 +18,8 @@
     ncdu
     xz
     gh
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    nextcloud-client
   ];
 
   home.extraOutputsToInstall = [ "doc" "info" "devdoc" ];

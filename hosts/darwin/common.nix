@@ -29,6 +29,16 @@
 
   services.nix-daemon.enable = true;
 
+  services.emacs = {
+    enable = true;
+  };
+
+  launchd.user.agents.emacs = {
+    environment = {
+      COLORTERM = "truecolor";
+    };
+  };
+
   system.defaults = {
     NSGlobalDomain.AppleEnableSwipeNavigateWithScrolls = true;
     NSGlobalDomain.InitialKeyRepeat = 25;

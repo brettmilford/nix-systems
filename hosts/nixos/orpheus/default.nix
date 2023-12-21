@@ -8,6 +8,7 @@
       ../cloud.nix
       ../desktop.nix
       ../zerotierone.nix
+      ./rsnapshot.nix
     ];
 
   boot.loader.systemd-boot.enable = true;

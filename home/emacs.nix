@@ -72,15 +72,4 @@
     };
   };
 
-  ### TODO: how to use nix-darwin's services.emacs here?
-  # services.emacs = {
-  #   enable = true;
-  # };
-  # 
-  # launchd.user.agents.emacs = {
-  #   environment = {
-  #     COLORTERM = "truecolor";
-  #   };
-  # };
-
 }

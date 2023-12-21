@@ -22,11 +22,6 @@
       fsType = "vfat";
     };
 
-  fileSystems."/srv/data" =
-    { device = "systemd-1";
-      fsType = "autofs";
-    };
-
   swapDevices =
     [ { device = "/dev/disk/by-uuid/977b2469-0f9b-4f8e-8795-7f4989789898"; }
     ];

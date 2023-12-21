@@ -55,7 +55,11 @@
 
   environment.systemPackages = with pkgs; [
     firefox
+    bitwarden
+    gnomeExtensions.appindicator
   ];
+
+  services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
   sound.enable = true;
   hardware.pulseaudio.enable = false;
