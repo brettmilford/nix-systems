@@ -11,12 +11,10 @@
     texlive.combined.scheme-basic
     ansible
     (pass.withExtensions (ext: [ext.pass-otp]))
-    lftp
     podman
     kubectl
     kubernetes-helm
     bitwarden-cli
-    htop
     ncdu
     xz
     gh
@@ -36,9 +34,6 @@
     ls = "ls -G ";
     http_serve = "python3 -m http.server 8080";
     mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
-    j = "juju ";
-    jw = "watch -tc juju status --color";
-    segmaassh = "f() { hostname=$1; shift; ssh ubuntu@`maas segmaas machines read hostname=\${hostname} | jq -r '.[].ip_addresses | .[]'` $@ ; } ; f";
   };
 
   programs.direnv = {
@@ -121,6 +116,7 @@
       "Network Trash Folder"
       "Temporary Items"
       ".apdisk"
+      ".swp"
     ];
     signing = {
       signByDefault = true;
@@ -132,7 +128,7 @@
     enable = true;
     settings = {
       require-cross-certification = true;
-      keyserver = "https://keyserver.ubuntu.com";
+      keyserver = "https://pgp.mit.edu";
       default-key = "0x4678907F";
       no-emit-version = true;
       no-comments = true;
@@ -155,11 +151,6 @@
   programs.man = {
       enable = true;
       generateCaches = true;
-  };
-
-  programs.nix-index = {
-      enable = true;
-      enableZshIntegration = true;
   };
 
   programs.pandoc.enable = true;
