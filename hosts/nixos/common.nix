@@ -7,6 +7,7 @@
   environment.systemPackages = with pkgs; [
     gcc
     git
+    mosh
   ];
 
   programs.vim = {

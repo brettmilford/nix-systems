@@ -115,14 +115,14 @@
 
     nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
       system = system.aarch64-linux;
-      modules = nixosCommonModules { user = "brett"; } ++ [
+      modules = nixosCommonModules { user = "brett"; desc = "Brett"; } ++ [
         ./hosts/nixos/Calliope
       ];
     };
 
     nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
       system = system.aarch64-linux;
-      modules = nixosCommonModules { user = "brett"; } ++ [
+      modules = nixosCommonModules { user = "brett"; desc = "Brett"; } ++ [
         {
           imports = [nixos-generators.nixosModules.all-formats];
           nixpkgs.hostPlatform = system.aarch64-linux;
