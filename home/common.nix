@@ -10,6 +10,7 @@
     remarshal
     texlive.combined.scheme-basic
     ansible
+    sshpass
     (pass.withExtensions (ext: [ext.pass-otp]))
     podman
     kubectl
@@ -25,7 +26,8 @@
   home.extraOutputsToInstall = [ "doc" "info" "devdoc" ];
 
   home.shellAliases = {
-    em = "emacsclient -tcq -a \"\"";
+    em = "emacs -nw";
+    emc = "emacsclient -tcq -a \"\"";
     t = "tmux";
     g = "git ";
     o = "openstack ";
@@ -178,10 +180,10 @@
 
   home.sessionVariables = { EDITOR = "vim"; };
 
-  programs.zsh.enable = true;
+  programs.zsh.enable = pkgs.stdenv.isDarwin;
 
   programs.bash = {
-    enable = true;
+    enable = pkgs.stdenv.isLinux;
     shellOptions = [
       "histappend"
     ];
@@ -191,7 +193,7 @@
   };
 
   services.gpg-agent = {
-    enable = true;
+    enable = pkgs.stdenv.isLinux;
   };
 
 }

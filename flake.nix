@@ -51,7 +51,6 @@
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.sharedModules = [
-          ./home/common.nix
           ./home/git-${user}.nix
         ];
         home-manager.users.${user} = homeManagerCommonConfig;
@@ -80,7 +79,6 @@
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.sharedModules = [
-          ./home/common.nix
           ./home/git-${user}.nix
         ];
         home-manager.users.${user} = homeManagerCommonConfig;

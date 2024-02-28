@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./alacritty.nix
+    ./common.nix
     ./emacs.nix
     ./tmux.nix
   ];

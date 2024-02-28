@@ -59,7 +59,7 @@
           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
           export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"
           export XDG_CONFIG_HOME="${config.home.sessionVariables.XDG_CONFIG_HOME}";
-          if [ ! -d "EMACSDIR" ]; then
+          if [ ! -d "$EMACSDIR" ]; then
             git clone --depth 1 https://github.com/doomemacs/doomemacs.git $EMACSDIR
           fi
           if [ ! -d "$DOOMLOCALDIR" ]; then
@@ -72,4 +72,10 @@
     };
   };
 
+  home.file.".emacs.d/early-init.el".text =
+    ''
+    (setenv "DOOMLOCALDIR" (expand-file-name (file-name-as-directory "${config.home.sessionVariables.DOOMLOCALDIR}")))
+    (setenv "EMACSDIR" (expand-file-name (file-name-as-directory "${config.home.sessionVariables.EMACSDIR}")))
+    (load (concat (expand-file-name (file-name-as-directory "${config.home.sessionVariables.EMACSDIR}")) "early-init.el") nil 'nomessage)
+    '';
 }

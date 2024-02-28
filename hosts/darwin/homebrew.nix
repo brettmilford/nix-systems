@@ -10,13 +10,15 @@
 
     taps = [
       "homebrew/cask"
+      "homebrew/cask-fonts"
     ];
 
     casks = [
+      "rectangle"
+      "notion"
       "firefox"
       "google-chrome"
       "nextcloud"
-      "bitwarden"
       "anki"
       "xquartz"
       "gimp"
@@ -24,6 +26,12 @@
       "inkscape"
       "obsidian"
       "iTerm2"
+      "font-iosevka"
+      "font-iosevka-aile"
     ];
+
+    masApps = {
+      Bitwarden = 1352778147;
+    };
   };
 }

@@ -1,6 +1,7 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; .doom.d/packages.el
 
+;; org-mode stuff
 (package! org-ql)
 (package! org-ref)
 (package! org-roam-ui)
@@ -12,5 +13,8 @@
 ;(package! org-mode-incremental-reading
 ;  :recipe (:host github :repo "vascoferreira25/org-mode-incremental-reading"))
 (package! ox-reveal)
+(package! org-modern)
+
+;; prog-mode stuff
 (package! salt-mode)
 (package! jsonnet-mode)

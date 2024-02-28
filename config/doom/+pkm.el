@@ -4,6 +4,36 @@
 (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
 
+(when window-system
+  (load-theme 'modus-operandi t)
+  (modus-themes-load-operandi)
+  (setq
+   doom-font (font-spec :family "Iosevka")
+   doom-variable-pitch-font (font-spec :family "Iosevka Aile"))
+  (after! org-modern
+    (set-face-attribute 'org-modern-symbol nil :family "Iosevka"))
+  (doom/reload-font)
+
+  (after! org
+    (global-org-modern-mode)
+    (setq writeroom-fringes-outside-margins nil)
+    (global-writeroom-mode)
+    (setq
+     org-auto-align-tags nil
+     org-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
+     org-hide-emphasis-markers t
+     org-ellipsis "…"
+     org-agenda-tags-column 0
+     org-agenda-block-separator ?─
+     org-agenda-time-grid
+     '((daily today require-timed)
+       (800 1000 1200 1400 1600 1800 2000)
+       " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+     org-agenda-current-time-string
+     "◀── now ─────────────────────────────────────────────────")))
+
 (after! org
   (org-clock-persistence-insinuate)
   (add-hook! 'org-mode-hook #'+word-wrap-mode)
@@ -49,11 +79,8 @@
   (setq org-refile-use-outline-path 'file)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-startup-folded t)
-  (setq org-tags-column -77)
   (setq org-cycle-open-archived-trees t)
   (setq org-adapt-indentation nil)
-  (setq org-startup-indented t)
-  (setq org-pretty-entities t)
   (setq org-log-done 'time)
   (setq org-enforce-todo-dependencies t)
   (setq org-latex-bib-compiler "biber")
@@ -74,7 +101,11 @@
   (setq org-clock-report-include-clocking-task t)
   (setq org-html-self-link-headlines t)
   (setq org-use-tag-inheritance nil)
-  (setq org-crypt-key "brettmilford@gmail.com"))
+  (setq org-crypt-key "brettmilford@gmail.com")
+  ;; org-modern
+  (setq org-startup-indented nil)
+  (setq org-tags-column 0)
+  (setq org-pretty-entities t))
 
 (setq org-roam-directory org-directory)
 (after! org-roam
@@ -100,7 +131,9 @@
     :desc "Capture template today" "x" #'org-roam-dailies-capture-today-w-tmpl))
 
   ;; makes id links work, if org-mode hasn't cached them
-  (org-id-update-id-locations (org-roam-list-files) 't)
+  ;; TODO: kills startup performance.
+  ;; (org-id-update-id-locations (org-roam-list-files) 't)
+
   (setq org-roam-mode-sections
         '((org-roam-backlinks-section :unique t)
            org-roam-reflinks-section))

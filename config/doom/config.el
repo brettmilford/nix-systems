@@ -19,7 +19,7 @@
       calc-algebraic-mode t
       calc-symbolic-mode t)
 
-;; NOTE: auto-fill is generally preferred over visual-line-mode as its faster
+;; NOTE: auto-fill is generally faster than visual-line-mode.
 (add-hook! 'text-mode-hook #'+word-wrap-mode)
 ;; TODO: this doesn't work in markdown?
 ;; needs to happen before markdown mode?
@@ -74,14 +74,14 @@
 (map! "C-x ?" 'help-command) ;; NOTE: 'SPC h .' does the same
 
 (map! "C-x ," '(lambda() (interactive)
-                 (find-file (expand-file-name "doom/.config/doom/config.el" config-directory))))
+                 (find-file (expand-file-name "doom/config.el" config-directory))))
 
 (if (and IS-MAC (display-graphic-p))
          (map! "s-n" #'make-frame
                "s-w" #'delete-frame))
 
 (defun merge-init() (interactive)
-       (ediff-merge-files (expand-file-name "doom/.config/doom/init.el" config-directory) "~/.emacs.d/init.example.el"))
+       (ediff-merge-files (expand-file-name "doom/init.el" config-directory) "~/.emacs.d/init.example.el"))
 
 ;; UI & Theme
 
@@ -92,10 +92,9 @@
 ;                  (not (string= (getenv "MACOS_DARKMODE") "true"))))
 ;    (load-theme (intern (concat (symbol-name doom-theme) "-light")) t))
 
-(load-theme 'doom-horizon t)
-;; Slightly increase contrast
-;(set-face-attribute 'default nil :foreground "#CFCFCF")
-(set-face-background 'default "undefined") ;;; Sets to terminal background
+(load-theme 'doom-tokyo-night t)
+;; (set-face-attribute 'default nil :foreground "#CFCFCF") ;; Slightly increase contrast
+;; (set-face-background 'default "undefined" (selected-frame)) ;; Sets to non-exsistent colour which falls back to terminal bg
 
 (after! doom-themes
   (setq
@@ -125,6 +124,9 @@
 (setq display-line-numbers-type nil)
 
 ;; Packages
+(after! highlight-indent-guides
+  (remove-hook! (prog-mode text-mode conf-mode) #'highlight-indent-guides-mode))
+
 (setq projectile-discover-projects-in-directory '("~/prjs"))
 (map! :leader "p ]" '+ivy/project-search)
 (setq magit-repository-directories '(("~/prjs" . 3) ("~/.emacs.d" . 0)))
@@ -164,5 +166,8 @@
 (after! python
   (add-hook! 'python-mode 'semantic-mode)
   (add-hook! 'python-mode 'semantic-stickyfun-mode))
+
+(after! upload
+  (setq ssh-deploy-debug t))
 
 (load! "+pkm")
