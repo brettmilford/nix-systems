@@ -7,7 +7,6 @@
   environment.systemPackages = with pkgs; [
     gcc
     git
-    mosh
   ];
 
   programs.vim = {
@@ -17,4 +16,6 @@
   programs.git = {
     enable = true;
   };
+
+  programs.mosh.enable = true;
 }

@@ -1,9 +1,11 @@
+{ config, lib, pkgs, ... }:
+
 {
   programs.tmux = {
     enable = true;
     aggressiveResize = true;
     baseIndex = 1;
-    customPaneNavigationAndResize = true;
+   customPaneNavigationAndResize = true;
     escapeTime = 0;
     historyLimit = 20000;
     keyMode = "vi";
@@ -112,5 +114,18 @@ set -g message-command-style fg=$colour_fg,bg=$colour_bg
 # Mode - effects the colours in copy mode (bind esc) 
 set -g mode-style fg=$colour_fg,bg=$colour_bg
 '';
+    plugins = with pkgs; [
+      {
+        plugin = tmuxPlugins.resurrect;
+        extraConfig = "set -g @resurrect-strategy-nvim 'session'";
+      }
+      {
+        plugin = tmuxPlugins.continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          set -g @continuum-save-interval '60' # minutes
+        '';
+      }
+    ];
   };
 }
