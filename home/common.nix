@@ -19,6 +19,7 @@
     ncdu
     xz
     gh
+    mosh
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     nextcloud-client
   ];
