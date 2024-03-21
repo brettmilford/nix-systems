@@ -1,6 +1,5 @@
-{pkgs,...}:
-{
-  home.packages = [ pkgs.syncthing ];
+{pkgs, ...}: {
+  home.packages = [pkgs.syncthing];
 
   # TODO: how to use nix-darwin's services.emacs here?
   #launchd.user.agents.syncthing = {
@@ -8,5 +7,4 @@
   #  serviceConfig.KeepAlive = true;
   #  serviceConfig.RunAtLoad = true;
   #};
-
 }

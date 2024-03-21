@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   users.users.nix = {
     isNormalUser = true;
     home = "/home/nix";
@@ -14,13 +17,13 @@
 
   virtualisation.vmVariant = {
     virtualisation = {
-      memorySize =  2048;
+      memorySize = 2048;
       cores = 2;
     };
   };
   virtualisation.vmVariantWithBootLoader = {
     virtualisation = {
-      memorySize =  2048;
+      memorySize = 2048;
       cores = 2;
     };
   };

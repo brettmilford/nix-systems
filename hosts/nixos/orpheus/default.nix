@@ -1,15 +1,19 @@
-{ config, lib, pkgs, modulesPath, options, ... }:
-
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common.nix
-      ../cloud.nix
-      ../desktop.nix
-      ../zerotierone.nix
-      ./rsnapshot.nix
-    ];
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  options,
+  ...
+}: {
+  imports = [
+    ./hardware-configuration.nix
+    ../common.nix
+    ../cloud.nix
+    ../desktop.nix
+    ../zerotierone.nix
+    ./rsnapshot.nix
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

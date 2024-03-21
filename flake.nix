@@ -3,17 +3,17 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-      nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
-      darwin.url = "github:lnl7/nix-darwin";
-      darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
-      home-manager.url = "github:nix-community/home-manager/release-23.11";
-      home-manager.inputs.nixpkgs.follows = "nixpkgs";
-      flake-utils.url = "github:numtide/flake-utils";
-      agenix.url = "github:ryantm/agenix";
-      agenix.inputs.nixpkgs.follows = "nixpkgs";
-      nixos-generators.url = "github:nix-community/nixos-generators";
-      nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
+    darwin.url = "github:lnl7/nix-darwin";
+    darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
+    home-manager.url = "github:nix-community/home-manager/release-23.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    flake-utils.url = "github:numtide/flake-utils";
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-generators.url = "github:nix-community/nixos-generators";
+    nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -25,8 +25,7 @@
     flake-utils,
     agenix,
     nixos-generators,
-  }@inputs:
-  let
+  } @ inputs: let
     system = flake-utils.lib.system;
     homeManagerCommonConfig = with self.homeManagerModules; {
       home.stateVersion = "23.11";
@@ -34,7 +33,7 @@
         ./home
       ];
     };
-    nixDarwinCommonModules = { user }: [
+    nixDarwinCommonModules = {user}: [
       {
         system.stateVersion = 4;
         nix = {
@@ -57,7 +56,10 @@
       }
       agenix.darwinModules.default
     ];
-    nixosCommonModules = { user, desc }: [
+    nixosCommonModules = {
+      user,
+      desc,
+    }: [
       home-manager.nixosModules.home-manager
       {
         system.stateVersion = "23.11";
@@ -86,62 +88,83 @@
       }
       agenix.nixosModules.default
     ];
-  in {
-
-    darwinConfigurations."thamrys" = darwin.lib.darwinSystem {
-      system = system.aarch64-darwin;
-      specialArgs = {
-        pkgs_x86 = import nixpkgs { system = system.x86_64-darwin; };
+  in
+    {
+      darwinConfigurations."thamrys" = darwin.lib.darwinSystem {
+        system = system.aarch64-darwin;
+        specialArgs = {
+          pkgs_x86 = import nixpkgs {system = system.x86_64-darwin;};
+        };
+        modules =
+          nixDarwinCommonModules {user = "brett";}
+          ++ [
+            ./hosts/darwin/thamrys
+          ];
       };
-      modules = nixDarwinCommonModules { user = "brett"; } ++ [
-        ./hosts/darwin/thamrys
-      ];
-    };
 
-    nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
-      system = system.x86_64-linux;
-      modules = nixosCommonModules { user = "brett"; desc = "Brett";  } ++ [
-        ./hosts/nixos/orpheus
-      ];
-    };
+      nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
+        system = system.x86_64-linux;
+        modules =
+          nixosCommonModules {
+            user = "brett";
+            desc = "Brett";
+          }
+          ++ [
+            ./hosts/nixos/orpheus
+          ];
+      };
 
-    nixosConfigurations."orpheus-vm" = nixpkgs.lib.nixosSystem {
-      system = system.x86_64-linux;
-      modules = nixosCommonModules { user = "brett"; desc = "Brett";  } ++ [
-        ./hosts/nixos/orpheus
-        ./hosts/nixos/build-vm.nix
-      ];
-    };
+      nixosConfigurations."orpheus-vm" = nixpkgs.lib.nixosSystem {
+        system = system.x86_64-linux;
+        modules =
+          nixosCommonModules {
+            user = "brett";
+            desc = "Brett";
+          }
+          ++ [
+            ./hosts/nixos/orpheus
+            ./hosts/nixos/build-vm.nix
+          ];
+      };
 
-    nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
-      system = system.aarch64-linux;
-      modules = nixosCommonModules { user = "brett"; desc = "Brett"; } ++ [
-        ./hosts/nixos/Calliope
-      ];
-    };
+      nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
+        system = system.aarch64-linux;
+        modules =
+          nixosCommonModules {
+            user = "brett";
+            desc = "Brett";
+          }
+          ++ [
+            ./hosts/nixos/Calliope
+          ];
+      };
 
-    nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
-      system = system.aarch64-linux;
-      modules = nixosCommonModules { user = "brett"; desc = "Brett"; } ++ [
-        {
-          imports = [nixos-generators.nixosModules.all-formats];
-          nixpkgs.hostPlatform = system.aarch64-linux;
-        }
-        ./hosts/nixos/dev
-      ];
-    };
-
-  } //
-  flake-utils.lib.eachDefaultSystem
-    (system:
-      let
+      nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
+        system = system.aarch64-linux;
+        modules =
+          nixosCommonModules {
+            user = "brett";
+            desc = "Brett";
+          }
+          ++ [
+            {
+              imports = [nixos-generators.nixosModules.all-formats];
+              nixpkgs.hostPlatform = system.aarch64-linux;
+            }
+            ./hosts/nixos/dev
+          ];
+      };
+    }
+    // flake-utils.lib.eachDefaultSystem
+    (
+      system: let
         pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
+      in {
         buildInputs = [
           agenix.packages.${system}.default
         ];
-        devShell = import ./shell.nix { inherit pkgs; };
+        devShell = import ./shell.nix {inherit pkgs;};
+        formatter = nixpkgs.legacyPackages.${system}.alejandra;
       }
     );
 }
