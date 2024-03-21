@@ -23,6 +23,7 @@
       ncdu
       xz
       gh
+      mosh
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       nextcloud-client
@@ -43,6 +44,7 @@
     ls = "ls -G ";
     http_serve = "python3 -m http.server 8080";
     mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
+    msh = "mosh ";
   };
 
   programs.direnv = {
@@ -91,7 +93,10 @@
     attributes = ["*.pdf diff=pdf"];
     extraConfig = {
       init.defaultBranch = "devel";
-      pull.rebase = false;
+      pull = {
+        rebase = false;
+        autoSetupRemote = true;
+      };
       credential.helper = "cache";
       core.excludesfile = "~/.gitignore_global";
       filter.lfs = {

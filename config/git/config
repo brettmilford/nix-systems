@@ -77,3 +77,5 @@
 [user]
 	email = "brettmilford@gmail.com"
 	name = "Brett Milford"
+[push]
+	autoSetupRemote = true

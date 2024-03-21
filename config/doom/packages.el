@@ -18,3 +18,6 @@
 ;; prog-mode stuff
 (package! salt-mode)
 (package! jsonnet-mode)
+
+(package! copilot
+  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el" "dist")))
