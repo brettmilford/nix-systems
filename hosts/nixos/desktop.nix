@@ -1,6 +1,10 @@
-{ config, lib, pkgs, options, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  options,
+  ...
+}: {
   networking.networkmanager.enable = true;
 
   i18n.extraLocaleSettings = {
@@ -14,7 +18,7 @@
     LC_TIME = "en_AU.UTF-8";
   };
 
-  console.packages = options.console.packages.default ++ [ pkgs.terminus_font ];
+  console.packages = options.console.packages.default ++ [pkgs.terminus_font];
 
   services.xserver = {
     enable = true;
@@ -29,29 +33,31 @@
     '';
   };
 
-  environment.gnome.excludePackages = (with pkgs; [
-    gnome-photos
-    gnome-tour
-    snapshot
-  ]) ++ (with pkgs.gnome; [
-    cheese # webcam tool
-    gnome-music
-    gnome-terminal
-    gedit # text editor
-    epiphany # web browser
-    geary # email reader
-    #evince # document viewer
-    gnome-characters
-    totem # video player
-    tali # poker game
-    iagno # go game
-    hitori # sudoku game
-    atomix # puzzle game
-    yelp # Help view
-    gnome-contacts
-    gnome-initial-setup
-    gnome-maps
-  ]);
+  environment.gnome.excludePackages =
+    (with pkgs; [
+      gnome-photos
+      gnome-tour
+      snapshot
+    ])
+    ++ (with pkgs.gnome; [
+      cheese # webcam tool
+      gnome-music
+      gnome-terminal
+      gedit # text editor
+      epiphany # web browser
+      geary # email reader
+      #evince # document viewer
+      gnome-characters
+      totem # video player
+      tali # poker game
+      iagno # go game
+      hitori # sudoku game
+      atomix # puzzle game
+      yelp # Help view
+      gnome-contacts
+      gnome-initial-setup
+      gnome-maps
+    ]);
 
   environment.systemPackages = with pkgs; [
     firefox
@@ -59,7 +65,7 @@
     gnomeExtensions.appindicator
   ];
 
-  services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
+  services.udev.packages = with pkgs; [gnome.gnome-settings-daemon];
 
   sound.enable = true;
   hardware.pulseaudio.enable = false;
@@ -72,15 +78,15 @@
   };
 
   powerManagement.powerDownCommands = ''
- echo enabled > /sys/bus/usb/devices/usb1/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb2/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb3/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb4/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb5/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb6/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb7/power/wakeup
- echo enabled > /sys/bus/usb/devices/usb8/power/wakeup
-'';
+    echo enabled > /sys/bus/usb/devices/usb1/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb2/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb3/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb4/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb5/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb6/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb7/power/wakeup
+    echo enabled > /sys/bus/usb/devices/usb8/power/wakeup
+  '';
 
   services.printing.enable = true;
 

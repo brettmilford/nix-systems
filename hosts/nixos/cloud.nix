@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   users.users.nix = {
     isNormalUser = true;
     home = "/home/nix";
@@ -15,13 +18,17 @@
 
   users.groups.nix = {};
 
-  security.sudo.extraRules = [{
-    users = [ "nix" ];
-    commands = [{
-      command = "ALL";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
+  security.sudo.extraRules = [
+    {
+      users = ["nix"];
+      commands = [
+        {
+          command = "ALL";
+          options = ["NOPASSWD"];
+        }
+      ];
+    }
+  ];
 
   networking.useDHCP = lib.mkDefault true;
   services.openssh.enable = true;

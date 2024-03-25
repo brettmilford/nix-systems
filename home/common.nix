@@ -1,30 +1,35 @@
-{ config, lib, pkgs, ... }:
-
 {
-  home.packages = with pkgs; [
-    direnv
-    qemu
-    git-review
-    tmux
-    jq
-    remarshal
-    texlive.combined.scheme-basic
-    ansible
-    sshpass
-    (pass.withExtensions (ext: [ext.pass-otp]))
-    podman
-    kubectl
-    kubernetes-helm
-    bitwarden-cli
-    ncdu
-    xz
-    gh
-    mosh
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
-    nextcloud-client
-  ];
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs;
+    [
+      direnv
+      qemu
+      git-review
+      tmux
+      jq
+      remarshal
+      texlive.combined.scheme-basic
+      ansible
+      sshpass
+      (pass.withExtensions (ext: [ext.pass-otp]))
+      podman
+      kubectl
+      kubernetes-helm
+      bitwarden-cli
+      ncdu
+      xz
+      gh
+      mosh
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      nextcloud-client
+    ];
 
-  home.extraOutputsToInstall = [ "doc" "info" "devdoc" ];
+  home.extraOutputsToInstall = ["doc" "info" "devdoc"];
 
   home.shellAliases = {
     em = "emacs -nw";
@@ -85,7 +90,7 @@
       rank = "shortlog -sn --no-merges";
       bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
     };
-    attributes = [ "*.pdf diff=pdf" ];
+    attributes = ["*.pdf diff=pdf"];
     extraConfig = {
       init.defaultBranch = "devel";
       pull = {
@@ -147,19 +152,19 @@
       verify-options = "show-uid-validity";
       use-agent = true;
       fixed-list-mode = true;
-      charset  = "utf-8";
-      personal-cipher-preferences = ["AES256" "AES192" "AES" "CAST5" ];
+      charset = "utf-8";
+      personal-cipher-preferences = ["AES256" "AES192" "AES" "CAST5"];
       personal-digest-preferences = "SHA256";
       cert-digest-algo = "SHA256";
-      default-preference-list = ["SHA512" "SHA384" "SHA256" "SHA224" "AES256" "AES192" "AES" "CAST5" "ZLIB" "BZIP2" "ZIP" "Uncompressed" ];
+      default-preference-list = ["SHA512" "SHA384" "SHA256" "SHA224" "AES256" "AES192" "AES" "CAST5" "ZLIB" "BZIP2" "ZIP" "Uncompressed"];
     };
   };
 
   programs.home-manager.enable = true;
 
   programs.man = {
-      enable = true;
-      generateCaches = true;
+    enable = true;
+    generateCaches = true;
   };
 
   programs.pandoc.enable = true;
@@ -180,10 +185,10 @@
       "set go+=c
       "set showmatch
       set clipboard^=unnamed,unnamedplus
-      '';
+    '';
   };
 
-  home.sessionVariables = { EDITOR = "vim"; };
+  home.sessionVariables = {EDITOR = "vim";};
 
   programs.zsh.enable = pkgs.stdenv.isDarwin;
 
@@ -200,5 +205,4 @@
   services.gpg-agent = {
     enable = pkgs.stdenv.isLinux;
   };
-
 }

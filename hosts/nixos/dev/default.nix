@@ -1,6 +1,10 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     (modulesPath + "/profiles/headless.nix")
@@ -24,5 +28,4 @@
   networking.hostName = "dev";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
-
 }
