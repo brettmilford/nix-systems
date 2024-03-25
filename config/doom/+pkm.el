@@ -34,6 +34,7 @@
      org-agenda-current-time-string
      "◀── now ─────────────────────────────────────────────────")))
 
+(remove-hook 'text-mode-hook #'vi-tilde-fringe-mode)
 (after! org
   (org-clock-persistence-insinuate)
   (add-hook! 'org-mode-hook #'+word-wrap-mode)
@@ -51,6 +52,13 @@
      "TAB" #'org-insert-structure-template
      :prefix ("c" . "+clock")
        :desc "Capture clocked" "x" #'org-capture-clocked)
+
+  (map!
+   :leader
+   :prefix ("n" . "notes")
+   :desc "Open org-default-notes-file" "g" #'(lambda() (interactive) (find-file org-default-notes-file))
+   :desc "Open +org-capture-todo-file" "T" #'(lambda() (interactive) (find-file +org-capture-todo-file))
+   :desc "Open +org-capture-journal-file" "j" #'(lambda () (interactive) (find-file +org-capture-journal-file)))
 
   (setq org-capture-templates
         '(("t" "Todo" entry
@@ -115,11 +123,11 @@
    :prefix ("n" . "notes")
    (:prefix ("r" . "org-roam")
     (:prefix ("d" . "by date")
-    :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
-    :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
-    :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
-    :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))
-    :desc "Capture template today" "x" #'org-roam-dailies-capture-today-w-tmpl))
+     :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
+     :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
+     :desc "Goto today" "n" #'(lambda () (interactive) (org-roam-dailies-goto-today "d"))
+     :desc "Goto yesterday" "y" #'(lambda () (interactive) (org-roam-dailies-goto-yesterday nil "d"))
+     :desc "Capture template today" "x" #'org-roam-dailies-capture-today-w-tmpl))
    :map org-mode-map
    :localleader
    :prefix ("m" . "org-roam")
@@ -142,20 +150,22 @@
   (setq org-roam-completion-system 'ivy)
   (setq org-roam-db-gc-threshold most-positive-fixnum)
   (setq org-roam-tag-sources '(prop all-directories))
+
   (setq org-roam-capture-templates
         '(("d" "default" plain
           "%?"
           :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:\n\n- topics ::")
-          :unnarrowed t)))  (setq org-roam-dailies-capture-templates
+          :unnarrowed t)))
 
+  (setq org-roam-dailies-capture-templates
         '(("d" "default" entry "* %? \t:crypt:\n%U\n"
            :if-new (file+head "%<%Y-%m-%d>.org"
                               "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
 
   (defun org-roam-dailies-capture-today-w-tmpl ()
     (interactive)
-    (let* ((tmpl-dir "./daily/tmpl")
-           (files (directory-files (expand-file-name tmpl-dir org-roam-directory) nil "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)"))
+    (let* ((tmpl-dir (expand-file-name "./daily/tmpl" org-roam-directory))
+           (files (directory-files tmpl-dir nil "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)"))
            (key-desc (mapcar (lambda (file)
                                (let ((key (replace-regexp-in-string "_.*" "" file))
                                      (desc (replace-regexp-in-string "\\(^.*_\\|\.org$\\)" "" file)))
@@ -164,15 +174,12 @@
            (org-roam-dailies-capture-templates (mapcar (lambda (a)
                                                          (let ((key (car a))
                                                                (desc (cdr a)))
-                                                           (key desc entry
-                                                             (file (format "%s/%s_%s.org" tmpl-dir key desc))
+                                                           `(,key ,desc entry
+                                                             (file ,(format "%s/%s_%s.org" tmpl-dir key desc))
                                                              :if-new (file+head "%<%Y-%m-%d>.org"
                                                                                 "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
-                                                       key-desc))
-           )
-      (message "%s" key-desc)
-      ;(org-roam-dailies-capture-today)
-      ))
+                                                       key-desc)))
+      (org-roam-dailies-capture-today)))
 )
 
 (after! (org org-roam)
