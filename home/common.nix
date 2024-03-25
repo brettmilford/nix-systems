@@ -4,30 +4,29 @@
   pkgs,
   ...
 }: {
-  home.packages = with pkgs;
-    [
-      direnv
-      qemu
-      git-review
-      tmux
-      jq
-      remarshal
-      texlive.combined.scheme-basic
-      ansible
-      sshpass
-      (pass.withExtensions (ext: [ext.pass-otp]))
-      podman
-      kubectl
-      kubernetes-helm
-      bitwarden-cli
-      ncdu
-      xz
-      gh
-      mosh
-    ]
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      nextcloud-client
-    ];
+  home.packages = with pkgs; [
+    direnv
+    qemu
+    git-review
+    tmux
+    jq
+    remarshal
+    texlive.combined.scheme-basic
+    ansible
+    sshpass
+    (pass.withExtensions (ext: [ext.pass-otp]))
+    podman
+    kubectl
+    kubernetes-helm
+    bitwarden-cli
+    ncdu
+    xz
+    gh
+    mosh
+    tree
+  ] ++ lib.optionals pkgs.stdenv.isLinux [
+    nextcloud-client
+  ];
 
   home.extraOutputsToInstall = ["doc" "info" "devdoc"];
 
@@ -45,6 +44,7 @@
     http_serve = "python3 -m http.server 8080";
     mkd = "f() { [ \"$1\" ] && mkdir -p \"\${1}\"; cd $!; } ; f";
     msh = "mosh ";
+    nixpkgs-search = "nix-env -f '<nixpkgs>' -qaP ";
   };
 
   programs.direnv = {
