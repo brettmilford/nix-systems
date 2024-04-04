@@ -22,6 +22,7 @@
     nodejs
     fontconfig
     nerdfonts
+    texlive.combined.scheme-medium
 # development tools
     gnumake
     shellcheck

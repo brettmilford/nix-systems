@@ -11,7 +11,6 @@
     tmux
     jq
     remarshal
-    texlive.combined.scheme-basic
     ansible
     sshpass
     (pass.withExtensions (ext: [ext.pass-otp]))
@@ -19,13 +18,13 @@
     kubectl
     kubernetes-helm
     bitwarden-cli
-    ncdu
     xz
     gh
     mosh
     tree
   ] ++ lib.optionals pkgs.stdenv.isLinux [
     nextcloud-client
+    ncdu # BUG: on aarch64-darwin nixpkgs/issues/290512
   ];
 
   home.extraOutputsToInstall = ["doc" "info" "devdoc"];
