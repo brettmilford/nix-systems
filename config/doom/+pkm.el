@@ -50,20 +50,98 @@
    :map org-mode-map
    :localleader
      "TAB" #'org-insert-structure-template
-     :prefix ("c" . "+clock")
+     :prefix ("c" . "clock")
        :desc "Capture clocked" "x" #'org-capture-clocked)
 
   (map!
    :leader
    :prefix ("n" . "notes")
-   :desc "Open org-default-notes-file" "g" #'(lambda() (interactive) (find-file org-default-notes-file))
-   :desc "Open +org-capture-todo-file" "T" #'(lambda() (interactive) (find-file +org-capture-todo-file))
-   :desc "Open +org-capture-journal-file" "j" #'(lambda () (interactive) (find-file +org-capture-journal-file)))
+   :desc "Open default-notes" "g" #'(lambda() (interactive) (find-file org-default-notes-file))
+   :desc "Open todo" "h" #'(lambda() (interactive) (find-file +org-capture-todo-file))
+   :desc "Open journal" "j" #'(lambda () (interactive) (find-file +org-capture-journal-file))
+   :desc "Open projects" "p" #'(lambda () (interactive) (find-file (expand-file-name +org-capture-projects-file org-directory))))
+
+  ;(setq org-capture-templates
+  ;      '(("t" "Todo" entry
+  ;         (file+headline org-default-notes-file "Inbox")
+  ;         "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n%i\n%a")))
+  (setq org-todo-keywords
+        '((sequence
+           "TODO(t!)"  ; A task that needs doing & is ready to do
+           "PROJ(p!)"  ; A project, which usually contains other tasks
+           "RECUR(r!)"  ; A recurring task
+           "INPROGRESS(i!)"  ; A task that is in progress
+           "WAIT(w@/!)"  ; Something external is holding up this task
+           "HOLD(h@/!)"  ; This task is paused/on hold because of me
+           ;"IDEA(i)"  ; An unconfirmed and unapproved task or notion
+           "|"
+           "DONE(d)"  ; Task successfully completed
+           "CANCELED(c)") ; Task was cancelled, aborted, or is no longer applicable
+          (sequence
+           "[ ](T!)"   ; A task that needs doing
+           "[>](I!)"   ; Task is in progress
+           "[?](W@/!)"   ; Task is being held up or paused
+           "|"
+           "[-](C)"   ; Task is canceled
+           "[X](D)")  ; Task was completed
+          )
+        org-todo-keyword-faces
+        '(("[-]"  . +org-todo-cancel)
+          ("INPROGRESS" . +org-todo-active)
+          ("[>]" . +org-todo-active)
+          ("[?]"  . +org-todo-onhold)
+          ("WAIT" . +org-todo-onhold)
+          ("HOLD" . +org-todo-onhold)
+          ("PROJ" . +org-todo-project)
+          ("CANCELED" . +org-todo-cancel)))
 
   (setq org-capture-templates
-        '(("t" "Todo" entry
-           (file+headline org-default-notes-file "Inbox")
-           "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n%i\n%a")))
+        '(("t" "Personal todo" entry
+           (file+headline +org-capture-todo-file "Backlog")
+           "* [ ] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n%i\n%a" :prepend t)
+          ("n" "Personal notes" entry
+           (file+headline +org-capture-notes-file "Inbox")
+           "* %u %?\n%i\n%a" :prepend t)
+          ("j" "Journal" entry
+           (file+olp+datetree +org-capture-journal-file)
+           "* %U %?\n%i\n%a" :prepend t)
+
+          ;; Will use {project-root}/{todo,notes,changelog}.org, unless a
+          ;; {todo,notes,changelog}.org file is found in a parent directory.
+          ;; Uses the basename from `+org-capture-todo-file',
+          ;; `+org-capture-changelog-file' and `+org-capture-notes-file'.
+          ("p" "Templates for projects")
+          ("pt" "Project-local todo" entry  ; {project-root}/todo.org
+           (file+headline +org-capture-project-todo-file "Backlog")
+           "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n%i\n%a" :prepend t)
+          ("pn" "Project-local notes" entry  ; {project-root}/notes.org
+           (file+headline +org-capture-project-notes-file "Inbox")
+           "* %U %?\n%i\n%a" :prepend t)
+          ("pc" "Project-local changelog" entry  ; {project-root}/changelog.org
+           (file+headline +org-capture-project-changelog-file "Unreleased")
+           "* %U %?\n%i\n%a" :prepend t)
+
+          ;; Will use {org-directory}/{+org-capture-projects-file} and store
+          ;; these under {ProjectName}/{Tasks,Notes,Changelog} headings. They
+          ;; support `:parents' to specify what headings to put them under, e.g.
+          ;; :parents ("Projects")
+          ("o" "Centralized templates for projects")
+          ("ot" "Project todo" entry
+           (function +org-capture-central-project-todo-file)
+           "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n %i\n %a"
+           :heading "Backlog"
+           :prepend nil)
+          ("on" "Project notes" entry
+           (function +org-capture-central-project-notes-file)
+           "* %U %?\n %i\n %a"
+           :heading "Notes"
+           :prepend t)
+          ("oc" "Project changelog" entry
+           (function +org-capture-central-project-changelog-file)
+           "* %U %?\n %i\n %a"
+           :heading "Changelog"
+           :prepend t)))
+
   (setq org-agenda-files (list org-directory))
   (setq org-agenda-window-setup 'reorganize-frame)
   (setq org-columns-default-format "%25ITEM %3PRIORITY %TODO %SCHEDULED %DEADLINE %TAGS")
@@ -122,6 +200,7 @@
    :leader
    :prefix ("n" . "notes")
    (:prefix ("r" . "org-roam")
+    :desc "Tag file" "t" #'org-roam-tag-add ;; NOTE: 'SPC m m o t' as well.
     (:prefix ("d" . "by date")
      :desc "Goto date" "d" #'(lambda () (interactive) (org-roam-dailies-goto-date nil "d"))
      :desc "Goto tomorrow" "m" #'(lambda () (interactive) (org-roam-dailies-goto-tomorrow nil "d"))
@@ -153,61 +232,61 @@
 
   (setq org-roam-capture-templates
         '(("d" "default" plain
-          "%?"
-          :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags:\n\n- topics ::")
+          "* ${title}\n%?"
+          :target (file+head "./roam/${cxt}/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n- topics ::\n")
           :unnarrowed t)))
 
   (setq org-roam-dailies-capture-templates
-        '(("d" "default" entry "* %? \t:crypt:\n%U\n"
+        '(("d" "default" entry "* %? :crypt:\n%U\n"
            :if-new (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
+                              "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n")
+           :unnarrowed t)))
 
   (defun org-roam-dailies-capture-today-w-tmpl ()
     (interactive)
     (let* ((tmpl-dir (expand-file-name "./daily/tmpl" org-roam-directory))
-           (files (directory-files tmpl-dir nil "^\\([^.]\\|\\.[^.]\\|\\.\\..\\)"))
-           (key-desc (mapcar (lambda (file)
-                               (let ((key (replace-regexp-in-string "_.*" "" file))
-                                     (desc (replace-regexp-in-string "\\(^.*_\\|\.org$\\)" "" file)))
-                                 (cons key desc)))
-                             files))
-           (org-roam-dailies-capture-templates (mapcar (lambda (a)
-                                                         (let ((key (car a))
-                                                               (desc (cdr a)))
-                                                           `(,key ,desc entry
-                                                             (file ,(format "%s/%s_%s.org" tmpl-dir key desc))
-                                                             :if-new (file+head "%<%Y-%m-%d>.org"
-                                                                                "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n"))))
-                                                       key-desc)))
+           (files (directory-files-recursively tmpl-dir "" t))
+           (org-roam-dailies-capture-templates
+            (mapcar (lambda (file)
+                 (let* ((f (file-name-nondirectory file))
+                        (key (replace-regexp-in-string "_.*" "" f))
+                        (desc (replace-regexp-in-string "\\(^.*_\\|\.org$\\)" "" f)))
+                   (if (file-directory-p file)
+                     `(,key ,desc)
+                     `(,key ,desc entry
+                       (file ,file)
+                       :if-new (file+head "%<%Y-%m-%d>.org"
+                                          "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n\n")))))
+               files)))
       (org-roam-dailies-capture-today)))
 )
 
-(after! (org org-roam)
-
- (defun org-roam-capture-case-notes (title)
-   (let ((id (org-id-new)))
-    (org-roam-capture- :node (org-roam-node-create :title title :id id)
-                       :templates '(("c" "case" plain "* ${title} %?"
-                                    :if-new (file+head "./roam/case/${slug}.org"
-                                                       ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")
-                                    ))
-                       :props '(:immediate-finish t))
-    id))
-
- (defun org-capture-case-notes (title)
-   (let* ((id (org-roam-capture-case-notes title))
-          (link (org-link-make-string (concat "id:" id) title))
-          (tmpl (format "* TODO [[case://%s]] %%?\n%%U\n%s\n" title link)))
-     tmpl))
-
- (defun org-capture-case-notes-prompt ()
-   (interactive)
-   (org-capture-case-notes (read-from-minibuffer "title: ")))
-
- (add-to-list 'org-capture-templates
-              '("w" "case" entry
-                (file+headline org-default-notes-file "Inbox")
-                (function org-capture-case-notes-prompt))))
+;(after! (org org-roam)
+;
+; (defun org-roam-capture-case-notes (title)
+;   (let ((id (org-id-new)))
+;    (org-roam-capture- :node (org-roam-node-create :title title :id id)
+;                       :templates '(("c" "case" plain "* ${title} %?"
+;                                    :if-new (file+head "./roam/case/${slug}.org"
+;                                                       ":PROPERTIES:\n:ROAM_ALIASES: case://${title}\n:END:\n#+title: ${title}\n")
+;                                    ))
+;                       :props '(:immediate-finish t))
+;    id))
+;
+; (defun org-capture-case-notes (title)
+;   (let* ((id (org-roam-capture-case-notes title))
+;          (link (org-link-make-string (concat "id:" id) title))
+;          (tmpl (format "* TODO [[case://%s]] %%?\n%%U\n%s\n" title link)))
+;     tmpl))
+;
+; (defun org-capture-case-notes-prompt ()
+;   (interactive)
+;   (org-capture-case-notes (read-from-minibuffer "title: ")))
+;
+; (add-to-list 'org-capture-templates
+;              '("w" "case" entry
+;                (file+headline org-default-notes-file "Inbox")
+;                (function org-capture-case-notes-prompt))))
 
 (after! org-roam-graph
   (if IS-MAC
