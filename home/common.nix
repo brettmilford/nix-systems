@@ -88,6 +88,7 @@
       tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
       rank = "shortlog -sn --no-merges";
       bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
+      stls = "stash list";
     };
     attributes = ["*.pdf diff=pdf"];
     extraConfig = {
