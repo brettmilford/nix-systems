@@ -73,9 +73,6 @@
 
 (map! "C-x ?" 'help-command) ;; NOTE: 'SPC h .' does the same
 
-(map! "C-x ," '(lambda() (interactive)
-                 (find-file (expand-file-name "doom/config.el" config-directory))))
-
 (if (and IS-MAC (display-graphic-p))
          (map! "s-n" #'make-frame
                "s-w" #'delete-frame))
@@ -177,5 +174,8 @@
               ("TAB" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+(after! auth-source
+  (setq auth-sources (nreverse auth-sources)))
 
 (load! "+pkm")
