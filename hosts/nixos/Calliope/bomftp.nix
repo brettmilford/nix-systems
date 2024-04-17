@@ -22,7 +22,7 @@
     description = "Run BOM download Timer";
     wantedBy = ["timers.target"];
     timerConfig = {
-      OnCalendar = "*-*-* 7:00:00";
+      OnCalendar = "hourly";
       Persistent = true;
       Unit = "bomftp.service";
     };

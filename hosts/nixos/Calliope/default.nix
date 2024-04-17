@@ -13,7 +13,6 @@
     ../zerotierone.nix
     ./postgresql.nix
     ./nextcloud.nix
-    ./bomftp.nix
   ];
 
   networking.hostName = "Calliope";

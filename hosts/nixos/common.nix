@@ -12,10 +12,10 @@
     git
   ];
 
-  environment.shellAliases = [
+  environment.shellAliases = {
     nrl = "sudo nixos-rebuild switch --flake /etc/nixos";
     nup = "nix flake update /etc/nixos && nrl";
-  ];
+  };
 
   programs.vim = {
     defaultEditor = true;
