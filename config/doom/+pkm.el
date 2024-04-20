@@ -36,6 +36,11 @@
 
 (remove-hook 'text-mode-hook #'vi-tilde-fringe-mode)
 (after! org
+  (add-to-list 'org-modules 'org-habit)
+  (setq
+   org-habit-show-habits t
+   org-habit-show-all-today t ;; BUG: No habit entries are shown otherwise?
+   org-habit-show-habits-only-for-today t)
   (org-clock-persistence-insinuate)
   (add-hook! 'org-mode-hook #'+word-wrap-mode)
   (remove-hook 'org-mode-hook #'auto-fill-mode)
@@ -141,7 +146,6 @@
           "%latex -interaction nonstopmode -output-directory %o %f"))
   (setq org-export-date-timestamp-format "%B %e, %Y")
   (setq org-log-into-drawer t)
-  (setq org-log-done t)
   (setq org-table-duration-custom-format 'minutes)
   (setq org-clock-persist t)
   (setq org-clock-continuously nil) ;; TODO: Check shouldn't be 't
@@ -149,7 +153,7 @@
   (setq org-clock-out-when-done t)
   (setq org-clock-report-include-clocking-task t)
   (setq org-html-self-link-headlines t)
-  (setq org-use-tag-inheritance nil)
+  (setq org-use-tag-inheritance t)
   (setq org-crypt-key "brettmilford@gmail.com")
   ;; org-modern
   (setq org-startup-indented nil)
