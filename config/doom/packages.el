@@ -5,8 +5,8 @@
 (package! org-ql)
 (package! org-ref)
 (package! org-roam-ui)
-;(package! org-roam-bibtex
-;  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
+(package! org-roam-bibtex
+  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
 (package! nov
   :recipe (:host nil :repo "https://depp.brause.cc/nov.el.git"))
 (package! anki-editor)

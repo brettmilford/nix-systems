@@ -1,19 +1,34 @@
 ;;; +pkm.el --- Personal Knowledge Management config -*- lexical-binding: t; -*-
 (setq org-directory "~/org")
-(when (file-directory-p org-directory)
-(add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
-(add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
+(defun +pkm/load ()
+  (add-to-list 'auto-mode-alist '("\\.org_archive\\'" . org-mode))
+  (add-to-list 'auto-mode-alist '("\\.org.gpg\\'"     . org-mode))
+  (remove-hook 'text-mode-hook #'vi-tilde-fringe-mode))
 
-(when window-system
+(defun +pkm/load-x ()
   (load-theme 'modus-operandi t)
   (modus-themes-load-operandi)
   (setq
    doom-font (font-spec :family "Iosevka")
    doom-variable-pitch-font (font-spec :family "Iosevka Aile"))
   (after! org-modern
-    (set-face-attribute 'org-modern-symbol nil :family "Iosevka"))
-  (doom/reload-font)
+    (set-face-attribute 'org-modern-symbol nil :family "Iosevka")
+    (setq org-modern-todo-faces
+          '(("WAIT" . (:inherit +org-todo-onhold :inverse-video t))
+            ("HOLD" . (:inherit +org-todo-onhold :inverse-video t))))
+    (setq org-modern-priority-faces
+          '((?A . (:inherit error :inverse-video t))
+            (?B . (:inherit warning :inverse-video t))))
+  (doom/reload-font)))
 
+(when (file-directory-p org-directory)
+  (+pkm/load)
+  (+pkm/load-x)
+  ;(defun +pkm/org-appearence-x ())
+  ;(defun +pkm/org-agenda)
+  ;(defun +pkm/org-capture)
+
+(when window-system
   (after! org
     (global-org-modern-mode)
     (setq writeroom-fringes-outside-margins nil)
@@ -34,7 +49,6 @@
      org-agenda-current-time-string
      "◀── now ─────────────────────────────────────────────────")))
 
-(remove-hook 'text-mode-hook #'vi-tilde-fringe-mode)
 (after! org
   (add-to-list 'org-modules 'org-habit)
   (setq
@@ -72,12 +86,12 @@
            "HOLD(h@/!)"
            "|"
            "DONE(d)"
-           "CANCELED(c)"))
+           "CANCELLED(c)"))
         org-todo-keyword-faces
         '(("INPROGRESS" . +org-todo-active)
           ("WAIT" . +org-todo-onhold)
           ("HOLD" . +org-todo-onhold)
-          ("CANCELED" . +org-todo-cancel)))
+          ("CANCELLED" . +org-todo-cancel)))
 
   (setq org-capture-templates
         '(("t" "Personal todo" entry
@@ -132,6 +146,7 @@
                    (goto-char (point-max))) t)))
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-refile-use-outline-path 'file)
+  (setq org-reverse-note-order t)
   (setq org-outline-path-complete-in-steps nil)
   (setq org-startup-folded t)
   (setq org-cycle-open-archived-trees t)
@@ -224,8 +239,7 @@
                        :if-new (file+head "%<%Y-%m-%d>.org"
                                           "#+title: %<%A the %e of %B %Y>\n#+filetags: %<:%Y:%B:>\n\n")))))
                files)))
-      (org-roam-dailies-capture-today)))
-)
+      (org-roam-dailies-capture-today))))
 
 (after! org-roam-graph
   (if IS-MAC
@@ -252,68 +266,8 @@
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 
-;; TODO: revisit: only being used for keyword formatting
-;(use-package! org-roam-bibtex
-;  :after org-roam
-;  ;:hook (org-roam-mode . org-roam-bibtex-mode)
-;  :config
-;  ;(require 'org-ref)
-;  (setq orb-preformat-keywords
-;   '("citekey" "title" "url" "author-or-editor" "keywords" "file"))
-;  (setq orb-process-file-field 't)
-;  (setq orb-insert-link-description 'citation-org-ref-2)
-;;  (add-to-list 'org-roam-capture-templates
-;;        '("r" "bibliography reference" plain "%?
-;;"
-;;           :target (file+head "annotations/${citekey}.org"
-;;                              "#+TITLE: ${title}
-;;#+FILETAGS: ${keywords}
-;; topics ::
-;;
-;;* ${title}
-;;:PROPERTIES:
-;;:Custom_ID: ${citekey}
-;;:URL: ${url}
-;;:AUTHOR: ${author-or-editor}
-;;:NOTER_DOCUMENT: ${file}
-;;:NOTER_PAGE:
-;;:END:")
-;;           :unnarrowed t))
-;)
-
 (setq reftex-default-bibliography (expand-file-name "references.bib" org-directory))
-
-(after! bibtex-completion
-  ;(advice-add 'bibtex-completion-candidates
-  ;            :filter-return 'reverse)
-  (setq bibtex-completion-notes-path (file-name-as-directory (expand-file-name "annotations" org-directory))
-        bibtex-completion-library-path (file-name-as-directory (expand-file-name "fulltext" org-directory))
-        bibtex-completion-bibliography reftex-default-bibliography)
-  (setq bibtex-completion-notes-template-multiple-files
-        (concat
-         ":PROPERTIES:\n"
-         ":ROAM_ALIASES: ${=key=}\n"
-         ":ROAM_REFS: @${=key=}\n"
-         ":END:\n"
-         "#+TITLE: ${title}\n"
-         "#+FILETAGS: ${keywords}\n\n"
-         "- keywords :: \n"
-         "* ${title}\n"
-         ":PROPERTIES:\n"
-         ":Custom_ID: ${=key=}\n"
-         ":URL: ${url}\n"
-         ":AUTHOR: ${author-abbrev}\n"
-         ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
-         ":NOTER_PAGE:"
-         ":JOURNAL: ${journaltitle}\n"
-         ":DATE: ${date}\n"
-         ":YEAR: ${year}\n"
-         ":DOI: ${doi}\n"
-         ":END:\n\n"))
-  (add-hook 'bibtex-completion-notes-mode-hook #'org-id-get-create))
-
-(use-package! org-ref
-  :after bibtex-completion)
+(setq org-cite-global-bibliography (list reftex-default-bibliography))
 
 (after! bibtex
   (setq bibtex-autokey-year-length 4
@@ -324,15 +278,89 @@
         bibtex-autokey-titlewords-stretch 1
         bibtex-autokey-titleword-length nil))
 
+(after! bibtex-completion
+  (advice-add 'bibtex-completion-candidates
+              :filter-return 'reverse)
+  (setq bibtex-completion-notes-path (file-name-as-directory (expand-file-name "annotations" org-directory))
+        bibtex-completion-library-path (file-name-as-directory (expand-file-name "fulltext" org-directory))
+        bibtex-completion-bibliography reftex-default-bibliography)
+  (setq bibtex-completion-notes-template-multiple-files
+        (concat
+         ":PROPERTIES:\n"
+         ":ROAM_ALIASES: ${=key=}\n"
+         ":ROAM_REFS: @${=key=}\n"
+         ":END:\n"
+         "#+title: ${title}\n"
+         "#+filetags: ${keywords}\n\n"
+         "- topics :: \n"
+         "* ${title}\n"
+         ":PROPERTIES:\n"
+         ":Custom_ID: ${=key=}\n"
+         ":URL: ${url}\n"
+         ":AUTHOR: ${author-abbrev}\n"
+         ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+         ":NOTER_PAGE:\n"
+         ":JOURNAL: ${journaltitle}\n"
+         ":DATE: ${date}\n"
+         ":YEAR: ${year}\n"
+         ":DOI: ${doi}\n"
+         ":END:\n\n"))
+  (add-hook 'bibtex-completion-notes-mode-hook #'org-id-get-create))
+
+;; TODO: Switch to citar
+(use-package! org-ref
+  :commands (org-ref-insert-cite-link org-ref-citation-hydra/body org-ref-bibtex-hydra/body)
+  :config
+  (setq org-ref-insert-cite-function
+        (lambda ()
+          (org-cite-insert nil))))
+
+(use-package! org-roam-bibtex
+  :after org-roam
+  :config
+  (setq orb-preformat-keywords
+   '("citekey" "title" "url" "author-or-editor" "keywords" "file"))
+  (setq orb-process-file-field t)
+  (setq orb-insert-link-description 'citation-org-cite)
+  (setq orb-citekey-format 'org-cite)
+  (map!
+   :leader
+   :prefix ("n" . "notes")
+   (:prefix ("r" . "roam")
+    :desc "ORB Edit Citation Note" "c" #'orb-edit-citation-note
+    :desc "ORB Note Actions" "b" #'orb-note-actions
+    :desc "ORB Insert Link" "@" #'orb-insert-link))
+  (defun orb-capture-template (oldfun citekey &rest args)
+    "Bind org-roam-capture-templates for orb."
+    (let ((org-roam-capture-templates
+           `(("r" "bibliography reference" plain "%?\n"
+              :target (file+head "annotations/${citekey}.org"
+                                 ,(concat
+                                  "#+title: ${title}\n"
+                                  "#+filetags: ${keywords}\n"
+                                  "- topics ::\n"
+                                  "* ${title}\n"
+                                  ":PROPERTIES:\n"
+                                  ":Custom_ID: ${citekey}\n"
+                                  ":URL: ${url}\n"
+                                  ":AUTHOR: ${author-or-editor}\n"
+                                  ":NOTER_DOCUMENT: ${file}\n"
+                                  ":NOTER_PAGE:\n"
+                                  ":END:\n"
+                                  ))
+              :unnarrowed t))))
+      (apply oldfun citekey args)))
+  (advice-add 'orb--new-note :around 'orb-capture-template))
+
 (after! org-noter
   (setq org-noter-notes-search-path bibtex-completion-notes-path))
-
-(use-package! ox-reveal
-  :after org-mode)
 
 (use-package! nov
   :init
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+
+(use-package! ox-reveal
+  :after org-mode)
 
 (after! anki-editor
        (setq anki-editor-create-decks t))
@@ -354,11 +382,8 @@
                          :file))))
       f)))
 
-(use-package jiralib2)
-
-(defun my/org-links ()
-  (pushnew! org-link-abbrev-alist '("jira" .  "https://jira/browse/%s"))
-  (org-link-set-parameters "gh"
+(defun +pkm/org-link-ghe ()
+  (org-link-set-parameters "ghe"
                            :follow (lambda (path)
                                      (let* ((org (car (split-string path "/")))
                                             (repo (cadr (split-string path "/")))
@@ -372,9 +397,17 @@
                                         ((eq backend 'html)
                                          (format "<a href='https://git/%s/%s/issues/%s'>%s</a>" org repo issue desc))
                                         ((eq backend 'latex)
-                                         (format "\\href{https://git/%s/%s/issues/%s}{%s}" org repo issues desc)))))))
+                                         (format "\\href{https://git/%s/%s/issues/%s}{%s}" org repo issues desc))
+                                        ((eq backend 'ascii)
+                                         (format "https://git/%s/%s/issues/%s" org repo issue))
+                                        ((eq backend 'md)
+                                         (format "[%s](https://git/%s/%s/issues/%s)" desc org repo issue)))))))
 
-(defun +pkm/org-capture-templates ()
+(defun +pkm/org-capture-template-jira ()
+
+  (use-package! jiralib2)
+  (pushnew! org-link-abbrev-alist '("jira" .  "https://jira/browse/%s"))
+
   (defun jira-capture-enrichment ()
     (when-let* ((pt (point))
                 (issue-key (and (org-at-heading-p)
@@ -416,6 +449,7 @@
                          :jump-to-captured nil
                          :immediate-finish t
                          :finalize 'insert-link)))))))
+
   (add-to-list 'org-capture-templates
                '("i" "Jira Issue" entry
                  (file+headline +org-capture-todo-file "Backlog")
@@ -424,7 +458,7 @@
                  :jump-to-captured t
                  :empty-lines-after 1
                  :hook jira-capture-enrichment
-                 :prependt)))
+                 :prepend t)))
 
 (load! "lisp/org-notification")
 ) ;; closes (when (file-directory-p "~/org")
