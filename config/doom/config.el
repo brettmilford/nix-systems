@@ -1,5 +1,6 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+(add-hook 'doom-after-init-hook (lambda () (tool-bar-mode 1) (tool-bar-mode 0)))
 (defvar config-directory "~/nix-systems/config")
 (add-to-list 'term-file-aliases '("alacritty" . "xterm"))
 (setq mouse-wheel-scroll-amount '(1)
@@ -124,9 +125,12 @@
 (after! highlight-indent-guides
   (remove-hook! (prog-mode text-mode conf-mode) #'highlight-indent-guides-mode))
 
-(setq projectile-discover-projects-in-directory '("~/prjs"))
+(defvar devenv 't) ;; docker, vm (ssh), direnv/nix/localhost (t), devcontainer ?
+(cond ((eq devenv 'docker) (setq projectile-project-search-path '(("/docker:de:/src" . 2))))
+      (t (setq projectile-project-search-path '(("~/src" . 2)))))
+(setq magit-repository-directories projectile-project-search-path)
+
 (map! :leader "p ]" '+ivy/project-search)
-(setq magit-repository-directories '(("~/prjs" . 3) ("~/.emacs.d" . 0)))
 
 (after! spell-fu
   (set-face-attribute 'spell-fu-incorrect-face nil :inherit 'unspecified))
@@ -173,9 +177,14 @@
               ("<tab>" . 'copilot-accept-completion)
               ("TAB" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+              ("C-<tab>" . 'copilot-accept-completion-by-word))
+  :config
+  (setq copilot-indent-offset-warning-disable t))
 
 (after! auth-source
   (setq auth-sources (nreverse auth-sources)))
+
+(after! poetry
+  (remove-hook 'python-mode-hook #'poetry-tracking-mode))
 
 (load! "+pkm")
