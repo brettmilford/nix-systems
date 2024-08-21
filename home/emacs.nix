@@ -30,15 +30,22 @@
     gopls
     gotools
     go-tools
-    python311
-    python311Packages.python-lsp-server
-    python311Packages.python-lsp-ruff
-    python311Packages.python-lsp-jsonrpc
-    python311Packages.python-lsp-black
-    python311Packages.pyls-isort
-    python311Packages.pylsp-mypy
-    python311Packages.pylsp-rope
-    poetry
+    (python3.withPackages (ps: with ps; [
+      black
+      isort
+      mypy
+      pyls-isort
+      pylsp-mypy
+      pylsp-rope
+      python-lsp-black
+      python-lsp-jsonrpc
+      python-lsp-ruff
+      python-lsp-server
+      numpy
+      poetry-core
+      matplotlib
+      scipy
+    ]))
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
     coreutils-prefixed
