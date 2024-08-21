@@ -1,5 +1,37 @@
 ;;; .doom.d/config.el -*- lexical-binding: t; -*-
 
+(setq +doom-dashboard-ascii-banner-fn
+(lambda ()
+  (let* ((banner '("
+                       :::                                     :
+                     :=+*+=- :-=++=-:                       -=+++-:
+            ::     :=**+****+*******+-:                   :+******=
+           :=*-::-+*+-:::=***=---=+***+-:      ::       ::+*=::-**+
+           -******+-:    :-=:      :=****=-:::=+::    :=---:   :+*-
+           :-=++=:     :==:          :=*******+::+=--=+-       -*+:
+                      -+=        -=:   :-====-::+****+:        +*:
+                    :=*-    :--:=***-          :-==-:         :*-
+                   :+*-  :-=+=::=+***:                        ++:
+                  :+*+:-=++-:    :=**-                       :*:
+                 :=****+=:        :**:                       +=
+                 :=++=:    ::::   :*=              ::       :*:
+                     :-==+++**+:  :=:::           :=-       +=
+                 :-=+**++=-=*+-:    :=:          :+-       :*:
+              :-+**+=-:  :--:      -+-          -+-        =+
+             -+**+-:     ::      :++:      :: :=+:        :*-
+           :=***+   ::--:       -*=:      -++=++:         =+:
+           :*****+==+=-:      :+*-      :=****=:         :*-
+            :=****+-:    :: :-*+:      :++--=:  :::      :-"))
+         (longest-line (apply #'max (mapcar #'length banner))))
+    (put-text-property
+     (point)
+     (dolist (line banner (point))
+       (insert (+doom-dashboard--center
+                +doom-dashboard--width
+                (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+               "\n"))
+     'face 'doom-dashboard-banner))))
+
 (add-hook 'doom-after-init-hook (lambda () (tool-bar-mode 1) (tool-bar-mode 0)))
 (defvar config-directory "~/nix-systems/config")
 (add-to-list 'term-file-aliases '("alacritty" . "xterm"))
