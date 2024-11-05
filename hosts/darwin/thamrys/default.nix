@@ -4,6 +4,7 @@
     ../libvirt.nix
     ../homebrew.nix
     #../yabai.nix
+    ../podman.nix
   ];
 
   networking = {
@@ -11,4 +12,6 @@
     computerName = "thamrys";
     localHostName = "thamrys";
   };
+
+  services.podman.enable = true;
 }

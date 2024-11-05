@@ -181,15 +181,9 @@
   (setq company-idle-delay nil))
 
 (after! projectile
-  (projectile-register-project-type 'nixosflake '("flake.nix")
-                                  :project-file "flake.nix"
-                                  :compile "darwin-rebuild switch --flake ~/nix-systems#"
-                                  :test "npm test"
-                                  :run "nix develop"
-                                  :test-suffix ".spec"))
-(setq-hook! 'nix-mode-hook
-  counsel-compile-history '("darwin-rebuild switch --flake ~/nix-systems#"))
-
+  (projectile-register-project-type 'nixflake '("flake.nix")
+                                  :compile "darwin-rebuild switch --flake .#"
+                                  :run "nix develop"))
 (use-package! jsonnet-mode
   :defer t
   :config

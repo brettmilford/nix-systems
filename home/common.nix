@@ -14,10 +14,8 @@
     ansible
     sshpass
     (pass.withExtensions (ext: [ext.pass-otp]))
-    podman
     kubectl
     kubernetes-helm
-    bitwarden-cli
     xz
     gh
     mosh
@@ -98,7 +96,7 @@
         autoSetupRemote = true;
       };
       credential.helper = "cache";
-      core.excludesfile = "~/.gitignore_global";
+      core.excludesfile = "~/.config/git/ignore";
       filter.lfs = {
         required = true;
         clean = "git-lfs clean -- %f";
@@ -205,4 +203,5 @@
   services.gpg-agent = {
     enable = pkgs.stdenv.isLinux;
   };
+
 }

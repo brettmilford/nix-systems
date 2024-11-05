@@ -14,9 +14,18 @@
   environment.shellAliases = {
     lctlrl = "f() { [ \"$1\" ] && launchctl unload $1 && launchctl load $1 ; } ; f";
     lctlrs = "f() { [ \"$1\" ] && launchctl stop $1 && launchctl start $1 ; } ; f";
-    nrl = "darwin-rebuild switch --flake ~/nix-systems#";
-    nup = "nix flake update ~/nix-systems && nrl";
+    nrl = "darwin-rebuild switch --flake ~/.config/nix#";
+    nup = "nix flake update ~/.config/nix && nrl";
   };
+
+  environment.extraInit = ''
+    if defaults read -g AppleInterfaceStyle 2>/dev/null | grep -q 'Dark'; then
+      export APPEARENCE=dark
+    else
+      export APPEARENCE=light
+    fi
+  '';
+
 
   programs.gnupg.agent = {
     enable = true;

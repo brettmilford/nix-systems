@@ -12,7 +12,7 @@
     escapeTime = 0;
     historyLimit = 20000;
     keyMode = "vi";
-    newSession = true;
+    newSession = false; # BUG: spawns a new window each time config is loaded...
     extraConfig = ''
       if-shell "test \$TERM = \'linux\'" "set -g default-terminal \'screen.linux\'" \
           "set -g default-terminal \'tmux-256color\'"
@@ -67,8 +67,9 @@
           "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
 
       ## colours
-      colour_fg=colour15
-      colour_bg=colour235
+      colour_fg=color235
+      colour_bg=colour254
+      if-shell '[ "$APPEARENCE" = "dark"]' 'colour_fg=color15; colour_bg=colour235'
       Silver=colour7
 
       # Basic status bar colors

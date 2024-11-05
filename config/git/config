@@ -43,7 +43,7 @@
 	gpgSign = true
 
 [core]
-	excludesfile = "~/.gitignore_global"
+	excludesfile = "~/.config/git/ignore"
 
 [credential]
 	helper = "cache"
