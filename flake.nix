@@ -3,7 +3,7 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
     darwin.url = "github:lnl7/nix-darwin";
     darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
@@ -56,13 +56,10 @@
       }
       agenix.darwinModules.default
     ];
-    nixosCommonModules = {
-      user,
-      desc,
-    }: [
+    nixosCommonModules = [
       home-manager.nixosModules.home-manager
       {
-        system.stateVersion = "23.11";
+        system.stateVersion = "24.05";
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-linux x86_64-linux
@@ -70,6 +67,15 @@
           '';
           settings.auto-optimise-store = true;
         };
+      }
+      agenix.nixosModules.default
+    ];
+    nixosUserModules = {
+      user,
+      desc,
+    }: [
+      home-manager.nixosModules.home-manager
+      {
         users.users.${user} = {
           home = "/home/${user}";
           isNormalUser = true;
@@ -86,7 +92,6 @@
         home-manager.users.${user} = homeManagerCommonConfig;
         systemd.services."home-manager-${user}".serviceConfig.TimeoutSec = 900;
       }
-      agenix.nixosModules.default
     ];
   in
     {
@@ -126,6 +131,24 @@
             ./hosts/nixos/build-vm.nix
           ];
       };
+
+      nixosConfigurations."eurydice" = nixpkgs.lib.nixosSystem {
+        system = system.x86_64-linux;
+        modules =
+          nixosCommonModules ++ [
+            ./hosts/nixos/eurydice
+          ];
+      };
+
+      nixosConfigurations."eurydice-vm" = nixpkgs.lib.nixosSystem {
+        system = system.x86_64-linux;
+        modules =
+          nixosCommonModules ++ [
+            ./hosts/nixos/eurydice
+            ./hosts/nixos/build-vm.nix
+          ];
+      };
+
 
       nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
         system = system.aarch64-linux;
