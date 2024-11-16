@@ -38,12 +38,12 @@
       gnome-photos
       gnome-tour
       snapshot
+      gedit # text editor
     ])
     ++ (with pkgs.gnome; [
       cheese # webcam tool
       gnome-music
       gnome-terminal
-      gedit # text editor
       epiphany # web browser
       geary # email reader
       #evince # document viewer
