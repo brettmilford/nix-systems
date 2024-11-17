@@ -17,7 +17,7 @@
     ./monitoring.nix
   ];
 
-  networking.hostName = "Calliope";
+  networking.hostName = "calliope";
   networking.hostId = "25f4937c";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;

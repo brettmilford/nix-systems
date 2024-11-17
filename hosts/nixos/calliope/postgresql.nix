@@ -10,7 +10,11 @@
     ensureUsers = [
       {
         name = config.services.nextcloud.config.dbuser;
-        ensurePermissions = {"DATABASE ${config.services.nextcloud.config.dbname}" = "ALL PRIVILEGES";};
+        ensureDBOwnership = true;
+        #ensureClauses = {
+        #  superuser = true;
+        #}
+        #ensurePermissions = {"DATABASE ${config.services.nextcloud.config.dbname}" = "ALL PRIVILEGES";};
       }
     ];
   };

@@ -150,15 +150,16 @@
       };
 
 
-      nixosConfigurations."Calliope" = nixpkgs.lib.nixosSystem {
+      nixosConfigurations."calliope" = nixpkgs.lib.nixosSystem {
         system = system.aarch64-linux;
         modules =
-          nixosCommonModules {
+          nixosCommonModules ++
+          nixosUserModules{
             user = "brett";
             desc = "Brett";
           }
           ++ [
-            ./hosts/nixos/Calliope
+            ./hosts/nixos/calliope
           ];
       };
 
