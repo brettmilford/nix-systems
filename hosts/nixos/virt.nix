@@ -10,6 +10,7 @@
 
   environment.systemPackages = with pkgs; [
     podman-compose
+    qemu
   ];
 
   virtualisation.oci-containers.backend = "podman";

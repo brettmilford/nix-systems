@@ -13,8 +13,8 @@
   ];
 
   environment.shellAliases = {
-    nrl = "sudo nixos-rebuild switch --flake /etc/nixos";
-    nup = "nix flake update /etc/nixos && nrl";
+    nrs = "sudo nixos-rebuild switch --flake /etc/nixos?submodules=1";
+    nup = "nix flake update /etc/nixos && nrs";
   };
 
   programs.vim = {

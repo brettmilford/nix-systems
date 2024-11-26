@@ -2,3 +2,6 @@
 	path = config
 	url = https://github.com/brettmilford/dotfiles.git
 	update = merge
+[submodule "deployments"]
+	path = deployments
+	url = https://github.com/brettmilford/deployments.git
