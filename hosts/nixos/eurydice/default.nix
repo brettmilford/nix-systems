@@ -13,8 +13,9 @@
     ../desktop.nix
     ../zerotierone.nix
     ../virt.nix
-    ../../../deployments/unifi-network-application
+    ../../../deployments/unifi
     ../../../deployments/home-assistant
+    ../../../deployments/elasticsearch
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
