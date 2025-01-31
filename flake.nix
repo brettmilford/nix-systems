@@ -3,11 +3,10 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-23.11-darwin";
-    darwin.url = "github:lnl7/nix-darwin";
-    darwin.inputs.nixpkgs.follows = "nixpkgs-darwin";
-    home-manager.url = "github:nix-community/home-manager/release-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nix-darwin.url = "github:lnl7/nix-darwin/nix-darwin-24.11";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     agenix.url = "github:ryantm/agenix";
@@ -19,8 +18,7 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-darwin,
-    darwin,
+    nix-darwin,
     home-manager,
     flake-utils,
     agenix,
@@ -28,7 +26,7 @@
   } @ inputs: let
     system = flake-utils.lib.system;
     homeManagerCommonConfig = with self.homeManagerModules; {
-      home.stateVersion = "23.11";
+      home.stateVersion = "24.11";
       imports = [
         ./home
       ];
@@ -41,7 +39,7 @@
             extra-platforms = aarch64-darwin x86_64-darwin
             experimental-features = nix-command flakes
           '';
-          settings.auto-optimise-store = true;
+          optimise.automatic = true;
         };
       }
       home-manager.darwinModules.home-manager
@@ -59,7 +57,7 @@
     nixosCommonModules = [
       home-manager.nixosModules.home-manager
       {
-        system.stateVersion = "24.05";
+        system.stateVersion = "24.11";
         nix = {
           extraOptions = ''
             extra-platforms = aarch64-linux x86_64-linux
@@ -95,7 +93,7 @@
     ];
   in
     {
-      darwinConfigurations."thamrys" = darwin.lib.darwinSystem {
+      darwinConfigurations."thamrys" = nix-darwin.lib.darwinSystem {
         system = system.aarch64-darwin;
         specialArgs = {
           pkgs_x86 = import nixpkgs {system = system.x86_64-darwin;};

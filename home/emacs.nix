@@ -5,7 +5,6 @@
   ...
 }: {
   home.packages = with pkgs; [
-    emacsNativeComp
     binutils
     git
     (ripgrep.override { withPCRE2 = true; })
@@ -23,6 +22,7 @@
     fontconfig
     nerdfonts
     texlive.combined.scheme-medium
+    graphviz
 # development tools
     gnumake
     shellcheck
@@ -50,6 +50,7 @@
     terminal-notifier
     coreutils-prefixed
   ] ++ lib.optionals pkgs.stdenv.isLinux [
+    emacsNativeComp # using emacs-mac on darwin
     xclip
   ];
 
@@ -70,7 +71,7 @@
         source = ../config/doom;
         recursive = true;
         onChange = "${pkgs.writeShellScript "doom-change" ''
-          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin"
+          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin:/opt/homebrew/bin"
           export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
           export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"
