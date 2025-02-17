@@ -12,6 +12,10 @@
     ../cloud.nix
     ../desktop.nix
     ../zerotierone.nix
+    ../virt.nix
+    ../../../deployments/unifi
+    ../../../deployments/home-assistant
+    ../../../deployments/elasticsearch
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -31,4 +35,16 @@
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   services.xserver.displayManager.gdm.autoSuspend = false;
+  environment.systemPackages = with pkgs; [
+    iw
+  ];
+
+  # common reverse proxy
+  security.acme = {
+	  acceptTerms = true;
+	  defaults.email = "admin+acme@example.org";
+  };
+  networking.firewall.allowedTCPPorts = [80 443];
+
+
 }
