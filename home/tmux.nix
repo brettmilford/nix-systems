@@ -13,6 +13,8 @@
     historyLimit = 20000;
     keyMode = "vi";
     newSession = false; # BUG: spawns a new window each time config is loaded...
+    terminal = "xterm-256color";
+    sensibleOnTop = false;
     extraConfig = ''
       if-shell "test \$TERM = \'linux\'" "set -g default-terminal \'screen.linux\'" \
           "set -g default-terminal \'tmux-256color\'"
