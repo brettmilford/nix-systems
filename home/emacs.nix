@@ -6,6 +6,8 @@
 }: {
   home.packages = with pkgs; [
     binutils
+    cmake
+    glibtool
     git
     (ripgrep.override { withPCRE2 = true; })
     gnutls
@@ -20,7 +22,7 @@
     emacs-all-the-icons-fonts
     nodejs
     fontconfig
-    nerdfonts
+    nerd-fonts.iosevka
     texlive.combined.scheme-medium
     graphviz
 # development tools
@@ -49,8 +51,9 @@
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
     coreutils-prefixed
+    emacs29-macport
   ] ++ lib.optionals pkgs.stdenv.isLinux [
-    emacsNativeComp # using emacs-mac on darwin
+    emacs
     xclip
   ];
 

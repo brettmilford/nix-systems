@@ -9,17 +9,6 @@
     enable = true;
     onActivation.cleanup = "zap";
 
-    taps = [
-      "railwaycat/emacsmacport"
-    ];
-
-    brews = [
-      {
-        name = "emacs-mac";
-        args = ["with-native-comp"];
-      }
-    ];
-
     casks = [
       "rectangle"
       "notion"
@@ -37,8 +26,6 @@
       "font-iosevka-aile"
       "proton-pass"
       "protonvpn"
-      "proton-mail"
-      "proton-drive"
     ];
   };
 }
