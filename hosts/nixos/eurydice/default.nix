@@ -13,9 +13,7 @@
     ../desktop.nix
     ../zerotierone.nix
     ../virt.nix
-    ../../../deployments/unifi
-    ../../../deployments/home-assistant
-    ../../../deployments/elasticsearch
+    ../../../deployments
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -45,6 +43,16 @@
 	  defaults.email = "admin+acme@example.org";
   };
   networking.firewall.allowedTCPPorts = [80 443];
+
+  # Enable container-based service deployments
+  services.deployments = {
+    enable = true;
+    
+    # Enable specific services
+    elasticsearch.enable = true;
+    homeAssistant.enable = true;
+    unifi.enable = true;
+  };
 
 
 }
