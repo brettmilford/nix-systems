@@ -7,8 +7,9 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
+  boot.kernelModules = [ "kvm-intel" "vfio_pci" ];
   boot.extraModulePackages = [ ];
+  boot.kernelParams = [ "iommu=pt" "intel_iommu=on" "vfio-pci.ids=8086:1521" ];
 
   fileSystems."/" =
     { device = "zpool/root";
