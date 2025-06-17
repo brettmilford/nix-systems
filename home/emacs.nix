@@ -5,8 +5,9 @@
   ...
 }: {
   home.packages = with pkgs; [
-    emacsNativeComp
     binutils
+    cmake
+    glibtool
     git
     (ripgrep.override { withPCRE2 = true; })
     gnutls
@@ -21,8 +22,9 @@
     emacs-all-the-icons-fonts
     nodejs
     fontconfig
-    nerdfonts
+    nerd-fonts.iosevka
     texlive.combined.scheme-medium
+    graphviz
 # development tools
     gnumake
     shellcheck
@@ -49,7 +51,9 @@
   ] ++ lib.optionals pkgs.stdenv.isDarwin [
     terminal-notifier
     coreutils-prefixed
+    emacs29-macport
   ] ++ lib.optionals pkgs.stdenv.isLinux [
+    emacs
     xclip
   ];
 
@@ -70,7 +74,7 @@
         source = ../config/doom;
         recursive = true;
         onChange = "${pkgs.writeShellScript "doom-change" ''
-          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin"
+          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin:/opt/homebrew/bin"
           export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
           export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"

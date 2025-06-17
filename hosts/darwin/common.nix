@@ -7,25 +7,31 @@
   environment.systemPackages = with pkgs; [
     vim
     git
+    gcc
   ];
 
   environment.variables.EDITOR = "vim";
 
   environment.shellAliases = {
-    lctlrl = "f() { [ \"$1\" ] && launchctl unload $1 && launchctl load $1 ; } ; f";
+    lctlrl = "f() { [ \"$1\"] && launchctl unload $1 && launchctl load $1 ; } ; f";
     lctlrs = "f() { [ \"$1\" ] && launchctl stop $1 && launchctl start $1 ; } ; f";
-    nrs = "darwin-rebuild switch --flake ~/.config/nix?submodules=1";
-    nup = "nix flake update ~/.config/nix && nrs";
+    nrs = "sudo darwin-rebuild switch --flake \"$HOME/.config/nix?submodules=1\"";
+    nup = "nix flake update --flake ~/.config/nix && nrs";
   };
 
   environment.extraInit = ''
     if defaults read -g AppleInterfaceStyle 2>/dev/null | grep -q 'Dark'; then
-      export APPEARENCE=dark
+      export APPEARANCE=dark
     else
-      export APPEARENCE=light
+      export APPEARANCE=light
     fi
   '';
 
+
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+             "claude-code"
+    ];
 
   programs.gnupg.agent = {
     enable = true;
@@ -35,10 +41,6 @@
     enable = true;
     enableCompletion = true;
   };
-
-  security.pam.enableSudoTouchIdAuth = true;
-
-  services.nix-daemon.enable = true;
 
   services.emacs = {
     enable = true;
