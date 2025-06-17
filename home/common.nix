@@ -4,7 +4,9 @@
   pkgs,
   ...
 }: {
+
   home.packages = with pkgs; [
+    claude-code
     direnv
     qemu
     git-review

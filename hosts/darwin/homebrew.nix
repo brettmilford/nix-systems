@@ -1,16 +1,13 @@
+
 {
   # NOTE: `brew` cli linked at this path
-  #environment.systemPath = [
-  #  "/opt/homebrew/bin"
-  #];
+  environment.systemPath = [
+    "/opt/homebrew/bin"
+  ];
 
   homebrew = {
     enable = true;
     onActivation.cleanup = "zap";
-
-    taps = [
-      "homebrew/cask-fonts"
-    ];
 
     casks = [
       "rectangle"
@@ -27,10 +24,8 @@
       "iTerm2"
       "font-iosevka"
       "font-iosevka-aile"
+      "proton-pass"
+      "protonvpn"
     ];
-
-    masApps = {
-      Bitwarden = 1352778147;
-    };
   };
 }
