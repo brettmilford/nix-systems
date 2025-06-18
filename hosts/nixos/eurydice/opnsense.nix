@@ -28,7 +28,14 @@ in {
     ];
   };
 
-  networking.defaultGateway = "192.168.1.1";
+  systemd.services."${tapInterface}-netdev" = {
+    # Prevent rebuild from stopping/restarting
+    restartIfChanged = false;
+    stopIfChanged = false;
+  };
+
+  networking.defaultGateway.address = "192.168.1.1";
+  networking.defaultGateway.interface = "tap0";
   networking.nameservers = [ "192.168.1.1" "1.0.0.1" "1.1.1.1" ];
   networking.search = [ "local" "internal" ];
 
@@ -41,6 +48,9 @@ in {
     wantedBy = [ "multi-user.target" ];
     after = [ "network-online.target"];
     requires = [ "network-online.target" ];
+    # Prevent rebuild from stopping/restarting
+    restartIfChanged = false;
+    stopIfChanged = false;
 
     serviceConfig = {
       # Prevent restarting - VM will only be restarted if it crashes

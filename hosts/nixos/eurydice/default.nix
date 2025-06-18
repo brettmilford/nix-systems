@@ -13,9 +13,7 @@
     ../cloud.nix
     ../desktop.nix
     ../zerotierone.nix
-    ../virt.nix
-    ../../../deployments/unifi
-    ../../../deployments/home-assistant
+    ../../../deployments
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -34,6 +32,18 @@
   networking.hostId = "04ca88ad";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
+  environment.systemPackages = with pkgs; [
+    iw
+    pciutils
+    usbutils
+    dig
+  ];
+
+  services.deployments = {
+    homeAssistant.enable = true;
+    unifi.enable = true;
+  };
+
   services.xserver.displayManager.gdm.autoSuspend = false;
   services.logind = {
     powerKey = "poweroff";
@@ -58,35 +68,6 @@
       idle-delay=uint32 0
     '';
   };
-
-  #programs.dconf.profiles = {
-  #  user.databases = [{
-  #    settings = {
-  #      "org/gnome/settings-daemon/plugins/power" = {
-  #        power-button-action = "poweroff";
-  #        sleep-inactive-ac-type = "nothing";
-  #        sleep-inactive-battery-type = "nothing";
-  #      };
-  #      "org/gnome/desktop/session" = {
-  #        idle-delay = lib.hm.gvariant.mkUint32 0;
-  #      };
-  #    };
-  #  }];
-  #};
-
-  environment.systemPackages = with pkgs; [
-    iw
-    pciutils
-    usbutils
-    dig
-  ];
-
-  # common reverse proxy
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "admin+acme@example.org";
-  };
-  networking.firewall.allowedTCPPorts = [80 443];
 
   services.openssh.settings = {
     X11Forwarding = true;
