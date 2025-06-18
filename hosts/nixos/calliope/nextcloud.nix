@@ -12,7 +12,7 @@
 
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud29;
+    package = pkgs.nextcloud30;
     hostName = "nextcloud.cirriform.au";
     config = {
       dbtype = "pgsql";
@@ -22,7 +22,7 @@
     appstoreEnable = true;
     extraApps = {
       inherit
-        (pkgs.nextcloud29Packages.apps)
+        (pkgs.nextcloud30Packages.apps)
         calendar
         contacts
         ;
