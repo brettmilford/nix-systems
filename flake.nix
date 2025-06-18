@@ -3,7 +3,7 @@
   nixConfig.bash-prompt = "\[nix-develop\]$ ";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nix-darwin.url = "github:lnl7/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.05";
@@ -153,12 +153,7 @@
       nixosConfigurations."calliope" = nixpkgs.lib.nixosSystem {
         system = system.aarch64-linux;
         modules =
-          nixosCommonModules ++
-          nixosUserModules{
-            user = "brett";
-            desc = "Brett";
-          }
-          ++ [
+          nixosCommonModules ++ [
             ./hosts/nixos/calliope
           ];
       };
@@ -188,7 +183,7 @@
           agenix.packages.${system}.default
         ];
         devShell = import ./shell.nix {inherit pkgs;};
-        formatter = nixpkgs.legacyPackages.${system}.alejandra;
+        formatter = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
       }
     );
 }
