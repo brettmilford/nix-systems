@@ -12,19 +12,17 @@
 
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud28;
+    package = pkgs.nextcloud29;
     hostName = "nextcloud.cirriform.au";
     config = {
       dbtype = "pgsql";
       adminpassFile = config.age.secrets.nextcloud.path;
       dbhost = "/run/postgresql";
-      defaultPhoneRegion = "AU";
-      extraTrustedDomains = ["localhost" "calliope" "calliope.cirriform" "calliope.cirriform.au"];
     };
     appstoreEnable = true;
     extraApps = {
       inherit
-        (pkgs.nextcloud28Packages.apps)
+        (pkgs.nextcloud29Packages.apps)
         calendar
         contacts
         ;
@@ -34,7 +32,7 @@
     configureRedis = true;
     https = true;
     datadir = "/srv/data/nextcloud";
-    extraOptions = {
+    settings = {
       mail_smtpmode = "sendmail";
       mail_sendmailmode = "pipe";
       mail_from_address = "admin";
@@ -59,6 +57,8 @@
         "OC\\Preview\\AVI"
         "OC\\Preview\\MSOfficeDoc"
       ];
+      trusted_domains = ["localhost" "calliope" "calliope.cirriform" "calliope.cirriform.au"];
+      default_phone_region = "AU";
     };
     phpOptions = {
       catch_workers_output = "yes";
