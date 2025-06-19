@@ -4,6 +4,13 @@
   pkgs,
   ...
 }: {
+
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+           "claude-code"
+           "zerotierone"
+    ];
+
   time.timeZone = "Australia/Brisbane";
   i18n.defaultLocale = "en_AU.UTF-8";
 

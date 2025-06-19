@@ -57,4 +57,28 @@
     nssmdns4 = true;
     openFirewall = true;
   };
+
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Experimental = true;
+      };
+    };
+  };
+
+  services.blueman.enable = true;
+
+  services.dbus.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    bluez
+    bluez-tools
+    iw
+    pciutils
+    usbutils
+    dig
+  ];
 }

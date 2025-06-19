@@ -37,11 +37,16 @@
         system.primaryUser = user;
         ids.gids.nixbld = 350;
         nix = {
+          distributedBuilds = true;
           extraOptions = ''
             extra-platforms = aarch64-darwin x86_64-darwin
             experimental-features = nix-command flakes
+            builders = ssh://nix@eurydice /Users/brett/.ssh/id_ed25519
           '';
           optimise.automatic = true;
+          settings.trusted-users = [
+            "${user}"
+          ];
         };
       }
       home-manager.darwinModules.home-manager
@@ -110,11 +115,12 @@
       nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
         system = system.x86_64-linux;
         modules =
-          nixosCommonModules {
+          nixosCommonModules ++
+          nixosUserModules {
             user = "brett";
             desc = "Brett";
-          }
-          ++ [
+          } ++
+          [
             ./hosts/nixos/orpheus
           ];
       };
@@ -154,7 +160,7 @@
         system = system.aarch64-linux;
         modules =
           nixosCommonModules ++
-          nixosUserModules{
+          nixosUserModules {
             user = "brett";
             desc = "Brett";
           }
