@@ -9,6 +9,7 @@
     builtins.elem (lib.getName pkg) [
            "claude-code"
            "zerotierone"
+           "broadcom-bt-firmware"
     ];
 
   time.timeZone = "Australia/Brisbane";
