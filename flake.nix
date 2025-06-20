@@ -66,6 +66,9 @@
             experimental-features = nix-command flakes
           '';
           settings.auto-optimise-store = true;
+          settings.trusted-users = [
+            "nix"
+          ];
         };
       }
       agenix.nixosModules.default
