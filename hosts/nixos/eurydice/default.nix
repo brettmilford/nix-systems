@@ -14,6 +14,7 @@
     ../desktop.nix
     ../zerotierone.nix
     ../../../deployments
+    ../../../modules/lma.nix
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -71,5 +72,10 @@
 
   services.openssh.settings = {
     X11Forwarding = true;
+  };
+
+  services.lma = {
+    enable = true;
+    domain = "lma.internal";
   };
 }
