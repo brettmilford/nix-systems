@@ -1,4 +1,5 @@
 {
+  self,
   config,
   lib,
   pkgs,
@@ -12,9 +13,8 @@
     ../common.nix
     ../cloud.nix
     ../desktop.nix
-    ../zerotierone.nix
     ../../../deployments
-    ../../../modules/lma.nix
+    "${self}/modules/monitoring"
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -74,8 +74,9 @@
     X11Forwarding = true;
   };
 
-  services.lma = {
+  services.monitoring = {
     enable = true;
-    domain = "lma.internal";
+    domain = "monit.internal";
+    enableUnpoller = true;
   };
 }
