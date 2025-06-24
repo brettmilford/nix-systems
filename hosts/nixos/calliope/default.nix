@@ -14,11 +14,41 @@
     ./postgresql.nix
     ./nextcloud.nix
     ../virt.nix
-    ./monitoring.nix
   ];
 
   networking.hostName = "calliope";
   networking.hostId = "25f4937c";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
+
+  services.prometheus.exporters.node = {
+    enable = true;
+    listenAddress = "172.22.70.58";
+    openFirewall = true;
+    enabledCollectors = [
+      "systemd"
+      "filesystem"
+      "meminfo"
+      "loadavg"
+      "stat"
+      "processes"
+      "interrupts"
+    ];
+  };
+
+  services.rsyslogd = {
+    enable = true;
+    defaultConfig = ''
+      # Forward all logs to remote rsyslog server on port 1514
+      *.* @@192.168.1.2:1514
+    '';
+  };
+
+  services.openssh = {
+    settings = {
+      PermitRootLogin = "prohibit-password";  # or "without-password"
+      PasswordAuthentication = false;
+    };
+  };
+
 }
