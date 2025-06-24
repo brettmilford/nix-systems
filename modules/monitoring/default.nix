@@ -1,17 +1,7 @@
-# NixOS Monitoring Stack Module
-# Deploys Prometheus, Grafana, Loki, and Alertmanager
-#
-# Based on verified patterns from NixOS community examples
-# Please verify specific syntax for your NixOS version/channel
-# Last researched: June 2025 - some syntax may need verification
-
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.lma;
-
-  # Monitoring configuration
-  domain = "lma.local";  # Adjust to your domain
+  cfg = config.services.monitoring;
 
   # Network settings - adjust to your environment
   listenLocal = "127.0.0.1";
@@ -19,31 +9,46 @@ let
 
   # Ports - keeping services on localhost, exposed via nginx
   prometheusPort = 9090;
+  prometheusNodeExporterPort = 9100;
+  prometheusSNMPExporterPort = 9116;
   grafanaPort = 3000;
   lokiPort = 3100;
   alertmanagerPort = 9093;
-  promtailPort = 9080;
+  unifiPollerPort = 9130;
+
 in
 {
-  options.services.lma = {
+  imports = [
+    ./fluentd
+  ];
+
+  options.services.monitoring = {
     enable = lib.mkEnableOption "monitoring stack with Prometheus, Grafana, Loki, and Alertmanager";
 
     domain = lib.mkOption {
       type = lib.types.str;
-      default = "lma.internal";
+      default = "monitoring.internal";
       description = "Domain name for the monitoring services";
     };
+
+    enableAlertManager = lib.mkEnableOption "Add Alert manager";
+    enableUnpoller = lib.mkEnableOption "Enable Unpoller";
   };
 
   config = lib.mkIf cfg.enable {
+
+    age.secrets.snmp_env = {
+      file = "${self}/secrets/snmp.env.age";
+    };
 
     # Prometheus configuration
     services.prometheus = {
       enable = true;
       port = prometheusPort;
-      listenAddress = listenNetwork;
+      listenAddress = listenLocal;
+      webExternalUrl = "http://${cfg.domain}/prometheus";
+      extraFlags = ["--web.route-prefix=/"];
 
-      # Basic global configuration
       globalConfig = {
         scrape_interval = "15s";
         evaluation_interval = "15s";
@@ -92,57 +97,93 @@ in
 
       # Scrape configurations
       scrapeConfigs = [
-        # Needs to be generated from actually running exporter configs
-        # {
-        #   job_name = "prometheus";
-        #   static_configs = [{
-        #     targets = [ "${listenAddress}:${toString prometheusPort}" ];
-        #   }];
-        # }
+        {
+          job_name = "prometheus";
+          static_configs = [{
+            targets = [ "${listenLocal}:${toString prometheusPort}" ];
+          }];
+        }
+        {
+          job_name = "loki";
+          static_configs = [{
+            targets = [ "${listenLocal}:${toString lokiPort}" ];
+          }];
+        }
+        {
+          job_name = "grafana";
+          static_configs = [{
+            targets = [ "${listenLocal}:${toString grafanaPort}" ];
+          }];
+        }
         {
           job_name = "node-exporter";
           static_configs = [{
-            targets = [ "${listenLocal}:${toString config.services.prometheus.exporters.node.port}" ];
+            targets = [ "${listenLocal}:${toString prometheusNodeExporterPort}"
+                        "calliope.zt:${toString prometheusNodeExporterPort}"
+                      ];
           }];
         }
-        # {
-        #   job_name = "loki";
-        #   static_configs = [{
-        #     targets = [ "${listenAddress}:${toString lokiPort}" ];
-        #   }];
-        # }
-        # {
-        #   job_name = "grafana";
-        #   static_configs = [{
-        #     targets = [ "${listenAddress}:${toString grafanaPort}" ];
-        #   }];
-        # }
-        # {
-        #   job_name = "alertmanager";
-        #   static_configs = [{
-        #     targets = [ "${listenAddress}:${toString alertmanagerPort}" ];
-        #   }];
-        # }
+        {
+          job_name = "unifi-poller";
+          static_configs = [{
+            targets = ["${listenLocal}:${toString unifiPollerPort}"];
+          }];
+        }
+        {
+          job_name = "snmp-exporter";
+          static_configs = [{
+            targets = [
+              "opnsense"
+            ];
+          }];
+          metrics_path = "/snmp";
+          params = {
+            module = ["opnsense"];
+            auth = ["public_v3"];
+          };
+          relabel_configs = [
+            {
+              source_labels = ["__address__"];
+              target_label = "__param_target";
+            }
+            {
+              source_labels = ["__param_target"];
+              target_label = "instance";
+            }
+            {
+              target_label = "__address__";
+              replacement = "${listenLocal}:${toString prometheusSNMPExporterPort}";
+            }
+          ];
+        }
+      ] ++ lib.optional config.services.prometheus.alertmanager.enable [
+        {
+          job_name = "alertmanager";
+          static_configs = [{
+            targets = [ "${listenLocal}:${toString alertmanagerPort}" ];
+          }];
+        }
       ];
-
-      # Connect to Alertmanager
-      alertmanagers = [{
-        static_configs = [{
-          targets = [ "${listenLocal}:${toString alertmanagerPort}" ];
-        }];
-      }];
 
       # Enable node exporter
       exporters = {
+        snmp = {
+          enable = true;
+          configurationPath = ./snmp.yml;
+          environmentFile = "${config.age.secrets.snmp_env.path}";
+        };
+
         node = {
           enable = true;
-          port = 9100;
+          port = prometheusNodeExporterPort;
           enabledCollectors = [
             "systemd"
             "filesystem"
             "meminfo"
             "loadavg"
             "stat"
+            "processes"
+            "interrupts"
           ];
         };
       };
@@ -150,12 +191,13 @@ in
 
     # Alertmanager configuration
     services.prometheus.alertmanager = {
-      enable = true;
+      enable = cfg.enableAlertManager;
       port = alertmanagerPort;
       listenAddress = listenLocal;
+      webExternalUrl = "http://${cfg.domain}/alertmanager/";
+      extraFlags = ["--web.route-prefix=/"];
 
-      # Basic alertmanager configuration
-      # Please verify this syntax for your NixOS version
+      # TODO: verify
       configuration = {
         global = {
           smtp_smarthost = "localhost:587";
@@ -191,14 +233,12 @@ in
     services.loki = {
       enable = true;
 
-      # Note: Please verify this configuration structure for your NixOS version
-      # The structure may vary between nixpkgs versions
       configuration = {
         auth_enabled = false;
 
         server = {
           http_listen_port = lokiPort;
-          http_listen_address = listenNetwork;
+          http_listen_address = listenLocal;
         };
 
         common = {
@@ -252,64 +292,14 @@ in
       };
     };
 
-    # Promtail configuration for log shipping
-    services.promtail = {
-      enable = true;
-
-      configuration = {
-        server = {
-          http_listen_port = promtailPort;
-          http_listen_address = listenLocal;
-        };
-
-        clients = [{
-          url = "http://${listenLocal}:${toString lokiPort}/loki/api/v1/push";
-        }];
-
-        scrape_configs = [
-          {
-            job_name = "systemd-journal";
-            journal = {
-              max_age = "12h";
-              labels = {
-                job = "systemd-journal";
-                host = config.networking.hostName;
-              };
-            };
-            relabel_configs = [
-              {
-                source_labels = [ "__journal__systemd_unit" ];
-                target_label = "unit";
-              }
-              {
-                source_labels = [ "__journal_priority" ];
-                target_label = "priority";
-              }
-            ];
-          }
-          # Add more log sources as needed
-          # {
-          #   job_name = "nginx-logs";
-          #   static_configs = [{
-          #     targets = [ "localhost" ];
-          #     labels = {
-          #       job = "nginx";
-          #       __path__ = "/var/log/nginx/*.log";
-          #     };
-          #   }];
-          # }
-        ];
-      };
-    };
-
     age.secrets.grafana_pass = {
-      file = ../../../secrets/grafana_pass.age;
+      file = "${self}/secrets/grafana_pass.age";
       owner = "grafana";
       group = "grafana ";
     };
 
     age.secrets.grafana_key = {
-      file = ../../../secrets/grafana_key.age;
+      file = "${self}/secrets/grafana_key.age";
       owner = "grafana";
       group = "grafana ";
     };
@@ -323,7 +313,7 @@ in
           http_addr = listenLocal;  # Use IP address, not hostname (Grafana 11.3+ requirement)
           http_port = grafanaPort;
           domain = cfg.domain;
-          root_url = "http://${cfg.domain}/";
+          root_url = "https://${cfg.domain}/";
         };
 
         # Security settings
@@ -333,10 +323,7 @@ in
           secret_key = "$__file{${config.age.secrets.grafana_key.path}}";
         };
 
-        # Analytics
-        analytics = {
-          reporting_enabled = false;
-        };
+        analytics.reporting_enabled = false;
       };
 
       # Provision datasources and dashboards
@@ -362,17 +349,29 @@ in
           ];
         };
 
-        # You can add dashboard provisioning here
-        # dashboards.settings = {
-        #   apiVersion = 1;
-        #   providers = [{
-        #     name = "default";
-        #     folder = "";
-        #     type = "file";
-        #     options.path = "/etc/grafana/dashboards";
-        #   }];
-        # };
+        dashboards.settings = {
+          apiVersion = 1;
+          providers = [{
+            name = "default";
+            folder = "";
+            type = "file";
+            options.path = "/var/lib/grafana/dashboards";
+          }];
+        };
       };
+    };
+
+    age.secrets.unifipoller_pass = {
+      file = "${self}/secrets/unifipoller_pass.age";
+      owner = "unifi-poller";
+    };
+
+    services.unpoller = {
+      enable = cfg.enableUnpoller;
+      influxdb.disable = true;
+      unifi.defaults.verify_ssl = false;
+      unifi.defaults.user = "unifipoller";
+      unifi.defaults.pass = config.age.secrets.unifipoller_pass.path;
     };
 
     services.nginx = {
@@ -389,44 +388,20 @@ in
             "/" = {
               proxyPass = "http://${listenLocal}:${toString grafanaPort}/";
               proxyWebsockets = true;
-              extraConfig = ''
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-              '';
             };
             "/prometheus/" = {
               proxyPass = "http://${listenLocal}:${toString prometheusPort}/";
-              extraConfig = ''
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              '';
             };
             "/loki/" = {
               proxyPass = "http://${listenLocal}:${toString lokiPort}/";
             };
-            "/alertmanager/" = {
+            "/alertmanager/" = lib.mkIf cfg.enableAlertManager {
               proxyPass = "http://${listenLocal}:${toString alertmanagerPort}/";
             };
           };
         };
       };
     };
-
-    # Firewall configuration
-    networking.firewall = {
-      allowedTCPPorts = [
-        prometheusPort
-        lokiPort
-      ];
-    };
-
-    # System packages for management tools
-    environment.systemPackages = with pkgs; [
-      prometheus-alertmanager  # Provides amtool for testing
-    ];
 
     # Ensure data directories exist with proper permissions
     systemd.tmpfiles.rules = [
@@ -438,34 +413,3 @@ in
     ];
   };
 }
-
-# Usage Example:
-# In your configuration.nix or as a separate module:
-#
-# {
-#   imports = [ ./lma.nix ];
-#
-#   services.lma = {
-#     enable = true;
-#     domain = "monitoring.example.com";
-#     externalAccess = true;
-#     openFirewall = true;
-#   };
-# }
-#
-# Access URLs (when externalAccess = true):
-# - Grafana: https://monitoring.example.com/
-# - Prometheus: https://monitoring.example.com/prometheus/
-# - Loki: https://monitoring.example.com/loki/
-# - Alertmanager: https://monitoring.example.com/alertmanager/
-#
-# Default credentials:
-# - Grafana: admin/admin (change immediately in production!)
-#
-# IMPORTANT NOTES:
-# 1. Change default passwords and secrets in production
-# 2. Verify Loki configuration syntax for your NixOS version
-# 3. Configure proper notification channels in Alertmanager
-# 4. Add TLS/SSL for production deployments
-# 5. Consider using NixOS secrets management for sensitive data
-# 6. Test schema migrations carefully in non-production first
