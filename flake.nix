@@ -144,6 +144,10 @@
           nixosCommonModules ++ [
             ./hosts/nixos/eurydice
           ];
+        specialArgs = {
+          inherit self;
+          inputs = inputs;
+        };
       };
 
       nixosConfigurations."eurydice-vm" = nixpkgs.lib.nixosSystem {

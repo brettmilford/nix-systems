@@ -18,6 +18,7 @@
   environment.systemPackages = with pkgs; [
     gcc
     git
+    (ripgrep.override { withPCRE2 = true; })
   ];
 
   environment.shellAliases = {

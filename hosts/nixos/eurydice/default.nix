@@ -1,4 +1,5 @@
 {
+  self,
   config,
   lib,
   pkgs,
@@ -12,8 +13,8 @@
     ../common.nix
     ../cloud.nix
     ../desktop.nix
-    ../zerotierone.nix
     ../../../deployments
+    "${self}/modules/monitoring"
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -71,5 +72,11 @@
 
   services.openssh.settings = {
     X11Forwarding = true;
+  };
+
+  services.monitoring = {
+    enable = true;
+    domain = "monit.internal";
+    enableUnpoller = true;
   };
 }

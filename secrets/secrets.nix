@@ -9,4 +9,8 @@ in {
   "cf_origin_key.pem.age".publicKeys = [eurydice calliope brett];
   "cfApiKey.age".publicKeys = [eurydice calliope brett];
   "cfd_tunnel_config.json.age".publicKeys = [eurydice brett];
+  "grafana_pass.age".publicKeys = [eurydice brett];
+  "grafana_key.age".publicKeys = [eurydice brett];
+  "unifipoller_pass.age".publicKeys = [eurydice brett];
+  "snmp.env.age".publicKeys = [eurydice brett];
 }
