@@ -25,6 +25,9 @@
         (pkgs.nextcloud31Packages.apps)
         calendar
         contacts
+        memories
+        previewgenerator
+        recognize
         ;
     };
     extraAppsEnable = true;
@@ -153,6 +156,7 @@
     ffmpeg_6-headless
     libde265
     libheif
+    nodejs_24  # recognize
   ];
 
   networking.firewall.allowedTCPPorts = [80 443];
