@@ -1,4 +1,5 @@
 {
+  self,
   config,
   lib,
   pkgs,
@@ -14,6 +15,7 @@
     ./postgresql.nix
     ./nextcloud.nix
     ../virt.nix
+    "${self}/modules/paperless.nix"
   ];
 
   networking.hostName = "calliope";
@@ -51,4 +53,5 @@
     };
   };
 
+  services.paperless-ngx.enable = true;
 }

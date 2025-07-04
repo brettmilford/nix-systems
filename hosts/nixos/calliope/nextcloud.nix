@@ -28,6 +28,7 @@
         memories
         previewgenerator
         recognize
+        integration_paperless
         ;
     };
     extraAppsEnable = true;
@@ -60,8 +61,12 @@
         "OC\\Preview\\AVI"
         "OC\\Preview\\MSOfficeDoc"
       ];
-      trusted_domains = ["localhost" "calliope" "calliope.cirriform" "calliope.cirriform.au"];
+      trusted_proxies = [ "localhost" "127.0.0.1" "::1" ];
+      overwriteprotocol = "https";
       default_phone_region = "AU";
+      "overwrite.cli.url" = "https://nextcloud.cirriform.au";
+      overwritehost = "nextcloud.cirriform.au";
+      forwarded_for_headers = [ "X-Forwarded-For" ];
     };
     phpOptions = {
       catch_workers_output = "yes";
@@ -79,14 +84,14 @@
     };
   };
 
-  age.secrets."cf_origin_cert" = {
+  age.secrets."cert.pem" = {
     file = ../../../secrets/cf_origin_cert.pem.age;
     mode = "770";
     owner = "nginx";
     group = "nginx";
   };
 
-  age.secrets."cf_origin_key" = {
+  age.secrets."key.pem" = {
     file = ../../../secrets/cf_origin_key.pem.age;
     mode = "770";
     owner = "nginx";
@@ -94,8 +99,9 @@
   };
 
   services.nginx.virtualHosts.${config.services.nextcloud.hostName} = {
-    sslCertificate = config.age.secrets."cf_origin_cert".path;
-    sslCertificateKey = config.age.secrets."cf_origin_key".path;
+    forceSSL = true;
+    sslCertificate = config.age.secrets."cert.pem".path;
+    sslCertificateKey = config.age.secrets."key.pem".path;
   };
 
   services.nginx.commonHttpConfig = let

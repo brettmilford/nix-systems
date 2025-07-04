@@ -166,6 +166,10 @@
           nixosCommonModules ++ [
             ./hosts/nixos/calliope
           ];
+        specialArgs = {
+          inherit self;
+          inputs = inputs;
+        };
       };
 
       nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {

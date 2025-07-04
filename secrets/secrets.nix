@@ -6,11 +6,15 @@ let
 in {
   "nextcloud.age".publicKeys = [thamrys calliope brett];
   "cf_origin_cert.pem.age".publicKeys = [eurydice calliope brett];
+  "cf_cert_2025.pem.age".publicKeys = [eurydice calliope brett];
   "cf_origin_key.pem.age".publicKeys = [eurydice calliope brett];
+  "cf_key_2025.pem.age".publicKeys = [eurydice calliope brett];
   "cfApiKey.age".publicKeys = [eurydice calliope brett];
   "cfd_tunnel_config.json.age".publicKeys = [eurydice brett];
   "grafana_pass.age".publicKeys = [eurydice brett];
   "grafana_key.age".publicKeys = [eurydice brett];
   "unifipoller_pass.age".publicKeys = [eurydice brett];
   "snmp.env.age".publicKeys = [eurydice brett];
+  "paperless.env.age".publicKeys = [calliope brett];
+  "paperlessBackupPass.age".publicKeys = [calliope brett];
 }
