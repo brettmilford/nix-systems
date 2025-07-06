@@ -4,7 +4,7 @@ let
   calliope = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICYnaqrEbdb9apQNMccZgfM0YRX6VTi1JPS+BmVd8Vb0";
   eurydice = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJfkZRQxQLgNZmGzSu9+XG3v3QoWhumJKzphxduT+5wI";
 in {
-  "nextcloud.age".publicKeys = [thamrys calliope brett];
+  "admin-passwd.age".publicKeys = [thamrys calliope brett];
   "cf_origin_cert.pem.age".publicKeys = [eurydice calliope brett];
   "cf_cert_2025.pem.age".publicKeys = [eurydice calliope brett];
   "cf_origin_key.pem.age".publicKeys = [eurydice calliope brett];
@@ -16,5 +16,5 @@ in {
   "unifipoller_pass.age".publicKeys = [eurydice brett];
   "snmp.env.age".publicKeys = [eurydice brett];
   "paperless.env.age".publicKeys = [calliope brett];
-  "paperlessBackupPass.age".publicKeys = [calliope brett];
+  "postfix-sasl-passwd.age".publicKeys = [calliope brett];
 }

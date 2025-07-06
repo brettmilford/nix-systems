@@ -1,0 +1,39 @@
+{ self, config, lib, pkgs, ... }:
+
+{
+  age.secrets.postfix-sasl-passwd = {
+    file = "${self}/secrets/postfix-sasl-passwd.age";
+  };
+
+  # systemctl --user start protonmail-bridge
+  services.protonmail-bridge = {
+    enable = true;
+    logLevel = "info";
+  };
+
+  services.postfix = {
+    enable = true;
+    setSendmail = true;
+
+    relayHost = "127.0.0.1";
+    relayPort = 1025;
+
+    config = {
+      myhostname = "mail.cirriform.au";
+      mydomain = "cirriform.au";
+      myorigin = "$mydomain";
+
+      smtp_sasl_auth_enable = "yes";
+      smtp_sasl_security_options = "noanonymous";
+      smtp_sasl_password_maps = "texthash:${config.age.secrets.postfix-sasl-passwd.path}";
+
+      # Bridge usually uses STARTTLS
+      smtp_tls_security_level = "may";
+
+      # Network settings
+      inet_interfaces = "localhost";
+      mydestination = "";
+
+    };
+  };
+}
