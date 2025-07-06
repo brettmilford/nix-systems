@@ -16,6 +16,7 @@
     ./nextcloud.nix
     ../virt.nix
     "${self}/modules/paperless.nix"
+    ./postfix.nix
   ];
 
   networking.hostName = "calliope";

@@ -1,11 +1,12 @@
 {
+  self,
   pkgs,
   config,
   lib,
   ...
 }: {
-  age.secrets.nextcloud = {
-    file = ../../../secrets/nextcloud.age;
+  age.secrets.nextcloud-admin-passwd = {
+    file = "${self}/secrets/admin-passwd.age";
     owner = "nextcloud";
     group = "nextcloud";
   };
@@ -16,7 +17,7 @@
     hostName = "nextcloud.cirriform.au";
     config = {
       dbtype = "pgsql";
-      adminpassFile = config.age.secrets.nextcloud.path;
+      adminpassFile = config.age.secrets.nextcloud-admin-passwd.path;
       dbhost = "/run/postgresql";
     };
     appstoreEnable = true;
@@ -28,7 +29,6 @@
         memories
         previewgenerator
         recognize
-        integration_paperless
         ;
     };
     extraAppsEnable = true;
@@ -61,7 +61,7 @@
         "OC\\Preview\\AVI"
         "OC\\Preview\\MSOfficeDoc"
       ];
-      trusted_proxies = [ "localhost" "127.0.0.1" "::1" ];
+      trusted_proxies = [ "127.0.0.1" "::1" ];
       overwriteprotocol = "https";
       default_phone_region = "AU";
       "overwrite.cli.url" = "https://nextcloud.cirriform.au";
@@ -152,10 +152,6 @@
 
     ignoreregex =
   '';
-
-  programs.msmtp = {
-    enable = true;
-  };
 
   environment.systemPackages = with pkgs; [
     imagemagick

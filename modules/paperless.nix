@@ -18,16 +18,16 @@ in
 
   config = mkIf cfg.enable {
 
-    age.secrets.admin_pass = {
-      file = "${self}/secrets/nextcloud.age";
+    age.secrets.paperless-admin-passwd = {
+      file = "${self}/secrets/admin-passwd.age";
     };
 
     age.secrets."paperless.env" = {
       file = "${self}/secrets/paperless.env.age";
     };
 
-    age.secrets."paperlessBackupPass" = {
-      file = "${self}/secrets/paperlessBackupPass.age";
+    age.secrets."smtp-passwd" = {
+      file = "${self}/secrets/smtp-passwd.age";
     };
 
     services.gotenberg.port = 3200;
@@ -36,7 +36,7 @@ in
       enable = true;
       address = "127.0.0.1";
       port = 28981;
-      passwordFile = config.age.secrets.admin_pass.path;
+      passwordFile = config.age.secrets.paperless-admin-passwd.path;
       configureTika = true;
       database.createLocally = true;
       environmentFile = config.age.secrets."paperless.env".path;
@@ -52,18 +52,15 @@ in
         PAPERLESS_URL = "https://paperless.cirriform.au";
         PAPERLESS_ALLOWED_HOSTS = "paperless.cirriform.au";
         PAPERLESS_TRUSTED_PROXIES = "127.0.0.1";
-        #PAPERLESS_OAUTH_CALLBACK_BASE_URL = "https://paperless.cirriform.au/"
 
         PAPERLESS_OCR_LANGUAGE = "eng";
         PAPERLESS_CONSUMER_RECURSIVE = "true";
-        PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = "true";
         PAPERLESS_TASK_WORKERS = "2";
         PAPERLESS_THREADS_PER_WORKER = "1";
 
         PAPERLESS_TIKA_GOTENBERG_ENDPOINT = "http://localhost:${toString config.services.gotenberg.port}";
 
-        # PAPERLESS_FILENAME_FORMAT = "{created_year}/{correspondent}/{title}";
-        #PAPERLESS_ENABLE_NLTK = "true";
+        PAPERLESS_EMAIL_FROM = "admin@cirriform.au";
       };
 
       dataDir = "${cfg.dataDir}";
@@ -120,7 +117,5 @@ in
       };
     };
 
-    # systemctl --user status protonmail-bridge
-    services.protonmail-bridge.enable = true;
   };
 }
