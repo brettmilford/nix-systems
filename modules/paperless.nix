@@ -57,6 +57,12 @@ in
         PAPERLESS_TIKA_GOTENBERG_ENDPOINT = "http://localhost:${toString config.services.gotenberg.port}";
 
         PAPERLESS_EMAIL_FROM = "admin@cirriform.au";
+
+        PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
+        PAPERLESS_SOCIAL_AUTO_SIGNUP = "true";
+        PAPERLESS_ACCOUNT_DEFAULT_GROUPS = "user";
+        PAPERLESS_SOCIAL_ACCOUNT_SYNC_GROUPS = "true";
+        PAPERLESS_REDIRECT_LOGIN_TO_SSO = "true";
       };
 
       dataDir = "${cfg.dataDir}";
