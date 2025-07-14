@@ -10,6 +10,11 @@
     owner = "nextcloud";
     group = "nextcloud";
   };
+  age.secrets."nextcloud-secrets.json" = {
+    file = "${self}/secrets/nextcloud-secrets.json.age";
+    owner = "nextcloud";
+    group = "nextcloud";
+  };
 
   services.nextcloud = {
     enable = true;
@@ -24,6 +29,7 @@
     extraApps = {
       inherit
         (pkgs.nextcloud31Packages.apps)
+        oidc_login
         calendar
         contacts
         memories
@@ -67,7 +73,20 @@
       "overwrite.cli.url" = "https://nextcloud.cirriform.au";
       overwritehost = "nextcloud.cirriform.au";
       forwarded_for_headers = [ "X-Forwarded-For" ];
+      oidc_login_client_id = "nextcloud";
+      oidc_login_provider_url = "https://auth.cirriform.au/realms/master";
+      oidc_login_auto_redirect = true;
+      oidc_login_redir_fallback = true;
+      oidc_login_end_session_redirect = true;
+      oidc_login_logout_url = "https://nextcloud.cirriform.au/apps/oidc_login/oidc";
+      oidc_login_attributes = {
+        id = "preferred_username";
+        mail = "email";
+      };
+      oidc_login_code_challenge_method = "S256";
+      oidc_login_hide_password_form = true;
     };
+    secretFile = config.age.secrets."nextcloud-secrets.json".path;
     phpOptions = {
       catch_workers_output = "yes";
       display_errors = "stderr";

@@ -26,10 +26,6 @@ in
       file = "${self}/secrets/paperless.env.age";
     };
 
-    age.secrets."smtp-passwd" = {
-      file = "${self}/secrets/smtp-passwd.age";
-    };
-
     services.gotenberg.port = 3200;
 
     services.paperless = {

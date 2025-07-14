@@ -17,6 +17,7 @@
     ../virt.nix
     "${self}/modules/paperless.nix"
     ./postfix.nix
+    "${self}/modules/auth.nix"
   ];
 
   networking.hostName = "calliope";
@@ -55,4 +56,8 @@
   };
 
   services.paperless-ngx.enable = true;
+  services.auth = {
+    enable = true;
+    domain = "auth.cirriform.au";
+  };
 }
