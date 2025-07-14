@@ -17,4 +17,6 @@ in {
   "snmp.env.age".publicKeys = [eurydice brett];
   "paperless.env.age".publicKeys = [calliope brett];
   "postfix-sasl-passwd.age".publicKeys = [calliope brett];
+  "keycloak-db-passwd.age".publicKeys = [calliope brett];
+  "nextcloud-secrets.json.age".publicKeys = [calliope brett];
 }
