@@ -18,6 +18,7 @@
     "${self}/modules/paperless.nix"
     ./postfix.nix
     "${self}/modules/auth.nix"
+    "${self}/modules/mealie.nix"
   ];
 
   networking.hostName = "calliope";
@@ -60,4 +61,5 @@
     enable = true;
     domain = "auth.cirriform.au";
   };
+  services.mealie-oidc.enable = true;
 }

@@ -19,4 +19,5 @@ in {
   "postfix-sasl-passwd.age".publicKeys = [calliope brett];
   "keycloak-db-passwd.age".publicKeys = [calliope brett];
   "nextcloud-secrets.json.age".publicKeys = [calliope brett];
+  "mealie.env.age".publicKeys = [calliope brett];
 }
