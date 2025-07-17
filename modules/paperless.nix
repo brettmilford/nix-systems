@@ -102,18 +102,60 @@ in
     };
 
     services.nginx = mkIf config.services.nginx.enable {
+       appendHttpConfig = ''
+         limit_req_zone $binary_remote_addr zone=paperless_api:10m rate=30r/m;
+         limit_req_zone $binary_remote_addr zone=paperless_general:10m rate=60r/m;
+       '';
       virtualHosts."paperless.cirriform.au" = {
         forceSSL = true;
         sslCertificate = config.age.secrets."cert.pem".path;
         sslCertificateKey = config.age.secrets."key.pem".path;
+        extraConfig = ''
+          # Security headers
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+          add_header X-Frame-Options "SAMEORIGIN" always;
+          add_header X-Content-Type-Options "nosniff" always;
+          add_header X-XSS-Protection "1; mode=block" always;
+          add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+          add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';" always;
+          add_header Permissions-Policy "geolocation=(), microphone=(), camera=()";
+
+          # Hide server information
+          server_tokens off;
+
+        '';
         locations."/" = {
           proxyPass = "http://127.0.0.1:28981";
           extraConfig = ''
+            limit_req zone=paperless_general burst=100 nodelay;
+            limit_req_status 429;
+
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
             client_max_body_size 100M;
+          '';
+        };
+        # Rate limit api
+        locations."~ ^/api/" = {
+          proxyPass = "http://127.0.0.1:28981";
+          extraConfig = ''
+            limit_req zone=paperless_api burst=60 nodelay;
+            limit_req_status 429;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Port $server_port;
+          '';
+        };
+        # Block django admin
+        locations."/admin/" = {
+          extraConfig = ''
+            deny all;
+            return 403;
           '';
         };
       };
