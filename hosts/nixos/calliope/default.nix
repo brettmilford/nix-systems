@@ -13,7 +13,6 @@
     ../cloud.nix
     ../zerotierone.nix
     ./postgresql.nix
-    ./nextcloud.nix
     ../virt.nix
     "${self}/modules/paperless.nix"
     ./postfix.nix
@@ -21,6 +20,7 @@
     "${self}/modules/mealie.nix"
     "${self}/modules/immich.nix"
     "${self}/modules/gateway.nix"
+    "${self}/modules/cloud.nix"
   ];
 
   networking.hostName = "calliope";
@@ -58,12 +58,13 @@
     };
   };
 
-  services.paperless-ngx.enable = true;
+  services.gateway.enable = true;
   services.auth = {
     enable = true;
     domain = "auth.cirriform.au";
   };
+  services.cloud.enable = true;
+  services.paperless-ngx.enable = true;
   services.mealie-oidc.enable = true;
   services.immich-oidc.enable = true;
-  services.gateway.enable = true;
 }

@@ -60,7 +60,7 @@ in
       };
     };
 
-    services.nginx = mkIf config.services.nginx.enable {
+    services.nginx = {
       virtualHosts."mealie.cirriform.au" = {
         forceSSL = true;
         sslCertificate = config.age.secrets."cert.pem".path;
@@ -107,26 +107,5 @@ in
         };
       };
     };
-
-    services.fail2ban = mkIf config.services.fail2ban.enable {
-      jails.mealie = ''
-        enabled = true
-        backend = systemd
-        filter = mealie
-        maxretry = 3
-        bantime = 3600
-        findtime = 600
-        ignoreip = 127.0.0.1/8
-      '';
-    };
-
-    # Create Mealie fail2ban filter
-    environment.etc."fail2ban/filter.d/mealie.conf".text = ''
-      [Definition]
-      failregex = ^ERROR:\s+Incorrect username or password from <HOST>
-      ignoreregex =
-      datepattern = %%d-%%b-%%y %%H:%%M:%%S
-      journalmatch = _SYSTEMD_UNIT=mealie.service
-    '';
   };
 }
