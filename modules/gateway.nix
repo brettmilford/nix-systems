@@ -11,6 +11,22 @@ in
   };
 
   config = mkIf cfg.enable {
+
+    networking.firewall.allowedTCPPorts = [80 443];
+    age.secrets."cert.pem" = {
+      file = "${self}/secrets/cf_origin_cert.pem.age";
+      mode = "770";
+      owner = "nginx";
+      group = "nginx";
+    };
+
+    age.secrets."key.pem" = {
+      file = "${self}/secrets/cf_origin_key.pem.age";
+      mode = "770";
+      owner = "nginx";
+      group = "nginx";
+    };
+
     services.nginx = {
       enable = true;
 
@@ -37,6 +53,7 @@ in
         limit_req_zone $binary_remote_addr zone=auth:10m rate=30r/m;
         limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
         limit_req_zone $binary_remote_addr zone=general:10m rate=30r/m;
+        limit_req_zone $binary_remote_addr zone=webdav:10m rate=30r/m;
         limit_conn_zone $binary_remote_addr zone=general_conn:10m;
       '';
     };
