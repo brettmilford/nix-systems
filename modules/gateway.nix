@@ -48,10 +48,13 @@ in
       cf-api-key = config.age.secrets."cf-api-key".path;
     in {
       enable = true;
-      extraPackages = [pkgs.curl pkgs.ipset];
+      extraPackages = [pkgs.curl pkgs.ipset pkgs.systemd];
       banaction = "iptables-ipset-proto6-allports";
+
       ignoreIP = [
-        "172.22.70.58/16"
+        "127.0.0.1/8"
+        "192.168.0.0/16"
+        "172.22.0.0/16"
       ];
 
       jails.nginx-noagent = ''
