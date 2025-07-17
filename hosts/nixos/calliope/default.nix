@@ -19,6 +19,7 @@
     ./postfix.nix
     "${self}/modules/auth.nix"
     "${self}/modules/mealie.nix"
+    "${self}/modules/immich.nix"
   ];
 
   networking.hostName = "calliope";
@@ -62,4 +63,5 @@
     domain = "auth.cirriform.au";
   };
   services.mealie-oidc.enable = true;
+  services.immich-oidc.enable = true;
 }
