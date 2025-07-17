@@ -61,42 +61,10 @@ in
     };
 
     services.nginx = mkIf config.services.nginx.enable {
-      appendHttpConfig = ''
-        # Rate limiting zones for Mealie
-        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-        limit_req_zone $binary_remote_addr zone=recipe_import:10m rate=1r/m;
-      '';
-
       virtualHosts."mealie.cirriform.au" = {
         forceSSL = true;
         sslCertificate = config.age.secrets."cert.pem".path;
         sslCertificateKey = config.age.secrets."key.pem".path;
-        extraConfig = ''
-          # HSTS - Force HTTPS for 2 years
-          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-          # XSS Protection
-          add_header X-XSS-Protection "1; mode=block" always;
-
-          # Prevent MIME type sniffing
-          add_header X-Content-Type-Options "nosniff" always;
-
-          # Clickjacking protection
-          add_header X-Frame-Options "SAMEORIGIN" always;
-
-          # Hide server information
-          server_tokens off;
-          add_header Server "nginx" always;
-
-          # Content Security Policy - restrictive but functional for Mealie
-          add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://auth.cirriform.au; frame-ancestors 'none';" always;
-
-          # Referrer Policy
-          add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-          # Permissions Policy (formerly Feature Policy)
-          add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()" always;
-        '';
         locations."/" = {
           proxyPass = "http://127.0.0.1:9000";
           extraConfig = ''
@@ -106,14 +74,9 @@ in
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
 
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-
             # File upload limit
             client_max_body_size 100M;
 
-            # Rate limiting for general API
-            limit_req zone=api burst=20 nodelay;
 
             # Timeout settings
             proxy_connect_timeout 5s;
@@ -129,11 +92,7 @@ in
         locations."/api/recipes/create-url" = {
           proxyPass = "http://127.0.0.1:9000";
           extraConfig = ''
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-
-            limit_req zone=recipe_import burst=2 nodelay;
-
+            limit_req zone=api burst=20 nodelay;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
