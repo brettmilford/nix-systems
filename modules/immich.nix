@@ -43,7 +43,43 @@ in
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            client_max_body_size 50000M;
+          '';
+        };
+      locations."~ ^/api/(asset/upload|asset/check)" = {
+          proxyPass = "http://localhost:${toString config.services.immich.port}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Upload-specific settings
+            client_max_body_size 5000M;
+            client_body_timeout 300s;
+            proxy_connect_timeout 300s;
+            proxy_send_timeout 300s;
+            proxy_read_timeout 300s;
+            proxy_request_buffering off;
+          '';
+        };
+      locations."~ ^/api/" = {
+          proxyPass = "http://localhost:${toString config.services.immich.port}";
+          proxyWebsockets = true;
+          extraConfig = ''
+            limit_req zone=api burst=20 nodelay;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # API timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+
+            # Standard file size for API calls
+            client_max_body_size 50M;
           '';
         };
       };
@@ -52,5 +88,27 @@ in
     systemd.tmpfiles.rules = [
       "d ${config.services.immich.mediaLocation} 0755 immich immich -"
     ];
+
+    services.fail2ban = {
+      jails = {
+        immich-upload-abuse = ''
+          enabled = true
+          backend = systemd
+          filter = immich-upload-abuse
+          maxretry = 10
+          findtime = 3600
+          bantime = 86400
+          action = iptables-multiport[name=immich-upload, port="http,https"]
+        '';
+      };
+    };
+    environment.etc = {
+      "fail2ban/filter.d/immich-upload-abuse.conf".text = ''
+        [Definition]
+        failregex = ^.*nginx.*client: <HOST>.*"POST /api/asset/upload.*HTTP.*" 413.*$
+                    ^.*nginx.*client: <HOST>.*"POST /api/asset/upload.*HTTP.*" 429.*$
+        journalmatch = _SYSTEMD_UNIT=nginx.service
+      '';
+    };
   };
 }
