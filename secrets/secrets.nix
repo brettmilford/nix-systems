@@ -9,7 +9,7 @@ in {
   "cf_cert_2025.pem.age".publicKeys = [eurydice calliope brett];
   "cf_origin_key.pem.age".publicKeys = [eurydice calliope brett];
   "cf_key_2025.pem.age".publicKeys = [eurydice calliope brett];
-  "cfApiKey.age".publicKeys = [eurydice calliope brett];
+  "cf-api-key.age".publicKeys = [eurydice calliope brett];
   "cfd_tunnel_config.json.age".publicKeys = [eurydice brett];
   "grafana_pass.age".publicKeys = [eurydice brett];
   "grafana_key.age".publicKeys = [eurydice brett];

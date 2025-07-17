@@ -20,6 +20,7 @@
     "${self}/modules/auth.nix"
     "${self}/modules/mealie.nix"
     "${self}/modules/immich.nix"
+    "${self}/modules/gateway.nix"
   ];
 
   networking.hostName = "calliope";
@@ -64,4 +65,5 @@
   };
   services.mealie-oidc.enable = true;
   services.immich-oidc.enable = true;
+  services.gateway.enable = true;
 }
