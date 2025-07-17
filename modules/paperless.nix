@@ -75,6 +75,13 @@ in
 
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir}/tmp 0750 paperless paperless -"
+      "d ${cfg.dataDir}/consume 0750 paperless paperless -"
+      "d ${cfg.dataDir}/export 0750 paperless paperless -"
+      # per-user dirs
+      "d ${cfg.dataDir}/consume/brett 0750 paperless paperless -"
+      "d ${cfg.dataDir}/consume/kate 0750 paperless paperless -"
+      "d ${cfg.dataDir}/export/brett 0750 paperless paperless -"
+      "d ${cfg.dataDir}/export/kate 0750 paperless paperless -"
     ];
 
     systemd.services.paperless-facl-setup = {
