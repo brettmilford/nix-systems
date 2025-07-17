@@ -34,6 +34,10 @@ in
         ${realIpsFromList cfipv4}
         ${realIpsFromList cfipv6}
         real_ip_header CF-Connecting-IP;
+        limit_req_zone $binary_remote_addr zone=auth:10m rate=30r/m;
+        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+        limit_req_zone $binary_remote_addr zone=general:10m rate=30r/m;
+        limit_conn_zone $binary_remote_addr zone=general_conn:10m;
       '';
     };
 

@@ -36,14 +36,34 @@ in
       };
 
       settings = {
-        hostname = cfg.domain;
+        hostname = "https://auth.cirriform.au";
+        hostname-admin = "https://keycloak.cirriform.au";
         http-enabled = true;
         http-port = 8080;
         proxy-headers = "xforwarded";
+        http-max-queued-requests = "1000";
+        Xms = "1g";
+        Xmx = "2g";
       };
     };
 
-    services.nginx.virtualHosts."${cfg.domain}" = {
+    services.nginx = {
+      virtualHosts."${cfg.domain}" = {
+        forceSSL = true;
+        sslCertificate = config.age.secrets."cert.pem".path;
+        sslCertificateKey = config.age.secrets."key.pem".path;
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
+          proxyWebsockets = true;
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+      };
+      virtualHosts."${config.services.keycloak.settings.hostname-admin}" = {
         forceSSL = true;
         sslCertificate = config.age.secrets."cert.pem".path;
         sslCertificateKey = config.age.secrets."key.pem".path;
@@ -59,4 +79,5 @@ in
         };
       };
     };
+  };
 }
