@@ -23,43 +23,22 @@ in
       database.enable = true;
       redis.enable = true;
       environment = {
-        IMMICH_MACHINE_LEARNING_ENABLED = "true";
-        IMMICH_TRUSTED_PROXIES = "127.0.0.1";
-        IMMICH_HOST = lib.mkForce "127.0.0.1";
         IMMICH_CONFIG_FILE = lib.mkForce config.age.secrets."immich.json".path;
       };
     };
 
     services.nginx = {
+      proxyTimeout = "600s";
       virtualHosts."immich.cirriform.au" = {
-        forceSSL = true;
-        sslCertificate = config.age.secrets."cert.pem".path;
-        sslCertificateKey = config.age.secrets."key.pem".path;
         locations."/" = {
           proxyPass = "http://localhost:${toString config.services.immich.port}";
           proxyWebsockets = true;
+          recommendedProxySettings = true;
           extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '';
-        };
-      locations."~ ^/api/(asset/upload|asset/check)" = {
-          proxyPass = "http://localhost:${toString config.services.immich.port}";
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-
-            # Upload-specific settings
-            client_max_body_size 5000M;
-            client_body_timeout 300s;
-            proxy_connect_timeout 300s;
-            proxy_send_timeout 300s;
-            proxy_read_timeout 300s;
-            proxy_request_buffering off;
+            proxy_read_timeout 600s;
+            proxy_send_timeout 600s;
+            send_timeout       600s;
+            client_max_body_size 50000M;
           '';
         };
       };
@@ -68,5 +47,8 @@ in
     systemd.tmpfiles.rules = [
       "d ${config.services.immich.mediaLocation} 0755 immich immich -"
     ];
+
+    services.immich.accelerationDevices = null;
+    users.users.immich.extraGroups = [ "video" "render" ];
   };
 }

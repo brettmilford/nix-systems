@@ -110,29 +110,19 @@ in
 
     services.nginx = mkIf config.services.nginx.enable {
       virtualHosts."paperless.cirriform.au" = {
-        forceSSL = true;
-        sslCertificate = config.age.secrets."cert.pem".path;
-        sslCertificateKey = config.age.secrets."key.pem".path;
         locations."/" = {
           proxyPass = "http://127.0.0.1:28981";
+          recommendedProxySettings = true;
           extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
             client_max_body_size 100M;
           '';
         };
         # Rate limit api
         locations."~ ^/api/" = {
           proxyPass = "http://127.0.0.1:28981";
+          recommendedProxySettings = true;
           extraConfig = ''
             limit_req zone=api burst=20 nodelay;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-Port $server_port;
           '';
         };
         # Block django admin

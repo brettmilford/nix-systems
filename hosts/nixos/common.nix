@@ -19,6 +19,7 @@
     gcc
     git
     (ripgrep.override { withPCRE2 = true; })
+    dig
   ];
 
   environment.shellAliases = {

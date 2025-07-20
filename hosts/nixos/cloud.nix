@@ -4,19 +4,21 @@
   pkgs,
   ...
 }: {
+  networking.useDHCP = lib.mkDefault true;
+
+  users.groups.nix = {};
+
   users.users.nix = {
     isNormalUser = true;
     home = "/home/nix";
     description = "Nix User";
     group = "nix";
-    extraGroups = ["wheel" "networkmaanger" "systemd-journal"];
+    extraGroups = ["wheel" "systemd-journal"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAlB/hd55JJCoIb8EDBvvwfrdGtTOli5H+d+3o0wqxYR brett@thamrys"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB9iwf2c7cAHQQpfkImGNDeZnYPzGbudZcZaBWkS03mu bmj"
     ];
   };
-
-  users.groups.nix = {};
 
   security.sudo.extraRules = [
     {
@@ -30,8 +32,17 @@
     }
   ];
 
-  networking.useDHCP = lib.mkDefault true;
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+      AllowUsers = ["nix"];
+    };
+  };
+
+  services.fail2ban.enable = true;
 
   environment.systemPackages = with pkgs; [
     screen

@@ -10,9 +10,20 @@ in
     enable = mkEnableOption "Enable general reverse proxy config";
   };
 
-  config = mkIf cfg.enable {
+  # Override the nginx virtualHosts submodule to set SSL defaults
+  options.services.nginx.virtualHosts = mkOption {
+    type = types.attrsOf (types.submodule {
+      config = {
+        forceSSL = mkDefault true;
+        sslCertificate = mkDefault config.age.secrets."cert.pem".path;
+        sslCertificateKey = mkDefault config.age.secrets."key.pem".path;
+      };
+    });
+  };
 
+  config = mkIf cfg.enable {
     networking.firewall.allowedTCPPorts = [80 443];
+
     age.secrets."cert.pem" = {
       file = "${self}/secrets/cf_origin_cert.pem.age";
       mode = "770";
@@ -30,32 +41,44 @@ in
     services.nginx = {
       enable = true;
 
-      #recommendedProxySettings = true; # TODO: this breaks some web apps
+      # recommendedProxySettings = true; # NOTE: This often breaks some web apps
       recommendedTlsSettings = true;
       recommendedGzipSettings = true;
       recommendedOptimisation = true;
 
-      commonHttpConfig = let
-      realIpsFromList = lib.strings.concatMapStringsSep "\n" (x: "set_real_ip_from  ${x};");
-      fileToList = x: lib.strings.splitString "\n" (builtins.readFile x);
-      cfipv4 = fileToList (pkgs.fetchurl {
-        url = "https://www.cloudflare.com/ips-v4";
-        sha256 = "0ywy9sg7spafi3gm9q5wb59lbiq0swvf0q3iazl0maq1pj1nsb7h";
-      });
-      cfipv6 = fileToList (pkgs.fetchurl {
-        url = "https://www.cloudflare.com/ips-v6";
-        sha256 = "1ad09hijignj6zlqvdjxv7rjj8567z357zfavv201b9vx3ikk7cy";
-      });
-      in ''
-        ${realIpsFromList cfipv4}
-        ${realIpsFromList cfipv6}
-        real_ip_header CF-Connecting-IP;
-        limit_req_zone $binary_remote_addr zone=auth:10m rate=30r/m;
-        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-        limit_req_zone $binary_remote_addr zone=general:10m rate=30r/m;
-        limit_req_zone $binary_remote_addr zone=webdav:10m rate=30r/m;
-        limit_conn_zone $binary_remote_addr zone=general_conn:10m;
-      '';
+      commonHttpConfig =
+        let
+          realIpsFromList = lib.strings.concatMapStringsSep "\n" (x: "set_real_ip_from  ${x};");
+          fileToList = x: lib.strings.splitString "\n" (builtins.readFile x);
+          cfipv4 = fileToList (pkgs.fetchurl {
+            url = "https://www.cloudflare.com/ips-v4";
+            sha256 = "0ywy9sg7spafi3gm9q5wb59lbiq0swvf0q3iazl0maq1pj1nsb7h";
+          });
+          cfipv6 = fileToList (pkgs.fetchurl {
+            url = "https://www.cloudflare.com/ips-v6";
+            sha256 = "1ad09hijignj6zlqvdjxv7rjj8567z357zfavv201b9vx3ikk7cy";
+          });
+        in
+          ''
+            ${realIpsFromList cfipv4}
+            ${realIpsFromList cfipv6}
+            real_ip_header CF-Connecting-IP;
+
+            # Define common rate limits
+            limit_req_zone $binary_remote_addr zone=auth:10m rate=30r/m;
+            limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+            limit_req_zone $binary_remote_addr zone=general:10m rate=30r/m;
+            limit_req_zone $binary_remote_addr zone=webdav:10m rate=30r/m;
+            limit_conn_zone $binary_remote_addr zone=general_conn:10m;
+
+            # From recommendedProxySettings (in the http context)
+            proxy_redirect          off;
+            proxy_connect_timeout   ${config.services.nginx.proxyTimeout};
+            proxy_send_timeout      ${config.services.nginx.proxyTimeout};
+            proxy_read_timeout      ${config.services.nginx.proxyTimeout};
+            proxy_http_version      1.1;
+            proxy_set_header        "Connection" "";
+          '';
     };
 
     age.secrets."cf-api-key".file = "${self}/secrets/cf-api-key.age";

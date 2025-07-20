@@ -51,34 +51,18 @@ in
     };
 
     services.nginx = {
-      virtualHosts."${cfg.domain}" = {
-        forceSSL = true;
-        sslCertificate = config.age.secrets."cert.pem".path;
-        sslCertificateKey = config.age.secrets."key.pem".path;
+      virtualHosts."auth.cirriform.au" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
           proxyWebsockets = true;
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '';
+          recommendedProxySettings = true;
         };
       };
-      virtualHosts."${config.services.keycloak.settings.hostname-admin}" = {
-        forceSSL = true;
-        sslCertificate = config.age.secrets."cert.pem".path;
-        sslCertificateKey = config.age.secrets."key.pem".path;
+      virtualHosts."keycloak.cirriform.au" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
           proxyWebsockets = true;
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '';
+          recommendedProxySettings = true;
         };
       };
     };

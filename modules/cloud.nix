@@ -29,10 +29,11 @@ in
         adminpassFile = config.age.secrets.nextcloud-admin-passwd.path;
         dbhost = "/run/postgresql";
       };
+      database.createLocally = true;
       appstoreEnable = false;
       extraApps = {
         inherit
-          (pkgs.nextcloud31Packages.apps)
+          (config.services.nextcloud.package.packages.apps)
           oidc_login
           calendar
           contacts
@@ -102,21 +103,6 @@ in
         "openssl.cafile" = "/etc/ssl/certs/ca-certificates.crt";
         short_open_tag = "Off";
       };
-    };
-
-    services.nginx.virtualHosts.${config.services.nextcloud.hostName} = {
-        forceSSL = true;
-        sslCertificate = config.age.secrets."cert.pem".path;
-        sslCertificateKey = config.age.secrets."key.pem".path;
-        locations."/" = {
-          extraConfig = ''
-            # Standard web settings
-            client_max_body_size 50M;
-            proxy_connect_timeout 60s;
-            proxy_send_timeout 60s;
-            proxy_read_timeout 60s;
-          '';
-        };
     };
 
     environment.systemPackages = with pkgs; [
