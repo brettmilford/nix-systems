@@ -42,8 +42,6 @@
     };
   };
 
-  services.fail2ban.enable = true;
-
   environment.systemPackages = with pkgs; [
     screen
   ];

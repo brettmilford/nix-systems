@@ -91,7 +91,7 @@
   };
   services.cloud.enable = true;
   services.paperless-ngx.enable = true;
-  services.mealie-oidc.enable = true;
+  services.mealie-oidc.enable = false;
   services.immich-oidc.enable = true;
   services.kubo = {
     enable = false;

@@ -24,6 +24,8 @@ in
   config = mkIf cfg.enable {
     networking.firewall.allowedTCPPorts = [80 443];
 
+    age.secrets."cf-api-key".file = "${self}/secrets/cf-api-key.age";
+
     age.secrets."cert.pem" = {
       file = "${self}/secrets/cf_origin_cert.pem.age";
       mode = "770";
@@ -36,6 +38,20 @@ in
       mode = "770";
       owner = "nginx";
       group = "nginx";
+    };
+
+    age.secrets."acme-cf.env" = {
+      file = "${self}/secrets/acme-cf.env.age";
+    };
+
+    # For vhosts not using cloudflare
+    security.acme = {
+      acceptTerms = true;
+      defaults = {
+        email = "certs@cirriform.au";
+        dnsProvider = "cloudflare";
+        environmentFile = config.age.secrets."acme-cf.env".path;
+      };
     };
 
     services.nginx = {
@@ -81,23 +97,22 @@ in
           '';
     };
 
-    age.secrets."cf-api-key".file = "${self}/secrets/cf-api-key.age";
-
-    services.fail2ban = let
-      cf-email = "brettmilford@gmail.com";
-      cf-api-key = config.age.secrets."cf-api-key".path;
-    in {
+    services.fail2ban = {
       enable = true;
       extraPackages = [pkgs.curl pkgs.ipset pkgs.systemd];
       banaction = "iptables-ipset-proto6-allports";
-
       ignoreIP = [
         "127.0.0.1/8"
         "192.168.0.0/16"
         "172.22.0.0/16"
       ];
 
-      jails.nginx-noagent = ''
+      jails.nginx-noagent =
+        let
+          cf-email = "brettmilford@gmail.com";
+          cf-api-key = config.age.secrets."cf-api-key".path;
+        in
+        ''
         enabled  = true
         port     = http,https
         filter   = nginx-noagent

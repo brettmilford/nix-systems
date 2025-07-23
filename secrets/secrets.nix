@@ -21,4 +21,5 @@ in {
   "nextcloud-secrets.json.age".publicKeys = [calliope brett];
   "mealie.env.age".publicKeys = [calliope brett];
   "immich.json.age".publicKeys = [calliope brett];
+  "acme-cf.env.age".publicKeys = [calliope brett];
 }
