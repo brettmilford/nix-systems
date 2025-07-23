@@ -66,46 +66,27 @@ in
         };
       };
     };
+
     services.fail2ban = {
-      enable = true;
-      jails = {
-        keycloak-auth = ''
-          enabled = true
-          backend = systemd
-          filter = keycloak-auth
-          maxretry = 5
-          findtime = 600
-          bantime = 3600
-          action = iptables-multiport[name=keycloak-auth, port="http,https"]
-        '';
-        keycloak-admin = ''
-          enabled = true
-          backend = systemd
-          filter = keycloak-admin
-          maxretry = 3
-          findtime = 300
-          bantime = 86400
-          action = iptables-multiport[name=keycloak-admin, port="http,https"]
-        '';
+      jails.keycloak.settings = {
+        enabled = true;
+        filter = "keycloak";
+        backend = "systemd";
       };
     };
 
-    # Fail2ban filters for Keycloak
-    environment.etc = {
-      "fail2ban/filter.d/keycloak-auth.conf".text = ''
+    environment.etc."fail2ban/filter.d/keycloak.local" = {
+      text = ''
+        [INCLUDES]
+        before = common.conf
+
         [Definition]
-        failregex = ^.*keycloak.*WARN.*type=LOGIN_ERROR.*user=.* error=invalid_user_credentials.*ip=<HOST>.*$
-                    ^.*keycloak.*WARN.*type=LOGIN_ERROR.*user=.* error=user_not_found.*ip=<HOST>.*$
-                    ^.*keycloak.*WARN.*type=LOGIN_ERROR.*user=.* error=user_disabled.*ip=<HOST>.*$
+        failregex = .*LOGIN_ERROR.*ipAddress="<HOST>".*(user_not_found|invalid_user_credentials).*
+
+        [Init]
         journalmatch = _SYSTEMD_UNIT=keycloak.service
       '';
-
-      "fail2ban/filter.d/keycloak-admin.conf".text = ''
-        [Definition]
-        failregex = ^.*nginx.*client: <HOST>.*"(GET|POST).*/admin/.*HTTP.*" (40[1-4]|50[0-3]).*$
-        journalmatch = _SYSTEMD_UNIT=nginx.service
-      '';
-
     };
+
   };
 }
