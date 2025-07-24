@@ -24,8 +24,6 @@ in
   config = mkIf cfg.enable {
     networking.firewall.allowedTCPPorts = [80 443];
 
-    age.secrets."cf-api-key".file = "${self}/secrets/cf-api-key.age";
-
     age.secrets."cert.pem" = {
       file = "${self}/secrets/cf_origin_cert.pem.age";
       mode = "770";
@@ -97,21 +95,57 @@ in
           '';
     };
 
+    # NOTE: cloudflare ban action with preloaded creds.
+    age.secrets."cf.conf" = {
+      file = "${self}/secrets/fail2ban-cf.conf.age";
+      path = "/etc/fail2ban/action.d/cf.conf";
+    };
+
     services.fail2ban = {
       enable = true;
       extraPackages = [pkgs.curl pkgs.ipset pkgs.systemd];
-      banaction = "iptables-ipset-proto6-allports";
       ignoreIP = [
         "127.0.0.1/8"
         "192.168.0.0/16"
         "172.22.0.0/16"
       ];
 
+      bantime-increment = {
+        enable = true;
+        multipliers = "1 2 4 8 16 32 64";
+        maxtime = "168h"; # Maximum ban time (1 week)
+        overalljails = true;
+      };
+
+      jails.nginx-limit-req.settings = {
+        enable = true;
+        backend = "auto";
+        action = ''cf
+                   iptables-multiport'';
+      };
+
+      jails.nginx-botsearch.settings = {
+        enable = true;
+        backend = "auto";
+        action = ''cf
+                   iptables-multiport'';
+      };
+
+      jails.nginx-bad-request.settings = {
+        enable = true;
+        backend = "auto";
+        action = ''cf
+                   iptables-multiport'';
+      };
+
+      jails.nginx-forbidden.settings = {
+        enable = true;
+        backend = "auto";
+        action = ''cf
+                   iptables-multiport'';
+      };
+
       jails.nginx-noagent =
-        let
-          cf-email = "brettmilford@gmail.com";
-          cf-api-key = config.age.secrets."cf-api-key".path;
-        in
         ''
         enabled  = true
         port     = http,https
@@ -119,10 +153,10 @@ in
         backend  = auto
         maxretry = 1
         logpath  = %(nginx_access_log)s
-        action   = cloudflare[cfuser="${cf-email}", cftoken="${cf-api-key}"]
-                   iptables-multiport[port="http,https"]
-      '';
-    };
+        action   = iptables-multiport
+                   cf
+        '';
+      };
 
     environment.etc."fail2ban/filter.d/nginx-noagent.conf".text = ''
       [Definition]

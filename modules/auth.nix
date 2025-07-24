@@ -67,15 +67,16 @@ in
       };
     };
 
-    services.fail2ban = {
-      jails.keycloak.settings = {
-        enabled = true;
-        filter = "keycloak";
-        backend = "systemd";
-      };
+    services.fail2ban.jails.keycloak-auth.settings = {
+      enabled = true;
+      port = "http,https";
+      filter = "keycloak-auth";
+      backend = "systemd";
+      action = ''cf
+                 iptables-multiport'';
     };
 
-    environment.etc."fail2ban/filter.d/keycloak.local" = {
+    environment.etc."fail2ban/filter.d/keycloak-auth.local" = {
       text = ''
         [INCLUDES]
         before = common.conf
