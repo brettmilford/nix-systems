@@ -53,15 +53,16 @@ in
       };
     };
 
-    services.fail2ban = {
-      jails.immich.settings = {
-        enabled = true;
-        filter = "immich";
-        backend = "systemd";
-      };
+    services.fail2ban.jails.immich-auth.settings = {
+      enabled = true;
+      port = "http,https";
+      filter = "immich-auth";
+      backend = "systemd";
+      action = ''cf
+                 iptables-multiport'';
     };
 
-    environment.etc."fail2ban/filter.d/immich.local" = {
+    environment.etc."fail2ban/filter.d/immich-auth.local" = {
       text = ''
         [Definition]
         failregex = .*immich\[[0-9]+\]:.*Failed login attempt for user.+from ip address\s+<ADDR>

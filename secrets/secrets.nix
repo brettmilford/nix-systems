@@ -22,4 +22,5 @@ in {
   "mealie.env.age".publicKeys = [calliope brett];
   "immich.json.age".publicKeys = [calliope brett];
   "acme-cf.env.age".publicKeys = [calliope brett];
+  "fail2ban-cf.conf.age".publicKeys = [calliope brett];
 }

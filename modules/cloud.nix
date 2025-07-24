@@ -14,6 +14,7 @@ in
       owner = "nextcloud";
       group = "nextcloud";
     };
+
     age.secrets."nextcloud-secrets.json" = {
       file = "${self}/secrets/nextcloud-secrets.json.age";
       owner = "nextcloud";
@@ -103,6 +104,25 @@ in
         "openssl.cafile" = "/etc/ssl/certs/ca-certificates.crt";
         short_open_tag = "Off";
       };
+    };
+
+    services.fail2ban.jails.nextcloud-auth.settings = {
+      enabled = true;
+      filter = "nextcloud-auth";
+      backend = "systemd";
+      journalmatch = "SYSLOG_IDENTIFIER=Nextcloud + PRIORITY=4";
+      action = ''cf
+                 iptables-allports'';
+    };
+
+    environment.etc."fail2ban/filter.d/nextcloud-auth.local" = {
+      text = ''
+        [Definition]
+        failregex = "remoteAddr":\s*"<HOST>".*"message":\s*"Login failed:
+        maxlines = 1
+
+        ignoreregex =
+      '';
     };
 
     environment.systemPackages = with pkgs; [

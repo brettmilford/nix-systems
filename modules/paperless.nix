@@ -47,9 +47,8 @@ in
 
         PAPERLESS_URL = "https://paperless.cirriform.au";
         PAPERLESS_ALLOWED_HOSTS = "paperless.cirriform.au";
-        PAPERLESS_TRUSTED_PROXIES = "127.0.0.1";
+        PAPERLESS_TRUSTED_PROXIES = "127.0.0.1,::1,localhost";
         PAPERLESS_USE_X_FORWARD_HOST = "true";
-        PAPERLESS_USE_X_FORWARD_PORT = "true";
         PAPERLESS_PROXY_SSL_HEADER = [ "HTTP_X_FORWARDED_PROTO" "https"];
 
         PAPERLESS_OCR_LANGUAGE = "eng";
@@ -111,35 +110,6 @@ in
       '';
     };
 
-    services.fail2ban = {
-      jails.paperless.settings = {
-        enabled = true;
-        filter = "paperless-nginx";
-        backend = "auto";
-        logpath = "/var/log/nginx/access.log";
-      };
-    };
-
-    environment.etc."fail2ban/filter.d/paperless-nginx.local" = {
-      text = ''
-        [Definition]
-        failregex = ^<HOST>.*"POST /api/token/.*" 400
-      '';
-    };
-
-    environment.etc."fail2ban/filter.d/paperless.local" = {
-      text = ''
-        [INCLUDES]
-        before = common.conf
-
-        [Definition]
-        failregex = Login failed for user `.*` from (?:IP|private IP) `<HOST>`\.$
-
-        [Init]
-        journalmatch = _SYSTEMD_UNIT=paperless-web.service
-      '';
-    };
-
     services.nginx = mkIf config.services.nginx.enable {
       virtualHosts."paperless.cirriform.au" = {
         locations."/" = {
@@ -147,14 +117,6 @@ in
           recommendedProxySettings = true;
           extraConfig = ''
             client_max_body_size 100M;
-          '';
-        };
-        # Rate limit api
-        locations."~ ^/api/" = {
-          proxyPass = "http://127.0.0.1:28981";
-          recommendedProxySettings = true;
-          extraConfig = ''
-            limit_req zone=api burst=20 nodelay;
           '';
         };
         # Block django admin
