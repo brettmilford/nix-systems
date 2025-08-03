@@ -15,14 +15,12 @@ in
     type = types.attrsOf (types.submodule {
       config = {
         forceSSL = mkDefault true;
-        sslCertificate = mkDefault config.age.secrets."cert.pem".path;
-        sslCertificateKey = mkDefault config.age.secrets."key.pem".path;
+        enableACME = mkDefault true;
       };
     });
   };
 
   config = mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = [80 443];
 
     age.secrets."cert.pem" = {
       file = "${self}/secrets/cf_origin_cert.pem.age";
@@ -108,6 +106,7 @@ in
         "127.0.0.1/8"
         "192.168.0.0/16"
         "172.22.0.0/16"
+        "158.180.4.235/32"
       ];
 
       bantime-increment = {
@@ -136,6 +135,7 @@ in
         backend = "auto";
         action = ''cf
                    iptables-multiport'';
+        logpath = "/var/log/nginx/access.log";
       };
 
       jails.nginx-forbidden.settings = {

@@ -17,6 +17,8 @@ in
       group = "immich";
     };
 
+    environment.systemPackages = with pkgs; [ exiftool ];
+
     services.immich = {
       enable = true;
       accelerationDevices = null;
@@ -33,12 +35,13 @@ in
 
     users.users.immich.extraGroups = [ "video" "render" ];
 
-    # Use http challenge
-    security.acme.certs."immich.cirriform.au".dnsProvider = null;
     services.nginx = {
       proxyTimeout = "600s";
       virtualHosts."immich.cirriform.au" = {
         enableACME = true;
+        extraConfig = ''
+          access_log /var/log/nginx/immich.access.log;
+        '';
         locations."/" = {
           proxyPass = "http://[::1]:${toString config.services.immich.port}";
           proxyWebsockets = true;
@@ -89,12 +92,26 @@ in
       };
 
       script = ''
-        ${pkgs.acl}/bin/setfacl -m u:nextcloud:rx ${config.services.immich.mediaLocation}/library
-        ${pkgs.acl}/bin/setfacl -d -m u:nextcloud:rx ${config.services.immich.mediaLocation}/library
-
         ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv
         ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv/data
         ${pkgs.acl}/bin/setfacl -m u:nextcloud:x ${config.services.immich.mediaLocation}
+        ${pkgs.acl}/bin/setfacl -m u:nextcloud:rx ${config.services.immich.mediaLocation}/library
+        ${pkgs.acl}/bin/setfacl -d -m u:nextcloud:rx ${config.services.immich.mediaLocation}/library
+        ${pkgs.acl}/bin/setfacl -R -m u:nextcloud:rX ${config.services.immich.mediaLocation}/library
+        ${pkgs.findutils}/bin/find ${config.services.immich.mediaLocation}/library -type d -exec ${pkgs.acl}/bin/setfacl -d -m u:nextcloud:rX {} \;
+        ${pkgs.findutils}/bin/find ${config.services.immich.mediaLocation}/library \
+              -type f ! -newermt "1970-01-03" ! -iname "*.mov" ! -iname "*.mp4" \
+              -exec ${pkgs.exiftool}/bin/exiftool -overwrite_original -q \
+                "-FileModifyDate<DateTimeOriginal" {} \;
+        ${pkgs.findutils}/bin/find ${config.services.immich.mediaLocation}/library \
+          -iname "*.mov" -type f ! -newermt "1970-01-03"
+          -exec ${pkgs.exiftool}/bin/exiftool  -overwrite_original -q
+            "-FileModifyDate<CreationDate" {} \;
+        ${pkgs.findutils}/bin/find ${config.services.immich.mediaLocation}/library \
+          -iname "*.mp4" -type f ! -newermt "1970-01-03"
+          -exec ${pkgs.exiftool}/bin/exiftool  -overwrite_original -q
+            "-FileModifyDate<CreateDate" {} \;
+        ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 8 -v
       '';
     };
   };
