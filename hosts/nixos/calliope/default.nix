@@ -27,7 +27,7 @@
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   services.openssh.openFirewall = false;
-  networking.firewall.interfaces."zth6rkq2c5".allowedTCPPorts = [ 22 ];
+  networking.firewall.interfaces."zth6rkq2c5".allowedTCPPorts = [ 22 80 443 ];
 
   services.postgresql = {
     enable = true;
@@ -64,7 +64,7 @@
 
       $ModLoad imfile
       # Nginx access log
-      $InputFileName /var/log/nginx/access.log
+      $InputFileName /var/log/nginx/*access.log
       $InputFileTag nginx-access:
       $InputFileStateFile nginx-access-state
       $InputFileSeverity info
@@ -72,7 +72,7 @@
       $InputRunFileMonitor
 
       # Nginx error log
-      $InputFileName /var/log/nginx/error.log
+      $InputFileName /var/log/nginx/*error.log
       $InputFileTag nginx-error:
       $InputFileStateFile nginx-error-state
       $InputFileSeverity error
