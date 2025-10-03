@@ -41,13 +41,24 @@ in
     };
 
     # For vhosts not using cloudflare
-    security.acme = {
+    security.acme = let
+      allVhosts = builtins.attrNames config.services.nginx.virtualHosts;
+      acmeVhosts = builtins.filter
+        (domain: lib.hasSuffix ".cirriform.au" domain)
+        allVhosts;
+      in
+      {
       acceptTerms = true;
       defaults = {
         email = "certs@cirriform.au";
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets."acme-cf.env".path;
       };
+      certs = lib.genAttrs acmeVhosts (_: {
+        dnsProvider = "cloudflare";
+        environmentFile = config.age.secrets."acme-cf.env".path;
+        webroot = null;
+      });
     };
 
     services.nginx = {
