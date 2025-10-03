@@ -6,6 +6,8 @@ in
 {
   options.services.cloud = {
     enable = mkEnableOption "Nextcloud";
+    enableOffice = mkEnableOption "Collabora";
+    enableFlow = mkEnableOption "Nextcloud flow/windmill";
   };
 
   config = mkIf cfg.enable {
@@ -38,6 +40,8 @@ in
           oidc_login
           calendar
           contacts
+          richdocuments
+          app_api
           ;
       };
       extraAppsEnable = true;
@@ -131,5 +135,96 @@ in
       libde265
       libheif
     ];
+
+    systemd.services.nextcloud-acl-setup = {
+      description = "Setup base nextcloud acls for external storage";
+      after = [ "systemd-tmpfiles-setup.service" ];
+      wants = [ "systemd-tmpfiles-setup.service" ];
+      before = [ "nextcloud-file-scan.service" ];
+      wantedBy = [ "nextcloud-file-scan.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = false;
+      };
+
+      script = ''
+        echo "Setting nextcloud base ACLs"
+        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv
+        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv/data
+      '';
+    };
+
+    systemd.services.nextcloud-file-scan = {
+      description = "Scan nextcloud external storage";
+      after = [ 
+        "systemd-tmpfiles-setup.service" 
+        "paperless-exporter.service"
+        "nextcloud-acl-setup.service"
+      ];
+      wants = [ 
+        "systemd-tmpfiles-setup.service" 
+        "paperless-exporter.service"
+        "nextcloud-acl-setup.service"
+      ];
+      wantedBy = [ "multi-user.target" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = false;
+      };
+
+      script = ''
+        echo "Running nextcloud files scan"
+        # see nextcloud-occ files_external:list
+        # Immich Library - brett
+        ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 8 -v
+        # Paperless export - brett
+        ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 9 -v
+        # Paperless export - kate
+        ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 10 -v
+
+      '';
+    };
+
+    services.collabora-online = mkIf cfg.enableOffice {
+      enable = true;
+      settings = {
+        ssl = {
+          enable = false;
+          termination = true;
+        };
+
+        net = {
+          listen = "lookback";
+          post_allow.host = ["127.0.0.1" "::1"];
+        };
+
+        sotrage.wopi = {
+          "@allow" = true;
+          host = ["cloud.cirriform.au"];
+        };
+
+        server_name = "collabora.cirriform.au";
+      };
+    };
+
+    services.nginx.virtualHosts."collabora.cirriform.au" = mkIf cfg.enableOffice {
+      locations."/" = {
+        proxyPass = "http://localhost:${toString config.services.collabora-online.port}";
+        proxyWebsockets = true;
+      };
+    };
+
+    services.windmill = mkIf cfg.enableFlow {
+      enable = true;
+      baseUrl = "https://windmill.cirriform.au";
+    };
+
+    services.nginx.virtualHosts."windmill.cirriform.au" = mkIf cfg.enableFlow {
+      locations."/" = {
+        proxyPass = "http://localhost:${toString config.services.windmill.serverPort}";
+      };
+    };
   };
 }

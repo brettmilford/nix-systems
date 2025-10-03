@@ -90,6 +90,7 @@
     domain = "auth.cirriform.au";
   };
   services.cloud.enable = true;
+  services.cloud.enableOffice = true;
   services.paperless-ngx.enable = true;
   services.mealie-oidc.enable = false;
   services.immich-oidc.enable = true;
