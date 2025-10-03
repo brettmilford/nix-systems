@@ -23,4 +23,6 @@ in {
   "immich.json.age".publicKeys = [calliope brett];
   "acme-cf.env.age".publicKeys = [calliope brett];
   "fail2ban-cf.conf.age".publicKeys = [calliope brett];
+  "borg-calliope-ssh-key.age".publicKeys = [calliope brett];
+  "paperless-api-token.age".publicKeys = [calliope brett];
 }
