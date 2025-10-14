@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ self, config, pkgs, lib, ... }:
 let
   vmName = "opnsense";
   vmMemory = 4096;
@@ -7,9 +7,8 @@ let
   tapInterface = "tap0";
 in {
 
-  environment.systemPackages = with pkgs; [
-    qemu
-    OVMF
+  imports =[
+    ./qemu.nix
   ];
 
   networking.interfaces.eno1 = {
@@ -40,7 +39,8 @@ in {
   networking.search = [ "local" "internal" ];
 
   systemd.tmpfiles.rules = [
-    "d /var/lib/qemu/${vmName} 0750 root root -"
+    "d /var/lib/qemu/images/${vmName} 0750 root root -"
+    "d /var/lib/qemu/snapshots/${vmName} 0750 root root -"
   ];
 
   systemd.services."qemu-${vmName}" = {
@@ -53,10 +53,11 @@ in {
     stopIfChanged = false;
 
     serviceConfig = {
-      # Prevent restarting - VM will only be restarted if it crashes
       Restart = "on-failure";
       RestartSec = "5s";
       OOMScoreAdjust = -1000;
+      RuntimeDirectory = "qemu/${vmName}";
+      RuntimeDirectoryMode = "0750";
 
       ExecStart = ''
         ${pkgs.qemu}/bin/qemu-kvm \
@@ -80,7 +81,9 @@ in {
           -device vfio-pci,host=01:00.0,multifunction=on \
           -device vfio-pci,host=01:00.1,multifunction=on \
           -device vfio-pci,host=01:00.2,multifunction=on \
-          -device vfio-pci,host=01:00.3,multifunction=on
+          -device vfio-pci,host=01:00.3,multifunction=on \
+          -monitor unix:/run/qemu/${vmName}/monitor.sock,server,nowait \
+          -qmp unix:/run/qemu/${vmName}/qmp.sock,server,nowait
       '';
     };
   };
