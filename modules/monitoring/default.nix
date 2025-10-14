@@ -236,9 +236,46 @@ in
       configuration = {
         auth_enabled = false;
 
+        analytics = {
+          reporting_enabled = false;
+        };
+
         server = {
           http_listen_port = lokiPort;
           http_listen_address = listenLocal;
+        # Server-side gRPC limits
+          grpc_server_max_recv_msg_size = 52428800; # 50MB
+          grpc_server_max_send_msg_size = 52428800; # 50MB
+        };
+
+        # Query scheduler gRPC client config
+        query_scheduler = {
+          grpc_client_config = {
+            max_recv_msg_size = 52428800; # 50MB
+            max_send_msg_size = 52428800; # 50MB
+          };
+        };
+
+        # Frontend worker gRPC client config
+        frontend_worker = {
+          grpc_client_config = {
+            max_recv_msg_size = 52428800; # 50MB
+            max_send_msg_size = 52428800; # 50MB
+          };
+        };
+
+        # Ingester client gRPC config
+        ingester_client = {
+          grpc_client_config = {
+            max_recv_msg_size = 52428800; # 50MB
+            max_send_msg_size = 52428800; # 50MB
+          };
+        };
+
+        # Other recommended settings for large log handling
+        limits_config = {
+          max_entries_limit_per_query = 1000000;
+          max_query_length = "12000h"; # Allow longer time ranges
         };
 
         common = {

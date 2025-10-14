@@ -15,6 +15,7 @@
     ../desktop.nix
     ../../../deployments
     "${self}/modules/monitoring"
+    "${self}/modules/backup.nix"
   ];
 
   boot.loader.efi.canTouchEfiVariables = false;
@@ -79,4 +80,6 @@
     domain = "monit.internal";
     enableUnpoller = true;
   };
+
+  services.backup.enable = true;
 }
