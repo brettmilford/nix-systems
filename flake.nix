@@ -14,6 +14,8 @@
     agenix.inputs.nixpkgs.follows = "nixpkgs";
     nixos-generators.url = "github:nix-community/nixos-generators";
     nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
+    lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs = {
@@ -25,6 +27,7 @@
     flake-utils,
     agenix,
     nixos-generators,
+    lanzaboote,
   } @ inputs: let
     system = flake-utils.lib.system;
     homeManagerCommonConfig = with self.homeManagerModules; {
@@ -81,6 +84,7 @@
         };
       }
       agenix.nixosModules.default
+      lanzaboote.nixosModules.lanzaboote
     ];
     nixosUserModules = {
       user,
@@ -172,6 +176,18 @@
         modules =
           nixosCommonModules ++ [
             ./hosts/nixos/calliope
+          ];
+        specialArgs = {
+          inherit self;
+          inputs = inputs;
+        };
+      };
+
+      nixosConfigurations."terpsichore" = nixpkgs.lib.nixosSystem {
+        system = system.x86_64-linux;
+        modules =
+          nixosCommonModules ++ [
+            ./hosts/nixos/terpsichore
           ];
         specialArgs = {
           inherit self;
