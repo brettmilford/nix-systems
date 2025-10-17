@@ -38,6 +38,8 @@
         ...
       }:
       {
+        imports = [ inputs.home-manager.flakeModules.home-manager ];
+
         systems = [
           "x86_64-linux"
           "aarch64-linux"
@@ -45,7 +47,7 @@
         ];
 
         perSystem =
-          { pkgs, ... }:
+          { pkgs, inputs', ... }:
           {
             devShells.default =
               let
@@ -55,200 +57,217 @@
               in
               pkgs.mkShell {
                 packages = with pkgs; [
-                  inputs.agenix.packages.${system}.default
+                  inputs'.agenix.packages.default
+                  inputs'.home-manager.packages.default
                 ];
                 shellHook = ''
                   export FLAKE="$(pwd)"
                   export PATH="$FLAKE/bin:${nixBin}/bin:$PATH"
                   export PS1='\[\033[1;32m\][nix-systems:\w]\$\[\033[0m\] '
+                  alias hms='home-manager switch --flake "$HOME/.config/nix?submodules=1#''${USER}@$(hostname -s)"'
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
           };
 
-        flake =
-          let
-            homeManagerCommonConfig = with self.homeManagerModules; {
-              home.stateVersion = "25.05";
-              imports = [
-                ./home
-              ];
-            };
-            nixDarwinCommonModules =
-              { user }:
-              [
-                {
-                  system.stateVersion = 4;
-                  system.primaryUser = user;
-                  ids.gids.nixbld = 350;
-                  nix = {
-                    distributedBuilds = true;
-                    extraOptions = ''
-                      extra-platforms = aarch64-darwin x86_64-darwin
-                      experimental-features = nix-command flakes
-                      builders = ssh://nix@eurydice /Users/brett/.ssh/id_ed25519
-                    '';
-                    optimise.automatic = true;
-                    settings.trusted-users = [
-                      "${user}"
-                    ];
-                  };
-                }
-                home-manager.darwinModules.home-manager
-                {
-                  users.users.${user}.home = "/Users/${user}";
-                  home-manager.useGlobalPkgs = true;
-                  home-manager.useUserPackages = true;
-                  home-manager.sharedModules = [
-                    ./home/git-${user}.nix
-                  ];
-                  home-manager.users.${user} = homeManagerCommonConfig;
-                }
-                agenix.darwinModules.default
-              ];
-            nixosCommonModules = [
-              home-manager.nixosModules.home-manager
-              {
-                system.stateVersion = "25.05";
-                nix = {
-                  extraOptions = ''
-                    extra-platforms = aarch64-linux x86_64-linux
-                    experimental-features = nix-command flakes
-                  '';
-                  settings.auto-optimise-store = true;
-                  gc = {
-                    automatic = true;
-                    dates = "weekly";
-                    options = "--delete-older-than 30d";
-                  };
-                };
-              }
-              agenix.nixosModules.default
-              lanzaboote.nixosModules.lanzaboote
-            ];
-            nixosUserModules =
-              {
-                user,
-                desc,
-              }:
-              [
-                home-manager.nixosModules.home-manager
-                {
-                  users.users.${user} = {
-                    home = "/home/${user}";
-                    isNormalUser = true;
-                    group = "${user}";
-                    description = "${desc}";
-                    extraGroups = [
-                      "wheel"
-                      "networkmanager"
-                    ];
-                  };
-                  users.groups.${user} = { };
-                  home-manager.useGlobalPkgs = true;
-                  home-manager.useUserPackages = true;
-                  home-manager.sharedModules = [
-                    ./home/git-${user}.nix
-                  ];
-                  home-manager.users.${user} = homeManagerCommonConfig;
-                  systemd.services."home-manager-${user}".serviceConfig.TimeoutSec = 900;
-                }
-              ];
-          in
-          {
-            darwinConfigurations."thamrys" = nix-darwin.lib.darwinSystem {
-              system = "aarch64-darwin";
-              specialArgs = {
-                pkgs_x86 = import nixpkgs { system = "x86_64-darwin"; };
-              };
-              modules = nixDarwinCommonModules { user = "brett"; } ++ [
-                ./hosts/darwin/thamrys
-              ];
-            };
-
-            nixosConfigurations."orpheus" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              modules =
-                nixosCommonModules
-                ++ nixosUserModules {
-                  user = "brett";
-                  desc = "Brett";
-                }
-                ++ [
-                  ./hosts/nixos/orpheus
-                ];
-            };
-
-            nixosConfigurations."orpheus-vm" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              modules =
-                nixosCommonModules {
-                  user = "brett";
-                  desc = "Brett";
-                }
-                ++ [
-                  ./hosts/nixos/orpheus
-                  ./hosts/nixos/build-vm.nix
-                ];
-            };
-
-            nixosConfigurations."eurydice" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              modules = nixosCommonModules ++ [
-                ./hosts/nixos/eurydice
-              ];
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-            };
-
-            nixosConfigurations."eurydice-vm" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              modules = nixosCommonModules ++ [
-                ./hosts/nixos/eurydice
-                ./hosts/nixos/build-vm.nix
-              ];
-            };
-
-            nixosConfigurations."calliope" = nixpkgs.lib.nixosSystem {
-              system = "aarch64-linux";
-              modules = nixosCommonModules ++ [
-                ./hosts/nixos/calliope
-              ];
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-            };
-
-            nixosConfigurations."terpsichore" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              modules = nixosCommonModules ++ [
-                ./hosts/nixos/terpsichore
-              ];
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-            };
-
-            nixosConfigurations."dev" = nixpkgs.lib.nixosSystem {
-              system = "aarch64-linux";
-              modules =
-                nixosCommonModules {
-                  user = "brett";
-                  desc = "Brett";
-                }
-                ++ [
+        flake = {
+          darwinConfigurations =
+            let
+              nixDarwinCommonModules =
+                { user }:
+                [
                   {
-                    imports = [ nixos-generators.nixosModules.all-formats ];
-                    nixpkgs.hostPlatform = "aarch64-linux";
+                    system.stateVersion = 4;
+                    system.primaryUser = user;
+                    ids.gids.nixbld = 350;
+                    nix = {
+                      distributedBuilds = true;
+                      extraOptions = ''
+                        extra-platforms = aarch64-darwin x86_64-darwin
+                        experimental-features = nix-command flakes
+                        builders = ssh://nix@eurydice /Users/brett/.ssh/id_ed25519
+                      '';
+                      optimise.automatic = true;
+                      settings.trusted-users = [
+                        "${user}"
+                      ];
+                    };
                   }
-                  ./hosts/nixos/dev
+                  {
+                    users.users.${user}.home = "/Users/${user}";
+                  }
+                  agenix.darwinModules.default
                 ];
+            in
+            {
+
+              "thamrys" = nix-darwin.lib.darwinSystem {
+                system = "aarch64-darwin";
+                specialArgs = {
+                  pkgs_x86 = import nixpkgs { system = "x86_64-darwin"; };
+                };
+                modules = nixDarwinCommonModules { user = "brett"; } ++ [
+                  ./hosts/darwin/thamrys
+                ];
+              };
             };
-          };
+
+          nixosConfigurations =
+            let
+              nixosCommonModules = [
+                {
+                  system.stateVersion = "25.05";
+                  nix = {
+                    extraOptions = ''
+                      extra-platforms = aarch64-linux x86_64-linux
+                      experimental-features = nix-command flakes
+                    '';
+                    settings.auto-optimise-store = true;
+                    gc = {
+                      automatic = true;
+                      dates = "weekly";
+                      options = "--delete-older-than 30d";
+                    };
+                  };
+                }
+                agenix.nixosModules.default
+              ];
+              nixosUserModules =
+                {
+                  user,
+                  desc,
+                }:
+                [
+                  {
+                    users.users.${user} = {
+                      home = "/home/${user}";
+                      isNormalUser = true;
+                      group = "${user}";
+                      description = "${desc}";
+                      extraGroups = [
+                        "wheel"
+                        "networkmanager"
+                      ];
+                    };
+                    users.groups.${user} = { };
+                  }
+                ];
+            in
+            {
+
+              "orpheus" = nixpkgs.lib.nixosSystem {
+                system = "x86_64-linux";
+                modules =
+                  nixosCommonModules
+                  ++ nixosUserModules {
+                    user = "brett";
+                    desc = "Brett";
+                  }
+                  ++ [
+                    ./hosts/nixos/orpheus
+                  ];
+              };
+
+              "orpheus-vm" = nixpkgs.lib.nixosSystem {
+                system = "x86_64-linux";
+                modules =
+                  nixosCommonModules {
+                    user = "brett";
+                    desc = "Brett";
+                  }
+                  ++ [
+                    ./hosts/nixos/orpheus
+                    ./hosts/nixos/build-vm.nix
+                  ];
+              };
+
+              "eurydice" = nixpkgs.lib.nixosSystem {
+                system = "x86_64-linux";
+                modules = nixosCommonModules ++ [
+                  ./hosts/nixos/eurydice
+                ];
+                specialArgs = {
+                  inherit self;
+                  inputs = inputs;
+                };
+              };
+
+              "calliope" = nixpkgs.lib.nixosSystem {
+                system = "aarch64-linux";
+                modules = nixosCommonModules ++ [
+                  ./hosts/nixos/calliope
+                ];
+                specialArgs = {
+                  inherit self;
+                  inputs = inputs;
+                };
+              };
+
+              "terpsichore" = nixpkgs.lib.nixosSystem {
+                system = "x86_64-linux";
+                modules = nixosCommonModules ++ [
+                  ./hosts/nixos/terpsichore
+                  lanzaboote.nixosModules.lanzaboote
+                ];
+                specialArgs = {
+                  inherit self;
+                  inputs = inputs;
+                };
+              };
+
+              "dev" = nixpkgs.lib.nixosSystem {
+                system = "aarch64-linux";
+                modules =
+                  nixosCommonModules {
+                    user = "brett";
+                    desc = "Brett";
+                  }
+                  ++ [
+                    {
+                      imports = [ nixos-generators.nixosModules.all-formats ];
+                      nixpkgs.hostPlatform = "aarch64-linux";
+                    }
+                    ./hosts/nixos/dev
+                  ];
+              };
+
+            };
+
+          homeConfigurations =
+            let
+              homeManagerCommonConfig = with self.homeManagerModules; {
+                home.stateVersion = "25.05";
+                imports = [
+                  ./home
+                ];
+              };
+            in
+            {
+              "brett@thamrys" = home-manager.lib.homeManagerConfiguration {
+                pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+                modules = [
+                  homeManagerCommonConfig
+                  ./home/git-brett.nix
+                  {
+                    home.username = "brett";
+                    home.homeDirectory = "/Users/brett";
+                  }
+                ];
+              };
+
+              "brett@orpheus" = home-manager.lib.homeManagerConfiguration {
+                pkgs = nixpkgs.legacyPackages.x86_64-linux;
+                modules = [
+                  homeManagerCommonConfig
+                  ./home/git-brett.nix
+                  {
+                    home.username = "brett";
+                    home.homeDirectory = "/home/brett";
+                  }
+                ];
+              };
+            };
+        };
       }
     );
 }
