@@ -27,6 +27,9 @@
     ncdu # BUG: on aarch64-darwin nixpkgs/issues/290512
   ];
 
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+             "claude-code"
+           ];
   home.extraOutputsToInstall = ["doc" "info" "devdoc"];
 
   home.shellAliases = {
