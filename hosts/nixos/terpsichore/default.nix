@@ -11,8 +11,11 @@
 {
   imports = [
     ./hardware-configuration.nix
+    (modulesPath + "/profiles/headless.nix")
     ../common.nix
     ../cloud.nix
+    "${self}/modules/gateway.nix"
+    "${self}/modules/monitoring"
   ];
 
   networking.hostName = "terpsichore";
@@ -75,6 +78,7 @@
 
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
   environment.systemPackages = with pkgs; [
     wpa_supplicant
     iw
@@ -85,4 +89,11 @@
     smartmontools
     nvme-cli
   ];
+
+  services.gateway.enable = true;
+  services.monitoring = {
+    enable = true;
+    domain = "metrics.cirriform.au";
+    enableUnpoller = true;
+  };
 }
