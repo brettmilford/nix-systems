@@ -51,20 +51,4 @@
       COLORTERM = "truecolor";
     };
   };
-
-  system.defaults = {
-    NSGlobalDomain.AppleEnableSwipeNavigateWithScrolls = true;
-    NSGlobalDomain.InitialKeyRepeat = 25;
-    NSGlobalDomain.KeyRepeat = 2;
-    NSGlobalDomain."com.apple.mouse.tapBehavior" = 1;
-    alf.globalstate = 1;
-    alf.stealthenabled = 1;
-    dock.orientation = "left";
-    dock.wvous-bl-corner = 14;
-    dock.wvous-br-corner = 7;
-    finder.FXDefaultSearchScope = "SCcf";
-    finder.FXPreferredViewStyle = "clmv";
-    loginwindow.GuestEnabled = false;
-    magicmouse.MouseButtonMode = "TwoButton";
-  };
 }

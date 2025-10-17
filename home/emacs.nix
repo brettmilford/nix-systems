@@ -15,7 +15,7 @@
     imagemagick
     pinentry-emacs
     zstd
-    nixfmt
+    nixfmt-rfc-style
     editorconfig-core-c
     sqlite
     (aspellWithDicts (d: [d.en]))
@@ -30,7 +30,6 @@
     shellcheck
     go
     gopls
-    gotools
     go-tools
     (python3.withPackages (ps: with ps; [
       black
