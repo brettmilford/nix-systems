@@ -411,31 +411,20 @@ in
       unifi.defaults.pass = config.age.secrets.unifipoller_pass.path;
     };
 
-    services.nginx = {
-      enable = true;
-      recommendedProxySettings = true;
-      recommendedOptimisation = true;
-      recommendedGzipSettings = true;
-
-      virtualHosts = {
-        "${cfg.domain}" = {
-          enableACME = true;
-          forceSSL = true;
-          locations = {
-            "/" = {
-              proxyPass = "http://${listenLocal}:${toString grafanaPort}/";
-              proxyWebsockets = true;
-            };
-            "/prometheus/" = {
-              proxyPass = "http://${listenLocal}:${toString prometheusPort}/";
-            };
-            "/loki/" = {
-              proxyPass = "http://${listenLocal}:${toString lokiPort}/";
-            };
-            "/alertmanager/" = lib.mkIf cfg.enableAlertManager {
-              proxyPass = "http://${listenLocal}:${toString alertmanagerPort}/";
-            };
-          };
+    services.nginx.virtualHosts."${cfg.domain}" = {
+      locations = {
+        "/" = {
+          proxyPass = "http://${listenLocal}:${toString grafanaPort}/";
+          proxyWebsockets = true;
+        };
+        "/prometheus/" = {
+          proxyPass = "http://${listenLocal}:${toString prometheusPort}/";
+        };
+        "/loki/" = {
+          proxyPass = "http://${listenLocal}:${toString lokiPort}/";
+        };
+        "/alertmanager/" = lib.mkIf cfg.enableAlertManager {
+          proxyPass = "http://${listenLocal}:${toString alertmanagerPort}/";
         };
       };
     };
