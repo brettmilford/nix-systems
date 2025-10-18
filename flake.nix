@@ -113,6 +113,7 @@
                   export PS1='\[\033[1;32m\][nix-systems:\w]\$\[\033[0m\] '
                   alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
                   alias nup='nix flake update --flake "''${FLAKE}" && nrs'
+                  alias nvm='nix run ".#nixosConfigurations.$(hostname -s).config.system.build.vmWithBootLoader"'
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
@@ -127,8 +128,23 @@
 
           darwinModules.default = {
             imports = [
+              agenix.darwinModules.default
               ./modules/darwin
             ];
+          };
+
+          nixosModules = {
+            default = {
+              imports = [
+                agenix.darwinModules.default
+                ./modules/nixos
+              ];
+            };
+            users = {
+              imports = [
+                ./modules/nixos/users.nix
+              ];
+            };
           };
 
           darwinConfigurations = {
@@ -140,133 +156,77 @@
               };
               modules = [
                 self.darwinModules.default
-                agenix.darwinModules.default
                 ./hosts/darwin/thamrys
               ];
             };
           };
 
-          nixosConfigurations =
-            let
-              nixosCommonModules = [
-                {
-                  system.stateVersion = "25.05";
-                  nix = {
-                    extraOptions = ''
-                      extra-platforms = aarch64-linux x86_64-linux
-                      experimental-features = nix-command flakes
-                    '';
-                    settings.auto-optimise-store = true;
-                    gc = {
-                      automatic = true;
-                      dates = "weekly";
-                      options = "--delete-older-than 30d";
-                    };
-                  };
-                }
-                agenix.nixosModules.default
+          nixosConfigurations = {
+            "orpheus" = nixpkgs.lib.nixosSystem {
+              system = "x86_64-linux";
+              specialArgs = {
+                inherit users;
+              };
+              modules = [
+                self.nixosModules.default
+                self.nixosModules.users
+                ./hosts/nixos/orpheus
               ];
-              nixosUserModules =
-                {
-                  user,
-                  desc,
-                }:
-                [
-                  {
-                    users.users.${user} = {
-                      home = "/home/${user}";
-                      isNormalUser = true;
-                      group = "${user}";
-                      description = "${desc}";
-                      extraGroups = [
-                        "wheel"
-                        "networkmanager"
-                      ];
-                    };
-                    users.groups.${user} = { };
-                  }
-                ];
-            in
-            {
-
-              "orpheus" = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules =
-                  nixosCommonModules
-                  ++ nixosUserModules {
-                    user = "brett";
-                    desc = "Brett";
-                  }
-                  ++ [
-                    ./hosts/nixos/orpheus
-                  ];
-              };
-
-              "orpheus-vm" = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules =
-                  nixosCommonModules {
-                    user = "brett";
-                    desc = "Brett";
-                  }
-                  ++ [
-                    ./hosts/nixos/orpheus
-                    ./hosts/nixos/build-vm.nix
-                  ];
-              };
-
-              "eurydice" = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = nixosCommonModules ++ [
-                  ./hosts/nixos/eurydice
-                ];
-                specialArgs = {
-                  inherit self;
-                  inputs = inputs;
-                };
-              };
-
-              "calliope" = nixpkgs.lib.nixosSystem {
-                system = "aarch64-linux";
-                modules = nixosCommonModules ++ [
-                  ./hosts/nixos/calliope
-                ];
-                specialArgs = {
-                  inherit self;
-                  inputs = inputs;
-                };
-              };
-
-              "terpsichore" = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = nixosCommonModules ++ [
-                  ./hosts/nixos/terpsichore
-                  lanzaboote.nixosModules.lanzaboote
-                ];
-                specialArgs = {
-                  inherit self;
-                  inputs = inputs;
-                };
-              };
-
-              "dev" = nixpkgs.lib.nixosSystem {
-                system = "aarch64-linux";
-                modules =
-                  nixosCommonModules {
-                    user = "brett";
-                    desc = "Brett";
-                  }
-                  ++ [
-                    {
-                      imports = [ nixos-generators.nixosModules.all-formats ];
-                      nixpkgs.hostPlatform = "aarch64-linux";
-                    }
-                    ./hosts/nixos/dev
-                  ];
-              };
-
             };
 
+            "eurydice" = nixpkgs.lib.nixosSystem {
+              system = "x86_64-linux";
+              specialArgs = {
+                inherit self;
+                inputs = inputs;
+              };
+              modules = [
+                self.nixosModules.default
+                ./hosts/nixos/eurydice
+              ];
+            };
+
+            "calliope" = nixpkgs.lib.nixosSystem {
+              system = "aarch64-linux";
+              specialArgs = {
+                inherit self;
+                inputs = inputs;
+              };
+              modules = [
+                self.nixosModules.default
+                ./hosts/nixos/calliope
+              ];
+            };
+
+            "terpsichore" = nixpkgs.lib.nixosSystem {
+              system = "x86_64-linux";
+              specialArgs = {
+                inherit self;
+                inputs = inputs;
+              };
+              modules = [
+                self.nixosModules.default
+                lanzaboote.nixosModules.lanzaboote
+                ./hosts/nixos/terpsichore
+              ];
+            };
+
+            "dev" = nixpkgs.lib.nixosSystem {
+              system = "aarch64-linux";
+              specialArgs = {
+                inherit users;
+              };
+              modules = [
+                self.nixosModules.default
+                self.nixosModules.users
+                {
+                  nixpkgs.hostPlatform = "aarch64-linux";
+                  imports = [ nixos-generators.nixosModules.all-formats ];
+                }
+                ./hosts/nixos/dev
+              ];
+            };
+          };
         };
       }
     );
