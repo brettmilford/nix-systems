@@ -1,11 +1,7 @@
 { config, lib, pkgs, ... }:
+with lib;
 let
   cfg = config.services.podman;
-
-  inherit (lib)
-    mkEnableOption
-    mkIf
-  ;
 in
 {
   options.services.podman = {

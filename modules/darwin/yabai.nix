@@ -1,4 +1,19 @@
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib;
+let
+  cfg = config.services.yabai;
+in
+{
+  options.services.yabai = {
+    enable = mkEnableOption "Yabai";
+  };
+
+  config = mkIf cfg.enable {
   services.yabai = {
     enable = true;
     config = {
@@ -122,4 +137,5 @@
   };
 
   system.defaults.dock.mru-spaces = false;
+  };
 }
