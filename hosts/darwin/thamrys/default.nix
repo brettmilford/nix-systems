@@ -1,16 +1,39 @@
 {
+  config,
+  lib,
+  pkgs,
+  users,
+  ...
+}:
+let
+  hostname = "thamrys";
+  user = users.${config.system.primaryUser};
+in
+{
   imports = [
     ../common.nix
-    ../libvirt.nix
     ../homebrew.nix
-    #../yabai.nix
-    ../podman.nix
   ];
 
+  system.primaryUser = "brett";
+
+  users.users =
+    let
+      primaryUser = config.system.primaryUser;
+      user = users.${primaryUser};
+    in
+    {
+
+      ${primaryUser} = {
+        name = user.name;
+        home = "/Users/${primaryUser}";
+      };
+    };
+
   networking = {
-    hostName = "thamrys";
-    computerName = "thamrys";
-    localHostName = "thamrys";
+    hostName = hostname;
+    computerName = hostname;
+    localHostName = hostname;
   };
 
   services.podman.enable = true;

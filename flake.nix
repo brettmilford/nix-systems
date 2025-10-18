@@ -37,6 +37,9 @@
         moduleWithSystem,
         ...
       }:
+      let
+        users = import ./users.nix;
+      in
       {
         imports = [ inputs.home-manager.flakeModules.home-manager ];
 
@@ -54,7 +57,6 @@
             ...
           }:
           let
-            users = import ./users.nix;
             mkHome =
               username: user:
               let
@@ -88,6 +90,16 @@
                 nixBin = pkgs.writeShellScriptBin "nix" ''
                   ${pkgs.nixVersions.stable}/bin/nix --option experimental-features "nix-command flakes" "$@"
                 '';
+                nrs = pkgs.writeShellScriptBin "nrs" (
+                  if pkgs.stdenv.isDarwin then
+                    ''
+                      sudo darwin-rebuild switch --flake "''${FLAKE}" "$@"
+                    ''
+                  else
+                    ''
+                      sudo nixos-rebuild switch --flake "''${FLAKE}" "$@"
+                    ''
+                );
               in
               pkgs.mkShell {
                 packages = with pkgs; [
@@ -97,9 +109,10 @@
                 ];
                 shellHook = ''
                   export FLAKE="$(pwd)"
-                  export PATH="$FLAKE/bin:${nixBin}/bin:$PATH"
+                  export PATH="${nrs}/bin:${nixBin}/bin:$PATH"
                   export PS1='\[\033[1;32m\][nix-systems:\w]\$\[\033[0m\] '
-                  alias hms='home-manager switch --flake "$HOME/.config/nix?submodules=1#''${USER}"'
+                  alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
+                  alias nup='nix flake update --flake "''${FLAKE}" && nrs'
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
@@ -112,45 +125,26 @@
             ];
           };
 
-          darwinConfigurations =
-            let
-              nixDarwinCommonModules =
-                { user }:
-                [
-                  {
-                    system.stateVersion = 4;
-                    system.primaryUser = user;
-                    ids.gids.nixbld = 350;
-                    nix = {
-                      distributedBuilds = true;
-                      extraOptions = ''
-                        extra-platforms = aarch64-darwin x86_64-darwin
-                        experimental-features = nix-command flakes
-                        builders = ssh://nix@eurydice /Users/brett/.ssh/id_ed25519
-                      '';
-                      optimise.automatic = true;
-                      settings.trusted-users = [
-                        "${user}"
-                      ];
-                    };
-                  }
-                  {
-                    users.users.${user}.home = "/Users/${user}";
-                  }
-                  agenix.darwinModules.default
-                ];
-            in
-            {
-              "thamrys" = nix-darwin.lib.darwinSystem {
-                system = "aarch64-darwin";
-                specialArgs = {
-                  pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
-                };
-                modules = nixDarwinCommonModules { user = "brett"; } ++ [
-                  ./hosts/darwin/thamrys
-                ];
+          darwinModules.default = {
+            imports = [
+              ./modules/darwin
+            ];
+          };
+
+          darwinConfigurations = {
+            "thamrys" = nix-darwin.lib.darwinSystem {
+              system = "aarch64-darwin";
+              specialArgs = {
+                inherit users;
+                pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
               };
+              modules = [
+                self.darwinModules.default
+                agenix.darwinModules.default
+                ./hosts/darwin/thamrys
+              ];
             };
+          };
 
           nixosConfigurations =
             let
