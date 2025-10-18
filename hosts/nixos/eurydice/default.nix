@@ -12,67 +12,74 @@
     ./opnsense.nix
     ../common.nix
     ../cloud.nix
-    ../desktop.nix
     ../../../deployments
     "${self}/modules/monitoring"
     "${self}/modules/backup.nix"
   ];
 
-  boot.loader.efi.canTouchEfiVariables = false;
-
-  boot.loader.grub = {
-    enable = true;
-    zfsSupport = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-    mirroredBoots = [
-      { devices = ["nodev"]; path = "/boot";}
-    ];
-  };
-
   networking.hostName = "eurydice";
   networking.hostId = "04ca88ad";
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.forceImportRoot = false;
+
+  # TPM2 support
+  boot.initrd.systemd.enable = true;
+  boot.initrd.systemd.tpm2.enable = true;
+  security.tpm2 = {
+    enable = true;
+    pkcs11.enable = true;
+    tctiEnvironment.enable = true;
+  };
+
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   environment.systemPackages = with pkgs; [
+    wpa_supplicant
     iw
     pciutils
     usbutils
-    dig
+    tpm2-tools
+    sbctl
+    smartmontools
+    nvme-cli
   ];
+
+  #services.xserver.displayManager.gdm.autoSuspend = false;
+  #services.logind = {
+  #  powerKey = "poweroff";
+  #  #powerKeyLongPress = "ignore";
+  #  #rebootKey = "reboot";
+  #  suspendKey = "poweroff";
+  #  #hibernateKey = "hibernate";
+  #  #lidSwitch = "suspend";
+  #  #lidSwitchExternalPower = "suspend";
+  #  #lidSwitchDocked = "ignore";
+  #};
+
+  #services.xserver.desktopManager.gnome = {
+  #  enable = true;
+  #  extraGSettingsOverrides = ''
+  #    [org.gnome.settings-daemon.plugins.power]
+  #    power-button-action='poweroff'
+  #    sleep-inactive-ac-type='nothing'
+  #    sleep-inactive-battery-type='nothing'
+
+  #    [org.gnome.desktop.session]
+  #    idle-delay=uint32 0
+  #  '';
+  #};
+
+  services.openssh.settings = {
+    X11Forwarding = true;
+  };
 
   services.deployments = {
     homeAssistant.enable = true;
     unifi.enable = true;
-  };
-
-  services.xserver.displayManager.gdm.autoSuspend = false;
-  services.logind = {
-    powerKey = "poweroff";
-    #powerKeyLongPress = "ignore";
-    #rebootKey = "reboot";
-    suspendKey = "poweroff";
-    #hibernateKey = "hibernate";
-    #lidSwitch = "suspend";
-    #lidSwitchExternalPower = "suspend";
-    #lidSwitchDocked = "ignore";
-  };
-
-  services.xserver.desktopManager.gnome = {
-    enable = true;
-    extraGSettingsOverrides = ''
-      [org.gnome.settings-daemon.plugins.power]
-      power-button-action='poweroff'
-      sleep-inactive-ac-type='nothing'
-      sleep-inactive-battery-type='nothing'
-
-      [org.gnome.desktop.session]
-      idle-delay=uint32 0
-    '';
-  };
-
-  services.openssh.settings = {
-    X11Forwarding = true;
   };
 
   services.monitoring = {
