@@ -1,9 +1,11 @@
 {
+  self,
   config,
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   programs.tmux = {
     enable = true;
     aggressiveResize = true;
@@ -15,7 +17,7 @@
     newSession = false; # BUG: spawns a new window each time config is loaded...
     terminal = "screen-256color";
     sensibleOnTop = false;
-    extraConfig = builtins.readFile ../config/tmux/tmux-extra.conf;
+    extraConfig = builtins.readFile "${self}/config/tmux/tmux-extra.conf";
     plugins = with pkgs; [
       {
         plugin = tmuxPlugins.resurrect;

@@ -47,8 +47,42 @@
         ];
 
         perSystem =
-          { pkgs, inputs', ... }:
           {
+            pkgs,
+            system,
+            inputs',
+            ...
+          }:
+          let
+            users = import ./users.nix;
+            mkHome =
+              username: user:
+              let
+                homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
+              in
+              home-manager.lib.homeManagerConfiguration {
+                inherit pkgs;
+                extraSpecialArgs = {
+                  inherit self;
+                  inputs = inputs;
+                };
+                modules = [
+                  {
+                    home.username = username;
+                    home.homeDirectory = homeDirectory;
+                    home.stateVersion = "25.05";
+                    programs.home-manager.enable = true;
+                    _module.args.userConfig = user // {
+                      username = username;
+                    };
+                  }
+                  self.homeModules.default
+                ];
+              };
+          in
+          {
+            legacyPackages.homeConfigurations = builtins.mapAttrs (username: user: mkHome username user) users;
+
             devShells.default =
               let
                 nixBin = pkgs.writeShellScriptBin "nix" ''
@@ -59,18 +93,25 @@
                 packages = with pkgs; [
                   inputs'.agenix.packages.default
                   inputs'.home-manager.packages.default
+                  nixfmt-tree
                 ];
                 shellHook = ''
                   export FLAKE="$(pwd)"
                   export PATH="$FLAKE/bin:${nixBin}/bin:$PATH"
                   export PS1='\[\033[1;32m\][nix-systems:\w]\$\[\033[0m\] '
-                  alias hms='home-manager switch --flake "$HOME/.config/nix?submodules=1#''${USER}@$(hostname -s)"'
+                  alias hms='home-manager switch --flake "$HOME/.config/nix?submodules=1#''${USER}"'
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
           };
 
         flake = {
+          homeModules.default = {
+            imports = [
+              ./modules/home
+            ];
+          };
+
           darwinConfigurations =
             let
               nixDarwinCommonModules =
@@ -100,11 +141,10 @@
                 ];
             in
             {
-
               "thamrys" = nix-darwin.lib.darwinSystem {
                 system = "aarch64-darwin";
                 specialArgs = {
-                  pkgs_x86 = import nixpkgs { system = "x86_64-darwin"; };
+                  pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
                 };
                 modules = nixDarwinCommonModules { user = "brett"; } ++ [
                   ./hosts/darwin/thamrys
@@ -233,40 +273,6 @@
 
             };
 
-          homeConfigurations =
-            let
-              homeManagerCommonConfig = with self.homeManagerModules; {
-                home.stateVersion = "25.05";
-                imports = [
-                  ./home
-                ];
-              };
-            in
-            {
-              "brett@thamrys" = home-manager.lib.homeManagerConfiguration {
-                pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-                modules = [
-                  homeManagerCommonConfig
-                  ./home/git-brett.nix
-                  {
-                    home.username = "brett";
-                    home.homeDirectory = "/Users/brett";
-                  }
-                ];
-              };
-
-              "brett@orpheus" = home-manager.lib.homeManagerConfiguration {
-                pkgs = nixpkgs.legacyPackages.x86_64-linux;
-                modules = [
-                  homeManagerCommonConfig
-                  ./home/git-brett.nix
-                  {
-                    home.username = "brett";
-                    home.homeDirectory = "/home/brett";
-                  }
-                ];
-              };
-            };
         };
       }
     );

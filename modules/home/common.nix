@@ -2,35 +2,47 @@
   config,
   lib,
   pkgs,
+  userConfig,
   ...
-}: {
+}:
+{
 
-  home.packages = with pkgs; [
-    claude-code
-    direnv
-    qemu
-    git-review
-    tmux
-    jq
-    remarshal
-    ansible
-    sshpass
-    (pass.withExtensions (ext: [ext.pass-otp]))
-    kubectl
-    kubernetes-helm
-    xz
-    gh
-    mosh
-    tree
-  ] ++ lib.optionals pkgs.stdenv.isLinux [
-    nextcloud-client
-    ncdu # BUG: on aarch64-darwin nixpkgs/issues/290512
+  home.packages =
+    with pkgs;
+    [
+      claude-code
+      direnv
+      qemu
+      git-review
+      tmux
+      jq
+      remarshal
+      ansible
+      sshpass
+      (pass.withExtensions (ext: [ ext.pass-otp ]))
+      kubectl
+      kubernetes-helm
+      xz
+      gh
+      mosh
+      tree
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      nextcloud-client
+      ncdu # BUG: on aarch64-darwin nixpkgs/issues/290512
+    ];
+
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "claude-code"
+    ];
+
+  home.extraOutputsToInstall = [
+    "doc"
+    "info"
+    "devdoc"
   ];
-
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-             "claude-code"
-           ];
-  home.extraOutputsToInstall = ["doc" "info" "devdoc"];
 
   home.shellAliases = {
     em = "emacs -nw";
@@ -59,6 +71,8 @@
   programs.git = {
     enable = true;
     lfs.enable = true;
+    userEmail = userConfig.email;
+    userName = userConfig.name;
     aliases = {
       lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
       lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
@@ -93,7 +107,7 @@
       bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
       stls = "stash list";
     };
-    attributes = ["*.pdf diff=pdf"];
+    attributes = [ "*.pdf diff=pdf" ];
     extraConfig = {
       init.defaultBranch = "devel";
       pull = {
@@ -156,10 +170,28 @@
       use-agent = true;
       fixed-list-mode = true;
       charset = "utf-8";
-      personal-cipher-preferences = ["AES256" "AES192" "AES" "CAST5"];
+      personal-cipher-preferences = [
+        "AES256"
+        "AES192"
+        "AES"
+        "CAST5"
+      ];
       personal-digest-preferences = "SHA256";
       cert-digest-algo = "SHA256";
-      default-preference-list = ["SHA512" "SHA384" "SHA256" "SHA224" "AES256" "AES192" "AES" "CAST5" "ZLIB" "BZIP2" "ZIP" "Uncompressed"];
+      default-preference-list = [
+        "SHA512"
+        "SHA384"
+        "SHA256"
+        "SHA224"
+        "AES256"
+        "AES192"
+        "AES"
+        "CAST5"
+        "ZLIB"
+        "BZIP2"
+        "ZIP"
+        "Uncompressed"
+      ];
     };
   };
 
@@ -191,7 +223,9 @@
     '';
   };
 
-  home.sessionVariables = {EDITOR = "vim";};
+  home.sessionVariables = {
+    EDITOR = "vim";
+  };
 
   programs.zsh.enable = pkgs.stdenv.isDarwin;
 
