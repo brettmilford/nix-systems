@@ -38,6 +38,7 @@
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
+      X11Forwarding = true;
       AllowUsers = ["nix"];
     };
   };

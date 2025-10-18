@@ -11,8 +11,6 @@
     ../common.nix
     ../cloud.nix
     ../desktop.nix
-    ../zerotierone.nix
-    ./rsnapshot.nix
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -20,4 +18,6 @@
   networking.hostName = "orpheus";
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
+
+  services.rsnapshotBackup.enable = true;
 }
