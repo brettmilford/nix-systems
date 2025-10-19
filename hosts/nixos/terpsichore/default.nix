@@ -56,10 +56,10 @@
             authorizedKeys = let
               sourceHost = hosts.${repoConfig.source};
               in
-                liboptional (sourceHost ? backupSshKey) sourceHost.borgSshKey;
+                lib.optional (sourceHost ? backupSshKey) sourceHost.backupSshKey;
           }
     ) backupTargetRepos
   );
-  services.openssh.settings.AllowUsers = lib.mkAfter ["borg"];
+  services.openssh.settings.AllowUsers = lib.mkIf isBackupTarget (lib.mkAfter ["borg"]);
 
 }

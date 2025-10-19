@@ -19,6 +19,7 @@
     ip = "192.168.1.2";
     domain = "eurydice.internal";
     system = "x86_64-linux";
+    backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZL7gbthPAl2oquJf/IMpa6VIn/ess6e28NLbepohIT root@calliope";
   };
 
   calliope = {
@@ -43,5 +44,6 @@
     ip = "192.168.10.11";
     domain = "thamrys.internal";
     system = "aarch64-darwin";
+    backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZL7gbthPAl2oquJf/IMpa6VIn/ess6e28NLbepohIT root@calliope";
   };
 }
