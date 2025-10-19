@@ -7,7 +7,10 @@
 
 let
   # Helper to get data mount for a host
-  getDataMount = hostname: hosts.${hostname}.dataMount or "/var/lib";
+  getDataPath = hostname: hosts.${hostname}.dataPath or "/var/lib";
+
+  # Helper to get backup base path for a host
+  getBackupPath = hostname: hosts.${hostname}.backupPath or "${getDataPath hostname}/backup";
 
   # Helper to resolve service data paths
   resolveServicePath =
@@ -15,16 +18,10 @@ let
     let
       svc = services.${serviceName} or null;
       config = if svc != null then svc.config or { } else { };
-      useDataMount = config.useDataMount or false;
       dataPath = config.dataPath or serviceName;
-      mediaPath = config.mediaPath or null;
     in
-    if useDataMount then
-      "${getDataMount hostname}/${dataPath}"
-    else if mediaPath != null then
-      "${getDataMount hostname}/${mediaPath}"
-    else
-      "/var/lib/${serviceName}";
+      "${getDataPath hostname}/${dataPath}";
+
   # Get backup repos where this host is a source
   getBackupReposForSource =
     hostname:
@@ -84,7 +81,7 @@ in
   # Get service config
   getServiceConfig = service: services.${service}.config or { };
 
-  # Get service data path (resolves dataMount)
+  # Get service data path (resolves dataPath)
   getServiceDataPath = hostname: serviceName: resolveServicePath hostname serviceName;
 
   # Get service URL
@@ -132,21 +129,22 @@ in
       backupConfig = services.backup.config or { };
       repos = backupConfig.repos or { };
       repoConfig = repos.${hostname} or null;
+      sourceHost = hosts.${hostname};
+      # Get paths to backup - from host config or default to dataPath
+      backupSources = sourceHost.backupSources or [ (getDataPath hostname) ];
     in
     if repoConfig != null then
       {
         ${hostname} = repoConfig // {
           # Source is the hostname
           source = hostname;
-          # Data path is the hostname
-          dataPath = "/${hostname}";
-          # Resolve full path
-          resolvedPath = "${getDataMount hostname}/${hostname}";
+          # Paths to backup from the source host
+          sources = backupSources;
           # Add target host metadata
           targetHosts = map (target: {
             hostname = target;
             host = hosts.${target};
-            repoPath = "${getDataMount target}/backup/${hostname}";
+            repoPath = "${getBackupPath target}/${hostname}";
           }) repoConfig.targets;
         };
       }
@@ -158,7 +156,7 @@ in
     hostname:
     let
       repos = getBackupReposForTarget hostname;
-      dataMount = getDataMount hostname;
+      backupPath = getBackupPath hostname;
     in
     builtins.mapAttrs (
       repoName: repo:
@@ -166,14 +164,14 @@ in
       // {
         # Source hostname is the repo name
         source = repoName;
-        # Data path is the source hostname
-        dataPath = "/${repoName}";
         # Repo path on this target
-        repoPath = "${dataMount}/backup/${repoName}";
+        repoPath = "${backupPath}/${repoName}";
         # Source host metadata
         sourceHost = {
           hostname = repoName;
           host = hosts.${repoName};
+          # Paths being backed up from source
+          backupSources = hosts.${repoName}.backupSources or [ (getDataPath repoName) ];
         };
       }
     ) repos;

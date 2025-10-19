@@ -9,12 +9,13 @@
   serviceMap,
   users,
   ...
-}: let
+}:
+let
   hostname = "terpsichore";
   thisHost = hosts.${hostname};
   isBackupTarget = serviceMap.lib.isBackupTarget hostname;
   backupTargetRepos = serviceMap.lib.getBackupTargetConfig hostname;
-  in
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -30,7 +31,10 @@
 
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
   environment.systemPackages = with pkgs; [
     wpa_supplicant
     iw
@@ -49,17 +53,20 @@
     enableUnpoller = true;
   };
 
+  # Check with nix eval .#nixosConfigurations.terpsichore.config.services.borgbackup.repos --json | jq
   services.borgbackup.repos = lib.mkIf isBackupTarget (
-    lib.mapAttrs' (repoName: repoConfig:
-          lib.nameValuePair repoName {
-            path = repoConfig.repoPath;
-            authorizedKeys = let
-              sourceHost = hosts.${repoConfig.source};
-              in
-                lib.optional (sourceHost ? backupSshKey) sourceHost.backupSshKey;
-          }
+    lib.mapAttrs' (
+      repoName: repoConfig:
+      lib.nameValuePair repoName {
+        path = repoConfig.repoPath;
+        authorizedKeys =
+          let
+            sourceHost = hosts.${repoConfig.source};
+          in
+          lib.optional (sourceHost ? backupSshKey) sourceHost.backupSshKey;
+      }
     ) backupTargetRepos
   );
-  services.openssh.settings.AllowUsers = lib.mkIf isBackupTarget (lib.mkAfter ["borg"]);
+  services.openssh.settings.AllowUsers = lib.mkIf isBackupTarget (lib.mkAfter [ "borg" ]);
 
 }
