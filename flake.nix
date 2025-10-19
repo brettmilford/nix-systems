@@ -119,115 +119,120 @@
             formatter = pkgs.nixfmt-rfc-style;
           };
 
-        flake = {
-          homeModules.default = {
-            imports = [
-              ./modules/home
-            ];
-          };
+        flake =
+          let
+            hosts = import ./hosts;
+            catalog = import ./services.nix;
 
-          darwinModules.default = {
-            imports = [
-              agenix.darwinModules.default
-              ./modules/darwin
-            ];
-          };
+            # Create our extended lib
+            ourLib = import ./lib { lib = nixpkgs.lib; };
+            extendedLib = nixpkgs.lib // ourLib;
 
-          nixosModules = {
-            default = {
+            # Validate at import time
+            _ = extendedLib.validateServices hosts catalog.services;
+            __ = extendedLib.validateBackupSets hosts (catalog.services.backup.config.repos or { });
+
+            # Create serviceMap with hosts and lib
+            serviceMap = {
+              # Expose raw data at top level
+              inherit (catalog) services domain;
+              inherit hosts;
+
+              # Wrap functions under lib
+              lib = import ./lib/serviceMap.nix {
+                lib = extendedLib;
+                inherit hosts;
+                inherit (catalog) services domain;
+              };
+            };
+
+            # Standard arguments passed to all configurations
+            commonSpecialArgs = {
+              inherit
+                self
+                users
+                hosts
+                serviceMap
+                ;
+              inputs = inputs;
+            };
+
+            # Standard modules for all configurations
+            commonModuleArgs = {
+              _module.args = commonSpecialArgs;
+            };
+
+            # Filter hosts by system type
+            nixosHosts = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "linux" host.system) hosts;
+
+            darwinHosts = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "darwin" host.system) hosts;
+
+            # Generate NixOS configuration
+            mkNixosConfiguration =
+              hostname: host:
+              nixpkgs.lib.nixosSystem {
+                system = host.system;
+                specialArgs = commonSpecialArgs;
+                modules = [
+                  commonModuleArgs
+                  self.nixosModules.default
+                  ./hosts/nixos/${hostname}
+                ]
+                ++ nixpkgs.lib.optional (serviceMap.lib.hasService hostname "secure-boot") lanzaboote.nixosModules.lanzaboote
+                ++ nixpkgs.lib.optional (serviceMap.lib.hasService hostname "desktop") self.nixosModules.users;
+              };
+            # Generate Darwin configuration
+            mkDarwinConfiguration =
+              hostname: host:
+              nix-darwin.lib.darwinSystem {
+                system = host.system;
+                specialArgs = commonSpecialArgs // {
+                  pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
+                };
+                modules = [
+                  commonModuleArgs
+                  self.darwinModules.default
+                  ./hosts/darwin/${hostname}
+                ];
+              };
+          in
+          {
+            lib = {
+              inherit users hosts serviceMap;
+            };
+
+            homeModules.default = {
+              imports = [
+                ./modules/home
+              ];
+            };
+
+            darwinModules.default = {
               imports = [
                 agenix.darwinModules.default
-                ./modules/nixos
+                ./modules/darwin
               ];
             };
-            users = {
-              imports = [
-                ./modules/nixos/users.nix
-              ];
+
+            nixosModules = {
+              default = {
+                imports = [
+                  agenix.nixosModules.default
+                  ./modules/nixos
+                ];
+              };
+
+              users = {
+                imports = [
+                  ./modules/nixos/users.nix
+                ];
+              };
             };
+
+            nixosConfigurations = builtins.mapAttrs mkNixosConfiguration nixosHosts;
+
+            darwinConfigurations = builtins.mapAttrs mkDarwinConfiguration darwinHosts;
           };
-
-          darwinConfigurations = {
-            "thamrys" = nix-darwin.lib.darwinSystem {
-              system = "aarch64-darwin";
-              specialArgs = {
-                inherit users;
-                pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
-              };
-              modules = [
-                self.darwinModules.default
-                ./hosts/darwin/thamrys
-              ];
-            };
-          };
-
-          nixosConfigurations = {
-            "orpheus" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              specialArgs = {
-                inherit users;
-              };
-              modules = [
-                self.nixosModules.default
-                self.nixosModules.users
-                ./hosts/nixos/orpheus
-              ];
-            };
-
-            "eurydice" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-              modules = [
-                self.nixosModules.default
-                ./hosts/nixos/eurydice
-              ];
-            };
-
-            "calliope" = nixpkgs.lib.nixosSystem {
-              system = "aarch64-linux";
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-              modules = [
-                self.nixosModules.default
-                ./hosts/nixos/calliope
-              ];
-            };
-
-            "terpsichore" = nixpkgs.lib.nixosSystem {
-              system = "x86_64-linux";
-              specialArgs = {
-                inherit self;
-                inputs = inputs;
-              };
-              modules = [
-                self.nixosModules.default
-                lanzaboote.nixosModules.lanzaboote
-                ./hosts/nixos/terpsichore
-              ];
-            };
-
-            "dev" = nixpkgs.lib.nixosSystem {
-              system = "aarch64-linux";
-              specialArgs = {
-                inherit users;
-              };
-              modules = [
-                self.nixosModules.default
-                self.nixosModules.users
-                {
-                  nixpkgs.hostPlatform = "aarch64-linux";
-                  imports = [ nixos-generators.nixosModules.all-formats ];
-                }
-                ./hosts/nixos/dev
-              ];
-            };
-          };
-        };
       }
     );
 }
