@@ -4,6 +4,7 @@ let
   calliope = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICYnaqrEbdb9apQNMccZgfM0YRX6VTi1JPS+BmVd8Vb0";
   eurydice = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJfkZRQxQLgNZmGzSu9+XG3v3QoWhumJKzphxduT+5wI";
   terpsichore = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIShGK1lWBkHiW7bLh9gbEVfxNLEgylyHO5956+ehhYZ";
+  orpheus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJD9JScMbvyixRtjd4zwrUmZNUndlMdbtkkvtPnFZ3Md";
 in {
   "admin-passwd.age".publicKeys = [thamrys calliope brett];
   "cf_origin_cert.pem.age".publicKeys = [eurydice terpsichore calliope brett];
@@ -26,4 +27,5 @@ in {
   "fail2ban-cf.conf.age".publicKeys = [calliope terpsichore brett];
   "borg-calliope-ssh-key.age".publicKeys = [calliope brett];
   "paperless-api-token.age".publicKeys = [calliope brett];
+  "borg-orpheus-ssh-key.age".publicKeys = [orpheus brett];
 }
