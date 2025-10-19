@@ -1,0 +1,96 @@
+let
+  domain = "cirriform.au";
+in
+{
+  inherit domain;
+
+  # Service configurations with metadata
+  services = {
+    dns = {
+      hosts = [ "opnsense" ];
+    };
+
+    dhcp = {
+      hosts = [ "opnsense" ];
+    };
+
+    rsyslog = {
+      hosts = [ "eurydice" "terpsichore" ];
+    };
+
+    secure-boot = {
+      hosts = [ "terpsichore" ];
+    };
+
+    desktop = {
+      hosts = [ "orpheus" ];
+    };
+
+    auth = {
+      hosts = [ "calliope" ];
+      fqdn = "auth.${domain}";
+    };
+
+    cloud = {
+      hosts = [ "calliope" ];
+      fqdn = "cloud.${domain}";
+      config = {
+        dataPath = "/nextcloud";
+      };
+    };
+
+    immich = {
+      hosts = [ "calliope" ];
+      fqdn = "immich.${domain}";
+      config = {
+        dataPath = "/immich";
+      };
+    };
+
+    paperless = {
+      hosts = [ "calliope" ];
+      fqdn = "paperless.${domain}";
+      config = {
+        dataPath = "/paperless";
+      };
+    };
+
+    monitoring = {
+      hosts = [ "eurydice" ];
+      fqdn = "metrics.${domain}";
+    };
+
+    hass = {
+      hosts = [ "eurydice" ];
+      fqdn = "hass.${domain}";
+    };
+
+    backup = {
+      config = {
+        repos = {
+          # Eurydice's data backed up to terpsichore and calliope
+          eurydice = {
+            targets = [ "terpsichore" "calliope" ];
+          };
+
+          calliope = {
+            targets = [ "terpsichore" ];
+          };
+
+          # Terpsichore's data backed up to calliope
+          terpsichore = {
+            targets = [ "calliope" ];
+          };
+
+          orpheus = {
+            targets = [ "terpsichore" ];
+          };
+
+          thamrys = {
+            targets = [ "terpsichore" ];
+          };
+        };
+      };
+    };
+  };
+}
