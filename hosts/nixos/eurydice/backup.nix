@@ -58,11 +58,7 @@ in
             preHook = ''
               echo "Creating OPNsense VM snapshot before backup..."
               SNAPSHOT_NAME="backup_$(date +%Y%m%d_%H%M%S)"
-              if ${pkgs.bash}/bin/bash ${./qemu-snapshot.sh} opnsense create "$SNAPSHOT_NAME"; then
-                echo "VM snapshot created: $SNAPSHOT_NAME"
-              else
-                echo "Warning: Failed to create VM snapshot, continuing with backup..."
-              fi
+              ${pkgs.bash}/bin/bash ${./qemu-snapshot.sh} opnsense create "$SNAPSHOT_NAME" || echo "Warning: VM snapshot failed"
             '';
           }
         ) repoConfig.targetHosts
