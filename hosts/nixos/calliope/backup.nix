@@ -13,6 +13,7 @@ let
   thisHost = hosts.${hostname};
   shouldBackup = serviceMap.lib.shouldBackup hostname;
   backupSourceRepos = serviceMap.lib.getBackupSourceConfig hostname;
+  backupRWPath = "/var/lib/postgresql/backups/";
 in
 {
   age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${hostname}-ssh-key.age";
@@ -53,6 +54,26 @@ in
               weekly = 4;
               monthly = 6;
             };
+
+            readWritePaths = [ "${backupRWPath}" ];
+            preHook = ''
+              echo "Starting PostgreSQL backup..."
+
+              # Backup global objects (roles, tablespaces, etc.)
+              echo "Backing up PostgreSQL globals..."
+              ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dumpall --globals-only > ${backupRWPath}/postgres_globals.sql
+              ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dumpall > ${backupRWPath}/postgres_all.sql
+
+              # Get list of databases and backup each individually
+              echo "Backing up individual databases..."
+              for db in $(${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql -t -c "select datname from pg_database where not datistemplate" | ${pkgs.gnugrep}/bin/grep '\S' | ${pkgs.gawk}/bin/awk '{$1=$1};1'); do
+                echo "  Backing up database: $db"
+                ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dump --create --format=custom "$db" > "${backupRWPath}/$db.pgdump"
+              done
+
+              echo "PostgreSQL backup completed"
+            '';
+
           }
         ) repoConfig.targetHosts
       )
