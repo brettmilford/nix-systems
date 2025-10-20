@@ -1,5 +1,6 @@
 result
 *.qcow2
 *.swp
+*.fd
 .claude
 CLAUDE.md

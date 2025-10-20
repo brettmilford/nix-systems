@@ -54,7 +54,7 @@ in
               "/var/lib/systemd"
             ];
 
-            repo = "borg@${target.host.ip}:.";
+            repo = "borg@${target.host.ip}:${target.repoPath}";
             doInit = true;
             environment.BORG_RSH = "ssh -i ${config.age.secrets.borg-ssh-key.path}";
 
