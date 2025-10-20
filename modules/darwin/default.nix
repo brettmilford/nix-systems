@@ -9,6 +9,7 @@ let
 in
 {
   imports = [
+    ./distributedBuilds.nix
     ./podman.nix
     ./libvirt.nix
   ];
@@ -42,7 +43,6 @@ in
     extraOptions = ''
       extra-platforms = aarch64-darwin x86_64-darwin
       experimental-features = nix-command flakes
-      builders = ssh://nix@eurydice /Users/${primaryUser}/.ssh/id_ed25519
     '';
     settings.trusted-users = [
       "@admin"
