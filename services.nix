@@ -65,6 +65,8 @@ in
       fqdn = "hass.${domain}";
     };
 
+    nixBuildMachines = [ "calliope" "orpheus" "terpsichore" ];
+
     backup = {
       config = {
         repos = {
