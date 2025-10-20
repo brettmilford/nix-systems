@@ -110,7 +110,7 @@
                 shellHook = ''
                   export FLAKE="$(pwd)"
                   export PATH="${nrs}/bin:${nixBin}/bin:$PATH"
-                  export PS1='\[\033[1;32m\][nix-systems:\w]\$\[\033[0m\] '
+                  export PS1='\[\033[1;32m\][\u@\h:\w](nix-systems)\$\[\033[0m\] '
                   alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
                   alias nup='nix flake update --flake "''${FLAKE}" && nrs'
                   alias nvm='nix run ".#nixosConfigurations.$(hostname -s).config.system.build.vmWithBootLoader"'
