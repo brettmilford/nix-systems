@@ -100,18 +100,23 @@
                       sudo nixos-rebuild switch --flake "''${FLAKE}" "$@"
                     ''
                 );
+                nrsr = pkgs.writeShellScriptBin "nrsr" ''
+                  ssh $1 "sudo nixos-rebuild switch --flake 'github:brettmilford/nix-systems/devel'"
+                '';
               in
               pkgs.mkShell {
                 packages = with pkgs; [
+                  nixBin
+                  nrs
+                  nrsr
                   inputs'.agenix.packages.default
                   inputs'.home-manager.packages.default
                   nixfmt-tree
                   jq
                 ];
                 shellHook = ''
-                  export FLAKE="$(pwd)"
-                  export PATH="${nrs}/bin:${nixBin}/bin:$PATH"
                   export PS1='\[\033[1;32m\](nix-systems)[\u@\h:\w]\$\[\033[0m\] '
+                  export FLAKE="$(pwd)"
                   alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
                   alias nup='nix flake update --flake "''${FLAKE}" && nrs'
                   alias nvm='nix run ".#nixosConfigurations.$(hostname -s).config.system.build.vmWithBootLoader"'
