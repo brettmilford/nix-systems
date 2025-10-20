@@ -25,7 +25,10 @@ in {
   "immich.json.age".publicKeys = [calliope brett];
   "acme-cf.env.age".publicKeys = [calliope terpsichore brett];
   "fail2ban-cf.conf.age".publicKeys = [calliope terpsichore brett];
-  "borg-calliope-ssh-key.age".publicKeys = [calliope brett];
   "paperless-api-token.age".publicKeys = [calliope brett];
+  "borg-calliope-ssh-key.age".publicKeys = [calliope brett];
   "borg-orpheus-ssh-key.age".publicKeys = [orpheus brett];
+  "borg-thamrys-ssh-key.age".publicKeys = [thamrys brett];
+  "borg-eurydice-ssh-key.age".publicKeys = [eurydice brett];
+  "borg-terpsichore-ssh-key.age".publicKeys = [terpsichore brett];
 }
