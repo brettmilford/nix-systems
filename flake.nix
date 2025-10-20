@@ -117,6 +117,9 @@
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
+            checks = {
+              libTests = import ./lib/tests/release.nix { inherit pkgs; };
+            };
           };
 
         flake =
