@@ -26,14 +26,15 @@ in
             paths = [ "/var/lib" ];
 
             patterns = [
+              "- /var/lib/qemu"
+              "+ /var/lib/qemu/snapshots/opnsense"
+              "+ /var/lib/qemu/images/opnsense"
               "- /var/lib/acme"
               "- /var/lib/containers"
               "- /var/lib/fail2ban"
-              "- /var/lib/ipfs"
-              "- /var/lib/redis-immich"
-              "- /var/lib/redis-nextcloud"
-              "- /var/lib/redis-paperless"
               "- /var/lib/systemd"
+              "- /var/lib/loki"
+              "- /var/lib/prometheus2"
             ];
 
             repo = "borg@${target.host.ip}:${target.repoPath}";
@@ -53,6 +54,16 @@ in
               weekly = 4;
               monthly = 6;
             };
+
+            preHook = ''
+              echo "Creating OPNsense VM snapshot before backup..."
+              SNAPSHOT_NAME="backup_$(date +%Y%m%d_%H%M%S)"
+              if ${./qemu-snapshot.sh} opnsense create "$SNAPSHOT_NAME"; then
+                echo "VM snapshot created: $SNAPSHOT_NAME"
+              else
+                echo "Warning: Failed to create VM snapshot, continuing with backup..."
+              fi
+            '';
           }
         ) repoConfig.targetHosts
       )

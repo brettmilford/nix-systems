@@ -10,6 +10,7 @@
   imports = [
     ./hardware-configuration.nix
     ./opnsense.nix
+    ./backup.nix
     ../common.nix
     ../cloud.nix
     ../../../deployments
