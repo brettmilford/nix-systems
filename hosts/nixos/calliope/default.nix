@@ -9,6 +9,7 @@
   imports = [
     ./hardware-configuration.nix
     ./backup.nix
+    ./backupRepo.nix
     (modulesPath + "/profiles/headless.nix")
     ../common.nix
     ../cloud.nix
