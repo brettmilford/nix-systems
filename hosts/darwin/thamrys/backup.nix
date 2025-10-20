@@ -24,8 +24,9 @@ in
         lib.imap1 (
           idx: target:
           lib.nameValuePair "${repoName}-${target.hostname}" {
+            paths = [ "/Users/${primaryUser}" ];
+
             patterns = [
-              "+ /Users/${primaryUser}"
               "- /Users/brett/.Trash"
               "- /Users/${primaryUser}/Library"
               "- /Users/${primaryUser}/Nextcloud"
