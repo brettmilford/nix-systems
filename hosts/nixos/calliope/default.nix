@@ -177,45 +177,4 @@
     "d /var/lib/postgresql/backups 0750 postgres postgres -"
   ];
 
-  services.borgbackup.jobs.calliope = let
-    backupLocation = "/var/lib/postgresql/backups/";
-  in {
-    paths = [
-      "/var/lib"
-    ];
-    exclude = [
-      "/var/lib/acme"
-      "/var/lib/containers"
-      "/var/lib/fail2ban"
-      "/var/lib/ipfs"
-      "/var/lib/redis-immich"
-      "/var/lib/redis-nextcloud"
-      "/var/lib/redis-paperless"
-      "/var/lib/systemd"
-    ];
-    repo = "borg@192.168.1.2:.";
-    doInit = true;
-    environment.BORG_RSH = "ssh -i ${config.age.secrets.borg-ssh-key.path}";
-    compression = "auto,lzma";
-    startAt = "daily";
-    encryption.mode = "none";
-    readWritePaths = [ "${backupLocation}" ];
-    preHook = ''
-      echo "Starting PostgreSQL backup..."
-
-      # Backup global objects (roles, tablespaces, etc.)
-      echo "Backing up PostgreSQL globals..."
-      ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dumpall --globals-only > ${backupLocation}/postgres_globals.sql
-      ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dumpall > ${backupLocation}/postgres_all.sql
-
-      # Get list of databases and backup each individually
-      echo "Backing up individual databases..."
-      for db in $(${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql -t -c "select datname from pg_database where not datistemplate" | ${pkgs.gnugrep}/bin/grep '\S' | ${pkgs.gawk}/bin/awk '{$1=$1};1'); do
-        echo "  Backing up database: $db"
-        ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/pg_dump --create --format=custom "$db" > "${backupLocation}/$db.pgdump"
-      done
-
-      echo "PostgreSQL backup completed"
-    '';
-  };
 }
