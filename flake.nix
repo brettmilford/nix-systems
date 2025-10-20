@@ -181,7 +181,9 @@
               hostname: host:
               nixpkgs.lib.nixosSystem {
                 system = host.system;
-                specialArgs = commonSpecialArgs;
+                specialArgs = commonSpecialArgs // {
+                  inherit hostname;
+                };
                 modules = [
                   commonModuleArgs
                   self.nixosModules.default
@@ -196,6 +198,7 @@
               nix-darwin.lib.darwinSystem {
                 system = host.system;
                 specialArgs = commonSpecialArgs // {
+                  inherit hostname;
                   pkgs-x86_64 = import nixpkgs { system = "x86_64-darwin"; };
                 };
                 modules = [
