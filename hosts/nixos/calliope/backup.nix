@@ -24,6 +24,7 @@ in
         lib.imap1 (
           idx: target:
           lib.nameValuePair "${repoName}-${target.hostname}" {
+            paths = [ "/var/lib" ];
             patterns = [
               "+ /var/lib/postgresql/backups"
               "- /var/lib/postgresql"
@@ -35,7 +36,6 @@ in
               "- /var/lib/redis-nextcloud"
               "- /var/lib/redis-paperless"
               "- /var/lib/systemd"
-              "+ /var/lib"
             ];
 
             repo = "borg@${target.host.ip}:${target.repoPath}";
