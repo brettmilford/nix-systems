@@ -4,20 +4,19 @@ let
   inherit
     (import ../serviceMap.nix {
       inherit lib;
-      hosts = testHosts;
+      nodes = testNodes;
       services = testServices;
-      domain = "test.com";
     })
     hasService
-    primaryHost
-    hostsFor
+    primaryNode
+    nodesFor
     getServiceDataPath
     shouldBackup
     isBackupTarget
     ;
 
   # Test data
-  testHosts = {
+  testNodes = {
     host1 = {
       hostname = "host1";
       ip = "192.168.1.10";
@@ -65,13 +64,13 @@ lib.runTests {
     expected = true;
   };
 
-  testPrimaryHost = {
-    expr = primaryHost "testApp";
+  testPrimaryNode = {
+    expr = primaryNode "testApp";
     expected = "host1";
   };
 
-  testHostsFor = {
-    expr = hostsFor "testApp";
+  testNodesFor = {
+    expr = nodesFor "testApp";
     expected = [
       "host1"
       "host2"

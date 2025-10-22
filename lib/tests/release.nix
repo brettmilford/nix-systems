@@ -23,6 +23,7 @@ let
 
   # Individual test derivations
   serviceMapTests = mkTestDrv "serviceMap" (import ./serviceMap.nix { inherit lib; });
+  validateServiceTests = mkTestDrv "validateServices" (import ./validateServices.nix { inherit lib; });
 
 in
 # Aggregate all tests into a single derivation

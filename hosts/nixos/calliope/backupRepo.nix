@@ -1,9 +1,9 @@
-{ config, lib, pkgs, hostname, hosts, serviceMap, ... }:
+{ config, lib, pkgs, hostname, nodes, services, ... }:
 
 let
-  thisHost = hosts.${hostname};
-  isBackupTarget = serviceMap.lib.isBackupTarget hostname;
-  backupTargetRepos = serviceMap.lib.getBackupTargetConfig hostname;
+  thisNode = nodes.${hostname};
+  isBackupTarget = services.lib.isBackupTarget hostname;
+  backupTargetRepos = services.lib.getBackupTargetConfig hostname;
 in
 {
   # Check with nix eval .#nixosConfigurations.calliope.config.services.borgbackup.repos --json | jq
@@ -14,9 +14,9 @@ in
         path = repoConfig.repoPath;
         authorizedKeys =
           let
-            sourceHost = hosts.${repoConfig.source};
+            sourceNode = nodes.${repoConfig.source};
           in
-          lib.optional (sourceHost ? backupSshKey) sourceHost.backupSshKey;
+          lib.optional (sourceNode ? backupSshKey) sourceNode.backupSshKey;
       }
     ) backupTargetRepos
   );

@@ -3,94 +3,86 @@ let
 in
 {
   inherit domain;
+  dns = {
+    hosts = [ "opnsense" ];
+  };
 
-  # Service configurations with metadata
-  services = {
-    dns = {
-      hosts = [ "opnsense" ];
+  dhcp = {
+    hosts = [ "opnsense" ];
+  };
+
+  rsyslog = {
+    hosts = [ "eurydice" "terpsichore" ];
+  };
+
+  desktop = {
+    hosts = [ "orpheus" ];
+  };
+
+  auth = {
+    hosts = [ "calliope" ];
+    fqdn = "auth.${domain}";
+  };
+
+  cloud = {
+    hosts = [ "calliope" ];
+    fqdn = "cloud.${domain}";
+    config = {
+      dataPath = "/nextcloud";
     };
+  };
 
-    dhcp = {
-      hosts = [ "opnsense" ];
+  immich = {
+    hosts = [ "calliope" ];
+    fqdn = "immich.${domain}";
+    config = {
+      dataPath = "/immich";
     };
+  };
 
-    rsyslog = {
-      hosts = [ "eurydice" "terpsichore" ];
+  paperless = {
+    hosts = [ "calliope" ];
+    fqdn = "paperless.${domain}";
+    config = {
+      dataPath = "/paperless";
     };
+  };
 
-    secure-boot = {
-      hosts = [ "terpsichore" ];
-    };
+  monitoring = {
+    hosts = [ "eurydice" ];
+    fqdn = "metrics.${domain}";
+  };
 
-    desktop = {
-      hosts = [ "orpheus" ];
-    };
+  hass = {
+    hosts = [ "eurydice" ];
+    fqdn = "hass.${domain}";
+  };
 
-    auth = {
-      hosts = [ "calliope" ];
-      fqdn = "auth.${domain}";
-    };
+  nixBuildMachines = [ "calliope" "orpheus" "terpsichore" ];
 
-    cloud = {
-      hosts = [ "calliope" ];
-      fqdn = "cloud.${domain}";
-      config = {
-        dataPath = "/nextcloud";
-      };
-    };
+  backup = {
+    config = {
+      repos = {
+        # Eurydice's data backed up to terpsichore and calliope
+        eurydice = {
+          targets = [ "terpsichore" "calliope" ];
+        };
 
-    immich = {
-      hosts = [ "calliope" ];
-      fqdn = "immich.${domain}";
-      config = {
-        dataPath = "/immich";
-      };
-    };
+        calliope = {
+          targets = [ "terpsichore" ];
+        };
 
-    paperless = {
-      hosts = [ "calliope" ];
-      fqdn = "paperless.${domain}";
-      config = {
-        dataPath = "/paperless";
-      };
-    };
+        # Terpsichore's data backed up to calliope
+        terpsichore = {
+          targets = [ "calliope" ];
+        };
 
-    monitoring = {
-      hosts = [ "eurydice" ];
-      fqdn = "metrics.${domain}";
-    };
+        orpheus = {
+          targets = [ "terpsichore" ];
+        };
 
-    hass = {
-      hosts = [ "eurydice" ];
-      fqdn = "hass.${domain}";
-    };
-
-    nixBuildMachines = [ "calliope" "orpheus" "terpsichore" ];
-
-    backup = {
-      config = {
-        repos = {
-          # Eurydice's data backed up to terpsichore and calliope
-          eurydice = {
-            targets = [ "terpsichore" "calliope" ];
-          };
-
-          calliope = {
-            targets = [ "terpsichore" ];
-          };
-
-          # Terpsichore's data backed up to calliope
-          terpsichore = {
-            targets = [ "calliope" ];
-          };
-
-          orpheus = {
-            targets = [ "terpsichore" ];
-          };
-
-          thamrys = {
-            targets = [ "terpsichore" ];
-          };
+        thamrys = {
+          targets = [ "terpsichore" ];
         };
       };
     };

@@ -4,15 +4,15 @@
   pkgs,
   self,
   hostname,
-  hosts,
-  serviceMap,
+  nodes,
+  services,
   users,
   ...
 }:
 let
-  thisHost = hosts.${hostname};
-  shouldBackup = serviceMap.lib.shouldBackup hostname;
-  backupSourceRepos = serviceMap.lib.getBackupSourceConfig hostname;
+  thisNode = nodes.${hostname};
+  shouldBackup = services.lib.shouldBackup hostname;
+  backupSourceRepos = services.lib.getBackupSourceConfig hostname;
 in
 {
   age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${hostname}-ssh-key.age";
@@ -37,7 +37,7 @@ in
               "- /var/lib/prometheus2"
             ];
 
-            repo = "borg@${target.host.ip}:${target.repoPath}";
+            repo = "borg@${target.node.ip}:${target.repoPath}";
             doInit = true;
             environment.BORG_RSH = "ssh -i ${config.age.secrets.borg-ssh-key.path}";
 
@@ -58,10 +58,10 @@ in
             preHook = ''
               echo "Creating OPNsense VM snapshot before backup..."
               SNAPSHOT_NAME="backup_$(date +%Y%m%d_%H%M%S)"
-              ${pkgs.bash}/bin/bash ${./qemu-snapshot.sh} opnsense create "$SNAPSHOT_NAME" || echo "Warning: VM snapshot failed"
+              qemu-snapshot opnsense create "$SNAPSHOT_NAME" || echo "Warning: VM snapshot failed"
             '';
           }
-        ) repoConfig.targetHosts
+        ) repoConfig.targetNodes
       )
     ) backupSourceRepos
   );
