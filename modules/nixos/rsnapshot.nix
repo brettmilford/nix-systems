@@ -40,7 +40,7 @@ in
     services.rsnapshot = {
       enable = true;
       extraConfig = ''
-        snapshot_root   /srv/data/lacie/rsnapshot/
+        snapshot_root   ${cfg.backupDrive.mount}/rsnapshot/
         retain  daily   7
         retain  weekly  4
         retain  monthly   12
@@ -52,8 +52,8 @@ in
     };
 
     systemd.services."rsnapshot@" = {
-      after = [ "srv-data-lacie.mount" ];
-      requires = [ "srv-data-lacie.mount" ];
+      after = [ "mnt-lacie.mount" ];
+      requires = [ "mnt-lacie.mount" ];
       description = "rsnapshot (%I) backup";
       serviceConfig = {
         ExecStart = "${pkgs.rsnapshot}/bin/rsnapshot %I";
@@ -65,6 +65,8 @@ in
 
     systemd.timers."rsnapshot-daily" = {
       description = "rsnapshot daily backup";
+      after = [ "mnt-lacie.mount" ];
+      wants = [ "mnt-lacie.mount" ];
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "12:00";
@@ -75,6 +77,8 @@ in
 
     systemd.timers."rsnapshot-weekly" = {
       description = "rsnapshot weekly backup";
+      after = [ "mnt-lacie.mount" ];
+      wants = [ "mnt-lacie.mount" ];
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "Monday *-*-* 13:30";
@@ -85,6 +89,8 @@ in
 
     systemd.timers."rsnapshot-monthly" = {
       description = "rsnapshot monthly backup";
+      after = [ "mnt-lacie.mount" ];
+      wants = [ "mnt-lacie.mount" ];
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = "*-*-1 03:30";

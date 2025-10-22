@@ -15,6 +15,8 @@
     lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    deploy-rs.url = "github:serokell/deploy-rs";
+    deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -28,6 +30,7 @@
       nixos-generators,
       lanzaboote,
       flake-parts,
+      deploy-rs,
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } (
@@ -100,17 +103,14 @@
                       sudo nixos-rebuild switch --flake "''${FLAKE}" "$@"
                     ''
                 );
-                nrsr = pkgs.writeShellScriptBin "nrsr" ''
-                  ssh $1 "sudo nixos-rebuild switch --flake 'github:brettmilford/nix-systems/devel'"
-                '';
               in
               pkgs.mkShell {
                 packages = with pkgs; [
                   nixBin
                   nrs
-                  nrsr
                   inputs'.agenix.packages.default
                   inputs'.home-manager.packages.default
+                  inputs'.deploy-rs.packages.default
                   nixfmt-tree
                   jq
                 ];
@@ -124,34 +124,35 @@
               };
             formatter = pkgs.nixfmt-rfc-style;
             checks = {
-              libTests = import ./lib/tests/release.nix { inherit pkgs; };
+              libTests =
+                import ./lib/tests/release.nix { inherit pkgs; }
+                // deploy-rs.lib.${system}.deployChecks self.deploy;
             };
           };
 
         flake =
           let
-            hosts = import ./hosts;
-            catalog = import ./services.nix;
+            nodesBase = import ./nodes.nix { inherit self; };
 
-            # Create our extended lib
-            ourLib = import ./lib { lib = nixpkgs.lib; };
-            extendedLib = nixpkgs.lib // ourLib;
+            nodes = builtins.listToAttrs (
+              map (hostname: {
+                name = hostname;
+                value = (nodesBase."${hostname}" // { hostname = hostname; });
+              }) (builtins.attrNames nodesBase)
+            );
 
-            # Validate at import time
-            _ = extendedLib.validateServices hosts catalog.services;
-            __ = extendedLib.validateBackupSets hosts (catalog.services.backup.config.repos or { });
+            # Create serviceMap with nodes and lib
+            serviceCatalog = import ./services.nix;
 
-            # Create serviceMap with hosts and lib
-            serviceMap = {
-              # Expose raw data at top level
-              inherit (catalog) services domain;
-              inherit hosts;
+            services = {
+              inherit nodes;
+              services = serviceCatalog;
 
               # Wrap functions under lib
               lib = import ./lib/serviceMap.nix {
-                lib = extendedLib;
-                inherit hosts;
-                inherit (catalog) services domain;
+                lib = nixpkgs.lib;
+                inherit nodes;
+                services = serviceCatalog;
               };
             };
 
@@ -160,8 +161,8 @@
               inherit
                 self
                 users
-                hosts
-                serviceMap
+                nodes
+                services
                 ;
               inputs = inputs;
             };
@@ -171,10 +172,10 @@
               _module.args = commonSpecialArgs;
             };
 
-            # Filter hosts by system type
-            nixosHosts = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "linux" host.system) hosts;
+            # Filter nodes by system type
+            nixosNodes = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "linux" host.system) nodes;
 
-            darwinHosts = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "darwin" host.system) hosts;
+            darwinNodes = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "darwin" host.system) nodes;
 
             # Generate NixOS configuration
             mkNixosConfiguration =
@@ -189,8 +190,8 @@
                   self.nixosModules.default
                   ./hosts/nixos/${hostname}
                 ]
-                ++ nixpkgs.lib.optional (serviceMap.lib.hasService hostname "secure-boot") lanzaboote.nixosModules.lanzaboote
-                ++ nixpkgs.lib.optional (serviceMap.lib.hasService hostname "desktop") self.nixosModules.users;
+                ++ (host.extraModules or [])
+                ++ nixpkgs.lib.optional (services.lib.hasService hostname "desktop") self.nixosModules.users;
               };
             # Generate Darwin configuration
             mkDarwinConfiguration =
@@ -210,7 +211,7 @@
           in
           {
             lib = {
-              inherit users hosts serviceMap;
+              inherit users nodes services;
             };
 
             homeModules.default = {
@@ -239,11 +240,28 @@
                   ./modules/nixos/users.nix
                 ];
               };
+
+              secureBoot = {
+                imports = [
+                  lanzaboote.nixosModules.lanzaboote
+                ];
+              };
             };
 
-            nixosConfigurations = builtins.mapAttrs mkNixosConfiguration nixosHosts;
+            nixosConfigurations = builtins.mapAttrs mkNixosConfiguration nixosNodes;
 
-            darwinConfigurations = builtins.mapAttrs mkDarwinConfiguration darwinHosts;
+            darwinConfigurations = builtins.mapAttrs mkDarwinConfiguration darwinNodes;
+
+            deploy.nodes = builtins.mapAttrs (hostname: host: {
+              hostname = hostname;
+              profiles.system = {
+                user = "root";
+                path = deploy-rs.lib.${host.system}.activate.nixos self.nixosConfigurations.${hostname};
+                sshUser = "nix";
+                remoteBuild = true;
+                fastConnection = true;
+              };
+            }) nixosNodes;
           };
       }
     );

@@ -4,16 +4,17 @@
   pkgs,
   self,
   modulesPath,
-  hosts,
-  serviceMap,
+  hostname,
+  nodes,
+  services,
   users,
   ...
 }:
 let
   hostname = "orpheus";
-  thisHost = hosts.${hostname};
-  shouldBackup = serviceMap.lib.shouldBackup hostname;
-  backupSourceRepos = serviceMap.lib.getBackupSourceConfig hostname;
+  thisNode = nodes.${hostname};
+  shouldBackup = services.lib.shouldBackup hostname;
+  backupSourceRepos = services.lib.getBackupSourceConfig hostname;
 in
 {
   imports = [
@@ -26,13 +27,13 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   networking.hostName = hostname;
-  networking.domain = thisHost.domain;
+  networking.domain = thisNode.domain;
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
 
   services.rsnapshotBackup.enable = true;
 
-  age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${thisHost.hostname}-ssh-key.age";
+  age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${hostname}-ssh-key.age";
 
   services.borgbackup.jobs = lib.mkIf shouldBackup (
     lib.concatMapAttrs (
@@ -54,7 +55,7 @@ in
               "/var/lib/systemd"
             ];
 
-            repo = "borg@${target.host.ip}:${target.repoPath}";
+            repo = "borg@${target.node.ip}:${target.repoPath}";
             doInit = true;
             environment.BORG_RSH = "ssh -i ${config.age.secrets.borg-ssh-key.path}";
 
@@ -72,7 +73,7 @@ in
               monthly = 6;
             };
           }
-        ) repoConfig.targetHosts
+        ) repoConfig.targetNodes
       )
     ) backupSourceRepos
   );

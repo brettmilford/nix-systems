@@ -4,17 +4,15 @@
   lib,
   pkgs,
   modulesPath,
-  lanzaboote,
-  hosts,
-  serviceMap,
-  users,
+  hostname,
+  nodes,
+  services,
   ...
 }:
 let
-  hostname = "terpsichore";
-  thisHost = hosts.${hostname};
-  isBackupTarget = serviceMap.lib.isBackupTarget hostname;
-  backupTargetRepos = serviceMap.lib.getBackupTargetConfig hostname;
+  thisNode = nodes.${hostname};
+  isBackupTarget = services.lib.isBackupTarget hostname;
+  backupTargetRepos = services.lib.getBackupTargetConfig hostname;
 in
 {
   imports = [
@@ -61,9 +59,9 @@ in
         path = repoConfig.repoPath;
         authorizedKeys =
           let
-            sourceHost = hosts.${repoConfig.source};
+            sourceNode = nodes.${repoConfig.source};
           in
-          lib.optional (sourceHost ? backupSshKey) sourceHost.backupSshKey;
+          lib.optional (sourceNode ? backupSshKey) sourceNode .backupSshKey;
       }
     ) backupTargetRepos
   );

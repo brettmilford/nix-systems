@@ -4,15 +4,14 @@
   pkgs,
   self,
   hostname,
-  hosts,
-  serviceMap,
-  users,
+  nodes,
+  services,
   ...
 }:
 let
-  thisHost = hosts.${hostname};
-  shouldBackup = serviceMap.lib.shouldBackup hostname;
-  backupSourceRepos = serviceMap.lib.getBackupSourceConfig hostname;
+  thisNode = nodes.${hostname};
+  shouldBackup = services.lib.shouldBackup hostname;
+  backupSourceRepos = services.lib.getBackupSourceConfig hostname;
   backupRWPath = "/var/lib/postgresql/backups/";
 in
 {
@@ -38,7 +37,7 @@ in
               "- /var/lib/systemd"
             ];
 
-            repo = "borg@${target.host.ip}:${target.repoPath}";
+            repo = "borg@${target.node.ip}:${target.repoPath}";
             doInit = true;
             environment.BORG_RSH = "ssh -i ${config.age.secrets.borg-ssh-key.path}";
 
@@ -76,7 +75,7 @@ in
             '';
 
           }
-        ) repoConfig.targetHosts
+        ) repoConfig.targetNodes
       )
     ) backupSourceRepos
   );
