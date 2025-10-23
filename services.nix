@@ -15,10 +15,6 @@ in
     hosts = [ "eurydice" "terpsichore" ];
   };
 
-  desktop = {
-    hosts = [ "orpheus" ];
-  };
-
   auth = {
     hosts = [ "calliope" ];
     fqdn = "auth.${domain}";

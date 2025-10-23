@@ -11,6 +11,9 @@
     system = "x86_64-linux";
     dataPath = "/srv";
     backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHSeI7btghOWNVXXYq7A35Z2th8+w431soOMYfDL0YLr borg@orpheus";
+    extraModules = [
+      self.nixosModules.users
+    ];
   };
 
   eurydice = {
