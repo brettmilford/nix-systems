@@ -3,14 +3,6 @@ let
 in
 {
   inherit domain;
-  dns = {
-    hosts = [ "opnsense" ];
-  };
-
-  dhcp = {
-    hosts = [ "opnsense" ];
-  };
-
   rsyslog = {
     hosts = [ "eurydice" "terpsichore" ];
   };

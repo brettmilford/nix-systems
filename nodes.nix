@@ -1,10 +1,5 @@
 { self }:
 {
-  opnsense = {
-    ip = "192.168.1.1";
-    system = "amd64-freebsd";
-  };
-
   orpheus = {
     ip = "192.168.10.31";
     domain = "internal";

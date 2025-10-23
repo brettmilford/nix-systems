@@ -3,12 +3,9 @@
   lib,
   pkgs,
   users,
+  hostname,
   ...
 }:
-let
-  hostname = "thamrys";
-  user = users.${config.system.primaryUser};
-in
 {
   imports = [
     ../common.nix
@@ -28,7 +25,27 @@ in
         name = user.name;
         home = "/Users/${primaryUser}";
       };
+
+      nix = {
+        name = "nix";
+        uid = 1001;
+        gid = 80;
+        home = "/Users/nix";
+        createHome = true;
+        shell = pkgs.bash;
+        openssh.authorizedKeys.keys = [
+          user.sshKey
+        ];
+      };
     };
+
+  users.knownUsers = [ "nix" ];
+
+  security.sudo.extraConfig = ''
+    nix ALL=(ALL:ALL) NOPASSWD: ALL
+  '';
+
+  services.openssh.enable = true;
 
   networking = {
     hostName = hostname;
