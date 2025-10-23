@@ -23,6 +23,7 @@ let
       openssh.authorizedKeys.keys = [ user.sshKey ];
     };
     users.groups.${username} = { };
+    services.openssh.settings.AllowUsers = lib.mkAfter [ username ];
   };
 in
 mkMerge (builtins.attrValues (builtins.mapAttrs mkUser users))

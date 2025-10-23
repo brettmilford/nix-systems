@@ -2,6 +2,7 @@
   description = "Nix systems config";
 
   inputs = {
+    self.submodules = true;
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nix-darwin.url = "github:lnl7/nix-darwin/nix-darwin-25.05";
@@ -132,14 +133,7 @@
 
         flake =
           let
-            nodesBase = import ./nodes.nix { inherit self; };
-
-            nodes = builtins.listToAttrs (
-              map (hostname: {
-                name = hostname;
-                value = (nodesBase."${hostname}" // { hostname = hostname; });
-              }) (builtins.attrNames nodesBase)
-            );
+            nodes = import ./nodes.nix { inherit self; };
 
             # Create serviceMap with nodes and lib
             serviceCatalog = import ./services.nix;
@@ -173,9 +167,13 @@
             };
 
             # Filter nodes by system type
-            nixosNodes = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "linux" host.system) nodes;
+            nixosNodes = nixpkgs.lib.filterAttrs (
+              nodeName: node: nixpkgs.lib.hasInfix "linux" node.system
+            ) nodes;
 
-            darwinNodes = nixpkgs.lib.filterAttrs (name: host: nixpkgs.lib.hasInfix "darwin" host.system) nodes;
+            darwinNodes = nixpkgs.lib.filterAttrs (
+              nodeName: node: nixpkgs.lib.hasInfix "darwin" node.system
+            ) nodes;
 
             # Generate NixOS configuration
             mkNixosConfiguration =
@@ -190,8 +188,7 @@
                   self.nixosModules.default
                   ./hosts/nixos/${hostname}
                 ]
-                ++ (host.extraModules or [])
-                ++ nixpkgs.lib.optional (services.lib.hasService hostname "desktop") self.nixosModules.users;
+                ++ (host.extraModules or [ ]);
               };
             # Generate Darwin configuration
             mkDarwinConfiguration =
@@ -252,16 +249,41 @@
 
             darwinConfigurations = builtins.mapAttrs mkDarwinConfiguration darwinNodes;
 
-            deploy.nodes = builtins.mapAttrs (hostname: host: {
-              hostname = hostname;
-              profiles.system = {
-                user = "root";
-                path = deploy-rs.lib.${host.system}.activate.nixos self.nixosConfigurations.${hostname};
-                sshUser = "nix";
-                remoteBuild = true;
-                fastConnection = true;
-              };
-            }) nixosNodes;
+            deploy.nodes = builtins.mapAttrs (
+              nodeName: node:
+              let
+                hasUsers = builtins.elem self.nixosModules.users (node.extraModules or [ ]);
+                userProfiles =
+                  if hasUsers then
+                    builtins.mapAttrs (username: userConfig: {
+                      user = username;
+                      path =
+                        deploy-rs.lib.${node.system}.activate.home-manager
+                          self.legacyPackages.${node.system}.homeConfigurations.${username};
+                      sshUser = username;
+                      remoteBuild = true;
+                      fastConnection = true;
+                    }) users
+                  else
+                    { };
+                systemType = if nixpkgs.lib.hasInfix "linux" node.system then "nixos" else "darwin";
+              in
+              {
+                hostname = nodeName;
+                profiles = {
+                  system = {
+                    user = "root";
+                    path =
+                      deploy-rs.lib.${node.system}.activate.${systemType}
+                        self."${systemType}Configurations".${nodeName};
+                    sshUser = "nix";
+                    remoteBuild = true;
+                    fastConnection = true;
+                  };
+                }
+                // userProfiles;
+              }
+            ) nodes;
           };
       }
     );
