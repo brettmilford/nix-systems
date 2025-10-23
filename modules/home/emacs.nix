@@ -80,21 +80,6 @@
       "doom" = {
         source = "${self}/config/doom";
         recursive = true;
-        onChange = "${pkgs.writeShellScript "doom-change" ''
-          export PATH="$PATH:$HOME/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin:/opt/homebrew/bin"
-          export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
-          export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
-          export EMACSDIR="${config.home.sessionVariables.EMACSDIR}"
-          export XDG_CONFIG_HOME="${config.home.sessionVariables.XDG_CONFIG_HOME}";
-          if [ ! -d "$EMACSDIR" ]; then
-            git clone --depth 1 https://github.com/doomemacs/doomemacs.git $EMACSDIR
-          fi
-          if [ ! -d "$DOOMLOCALDIR" ]; then
-            ${config.xdg.configHome}/emacs/bin/doom --force install
-          else
-            ${config.xdg.configHome}/emacs/bin/doom sync -e
-          fi
-        ''}";
       };
     };
   };

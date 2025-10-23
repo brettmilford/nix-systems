@@ -1,12 +1,9 @@
-{ self, config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, self, ... }:
 
 with lib;
 
 let
   cfg = config.services.immich-oidc;
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    system = pkgs.system;
-  };
 in
 {
   options.services.immich-oidc = {
@@ -24,7 +21,7 @@ in
 
     services.immich = {
       enable = true;
-      package = pkgs-unstable.immich;
+      package = pkgs.unstable.immich;
       accelerationDevices = null;
       mediaLocation = "/srv/data/immich";
       database.enable = true;

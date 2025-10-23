@@ -35,7 +35,7 @@
       ...
     }:
     flake-parts.lib.mkFlake { inherit inputs; } (
-      top@{
+      {
         config,
         withSystem,
         moduleWithSystem,
@@ -45,8 +45,6 @@
         users = import ./users.nix;
       in
       {
-        imports = [ inputs.home-manager.flakeModules.home-manager ];
-
         systems = [
           "x86_64-linux"
           "aarch64-linux"
@@ -70,7 +68,6 @@
                 inherit pkgs;
                 extraSpecialArgs = {
                   inherit self;
-                  inputs = inputs;
                 };
                 modules = [
                   {
@@ -135,7 +132,7 @@
           let
             nodes = import ./nodes.nix { inherit self; };
 
-            # Create serviceMap with nodes and lib
+            # Create services with nodes and lib
             serviceCatalog = import ./services.nix;
 
             services = {
@@ -158,7 +155,6 @@
                 nodes
                 services
                 ;
-              inputs = inputs;
             };
 
             # Standard modules for all configurations
@@ -186,6 +182,7 @@
                 modules = [
                   commonModuleArgs
                   self.nixosModules.default
+                  self.nixosModules.nixpkgsUnstable
                   ./hosts/nixos/${hostname}
                 ]
                 ++ (host.extraModules or [ ]);
@@ -207,10 +204,6 @@
               };
           in
           {
-            lib = {
-              inherit users nodes services;
-            };
-
             homeModules.default = {
               imports = [
                 ./modules/home
@@ -241,6 +234,16 @@
               secureBoot = {
                 imports = [
                   lanzaboote.nixosModules.lanzaboote
+                ];
+              };
+
+              nixpkgsUnstable = {
+                nixpkgs.overlays = [
+                  (final: prev: {
+                    unstable = import inputs.nixpkgs-unstable {
+                      system = prev.system;
+                    };
+                  })
                 ];
               };
             };
