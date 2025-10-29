@@ -11,7 +11,6 @@
     ./build-vm.nix
   ];
 
-  system.stateVersion = "25.05";
   nix = {
     extraOptions = ''
       extra-platforms = aarch64-linux x86_64-linux

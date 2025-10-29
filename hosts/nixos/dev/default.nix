@@ -3,6 +3,7 @@
   lib,
   pkgs,
   modulesPath,
+  hostname,
   ...
 }: {
   imports = [
@@ -11,6 +12,8 @@
     ../common.nix
     ../cloud.nix
   ];
+
+ system.stateVersion = "23.05";
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -25,7 +28,7 @@
     fsType = "vfat";
   };
 
-  networking.hostName = "dev";
+  networking.hostName = hostname;
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
 }

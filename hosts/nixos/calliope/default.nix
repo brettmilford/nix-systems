@@ -8,21 +8,16 @@
 }: {
   imports = [
     ./hardware-configuration.nix
-    ./backup.nix
-    ./backupRepo.nix
     (modulesPath + "/profiles/headless.nix")
+    ./backup.nix
     ../common.nix
     ../cloud.nix
     ../zerotierone.nix
     ../virt.nix
-    "${self}/modules/paperless"
     ./postfix.nix
-    "${self}/modules/auth.nix"
-    "${self}/modules/mealie.nix"
-    "${self}/modules/immich.nix"
-    "${self}/modules/gateway.nix"
-    "${self}/modules/cloud.nix"
   ];
+
+  system.stateVersion = "23.05";
 
   networking.hostName = "calliope";
   networking.hostId = "25f4937c";
@@ -37,65 +32,6 @@
     package = pkgs.postgresql_14;
   };
 
-  services.prometheus.exporters.node = {
-    enable = true;
-    listenAddress = "172.22.70.58";
-    openFirewall = true;
-    enabledCollectors = [
-      "systemd"
-      "filesystem"
-      "meminfo"
-      "loadavg"
-      "stat"
-      "processes"
-      "interrupts"
-    ];
-  };
-
-  services.rsyslogd = {
-    enable = true;
-    defaultConfig = ''
-      # Rate limit syslog source
-      $SystemLogRateLimitInterval 5
-      $SystemLogRateLimitBurst 50000
-      $SystemLogRateLimitSeverity 5
-
-      # Has default rate limiting
-      # https://www.rsyslog.com/doc/configuration/modules/imjournal.html
-      $ModLoad imjournal
-
-      $ModLoad imfile
-      # Nginx access log
-      $InputFileName /var/log/nginx/*access.log
-      $InputFileTag nginx-access:
-      $InputFileStateFile nginx-access-state
-      $InputFileSeverity info
-      $InputFileFacility local1
-      $InputRunFileMonitor
-
-      # Nginx error log
-      $InputFileName /var/log/nginx/*error.log
-      $InputFileTag nginx-error:
-      $InputFileStateFile nginx-error-state
-      $InputFileSeverity error
-      $InputFileFacility local1
-      $InputRunFileMonitor
-
-      # Forward all logs to remote rsyslog server on port 1514
-      *.* @@192.168.1.2:1514
-    '';
-  };
-
-  services.gateway.enable = true;
-  services.auth = {
-    enable = true;
-    domain = "auth.cirriform.au";
-  };
-  services.cloud.enable = true;
-  services.cloud.enableOffice = true;
-  services.paperless-ngx.enable = true;
-  services.mealie-oidc.enable = false;
-  services.immich-oidc.enable = true;
   services.kubo = {
     enable = false;
     autoMount = true;
@@ -171,11 +107,4 @@
   #    4001  # IPFS swarm port (QUIC)
   #  ];
   #};
-
-  age.secrets.borg-ssh-key.file = "${self}/secrets/borg-calliope-ssh-key.age";
-
-  systemd.tmpfiles.rules = [
-    "d /var/lib/postgresql/backups 0750 postgres postgres -"
-  ];
-
 }

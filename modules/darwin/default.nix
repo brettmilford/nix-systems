@@ -35,7 +35,6 @@ in
     fi
   '';
 
-  system.stateVersion = 4;
   ids.gids.nixbld = 350;
   nix = {
     distributedBuilds = true;

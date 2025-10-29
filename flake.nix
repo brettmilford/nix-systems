@@ -73,7 +73,7 @@
                   {
                     home.username = username;
                     home.homeDirectory = homeDirectory;
-                    home.stateVersion = "25.05";
+                    home.stateVersion = "22.11";
                     programs.home-manager.enable = true;
                     _module.args.userConfig = user // {
                       username = username;
@@ -135,6 +135,7 @@
             # Create services with nodes and lib
             serviceCatalog = import ./services.nix;
 
+            # TODO: refac to catalog
             services = {
               inherit nodes;
               services = serviceCatalog;
@@ -145,6 +146,12 @@
                 inherit nodes;
                 services = serviceCatalog;
               };
+            };
+
+            # Import the service modules factory
+            serviceModulesLib = import ./lib/serviceModules.nix {
+              inherit (nixpkgs) lib;
+              inherit nodes services;
             };
 
             # Standard arguments passed to all configurations
@@ -174,6 +181,10 @@
             # Generate NixOS configuration
             mkNixosConfiguration =
               hostname: host:
+              let
+                # Get modules and options for this host based on services
+                hostModules = serviceModulesLib.createModulesForHost hostname;
+              in
               nixpkgs.lib.nixosSystem {
                 system = host.system;
                 specialArgs = commonSpecialArgs // {
@@ -184,6 +195,10 @@
                   self.nixosModules.default
                   self.nixosModules.nixpkgsUnstable
                   ./hosts/nixos/${hostname}
+                ]
+                ++ hostModules.modules
+                ++ [
+                  hostModules.optionsModule
                 ]
                 ++ (host.extraModules or [ ]);
               };

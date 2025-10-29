@@ -3,19 +3,32 @@
 with lib;
 
 let
-  cfg = config.services.immich-oidc;
+  cfg = config.services.photos;
 in
 {
-  options.services.immich-oidc = {
+  imports = [
+    ./gateway.nix
+  ];
+
+  options.services.photos = {
     enable = mkEnableOption "Immich with basic configuration for OIDC setup";
+    fqdn = mkOption {
+      type = types.str;
+      example = "photos.example.com";
+      description = "Domain name for Immich instance";
+    };
+    dataPath = mkOption {
+      type = types.str;
+      default = "/srv/data/immich";
+      description = "Immich media dir";
+    };
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      description = "Secret file paths";
+    };
   };
 
   config = mkIf cfg.enable {
-    age.secrets."immich.json" = {
-      file = "${self}/secrets/immich.json.age";
-      owner = "immich";
-      group = "immich";
-    };
 
     environment.systemPackages = with pkgs; [ exiftool ];
 
@@ -27,19 +40,19 @@ in
       database.enable = true;
       redis.enable = true;
       environment = {
-        IMMICH_CONFIG_FILE = lib.mkForce config.age.secrets."immich.json".path;
+        IMMICH_CONFIG_FILE = lib.mkForce cfg.secretPaths."immich.json";
       };
       machine-learning.environment = {
-        MACHINE_LEARNING_CACHE_FOLDER = lib.mkForce "/srv/data/immich/cache";
+        MACHINE_LEARNING_CACHE_FOLDER = lib.mkForce "${cfg.dataPath}/cache";
       };
     };
 
     users.users.immich.extraGroups = [ "video" "render" ];
 
+    services.gateway.enable = true;
     services.nginx = {
       proxyTimeout = "600s";
       virtualHosts."immich.cirriform.au" = {
-        enableACME = true;
         extraConfig = ''
           access_log /var/log/nginx/immich.access.log;
         '';

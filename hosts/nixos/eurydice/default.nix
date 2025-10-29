@@ -14,9 +14,9 @@
     ../common.nix
     ../cloud.nix
     ../../../deployments
-    "${self}/modules/monitoring"
-    "${self}/modules/backup.nix"
   ];
+
+  system.stateVersion = "24.05";
 
   networking.hostName = "eurydice";
   networking.hostId = "04ca88ad";
@@ -49,31 +49,6 @@
     nvme-cli
   ];
 
-  #services.xserver.displayManager.gdm.autoSuspend = false;
-  #services.logind = {
-  #  powerKey = "poweroff";
-  #  #powerKeyLongPress = "ignore";
-  #  #rebootKey = "reboot";
-  #  suspendKey = "poweroff";
-  #  #hibernateKey = "hibernate";
-  #  #lidSwitch = "suspend";
-  #  #lidSwitchExternalPower = "suspend";
-  #  #lidSwitchDocked = "ignore";
-  #};
-
-  #services.xserver.desktopManager.gnome = {
-  #  enable = true;
-  #  extraGSettingsOverrides = ''
-  #    [org.gnome.settings-daemon.plugins.power]
-  #    power-button-action='poweroff'
-  #    sleep-inactive-ac-type='nothing'
-  #    sleep-inactive-battery-type='nothing'
-
-  #    [org.gnome.desktop.session]
-  #    idle-delay=uint32 0
-  #  '';
-  #};
-
   services.openssh.settings = {
     X11Forwarding = true;
   };
@@ -82,12 +57,4 @@
     homeAssistant.enable = true;
     unifi.enable = true;
   };
-
-  services.monitoring = {
-    enable = true;
-    domain = "monit.internal";
-    enableUnpoller = true;
-  };
-
-  services.backup.enable = true;
 }

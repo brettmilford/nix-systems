@@ -2,8 +2,8 @@
   config,
   lib,
   pkgs,
-  users,
   hostname,
+  users,
   ...
 }:
 {
@@ -12,6 +12,7 @@
     ../homebrew.nix
   ];
 
+  system.stateVersion = 4;
   system.primaryUser = "brett";
 
   users.users =
@@ -20,7 +21,6 @@
       user = users.${primaryUser};
     in
     {
-
       ${primaryUser} = {
         name = user.name;
         home = "/Users/${primaryUser}";

@@ -14,6 +14,11 @@ let
 in
 
 {
+
+  imports = [
+    ../gateway.nix
+  ];
+
   options.services.paperless-ngx = {
     enable = mkEnableOption "Paperless-NGX document management system";
     dataDir = mkOption {
@@ -21,27 +26,18 @@ in
       default = "/srv/data/paperless";
       description = "Directory where paperless data are stored";
     };
+    fqdn = mkOption {
+      type = types.str;
+      example = "paperless.example.com";
+      description = "Domain name for Paperless instance";
+    };
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      description = "Secret file paths";
+    };
   };
 
   config = mkIf cfg.enable {
-
-    age.secrets.paperless-admin-passwd = {
-      file = "${self}/secrets/admin-passwd.age";
-      owner = "paperless";
-      group = "paperless";
-    };
-
-    age.secrets."paperless.env" = {
-      file = "${self}/secrets/paperless.env.age";
-      #owner = "paperless";
-      #group = "paperless";
-    };
-
-    age.secrets.paperless-api-token = {
-      file = "${self}/secrets/paperless-api-token.age";
-      owner = "paperless";
-      group = "paperless";
-    };
 
     services.gotenberg.port = 3200;
 
@@ -49,10 +45,10 @@ in
       enable = true;
       address = "127.0.0.1";
       port = 28981;
-      passwordFile = config.age.secrets.paperless-admin-passwd.path;
+      passwordFile = cfg.secretPaths.paperless-admin-passwd;
       configureTika = true;
       database.createLocally = true;
-      environmentFile = config.age.secrets."paperless.env".path;
+      environmentFile = cfg.secretPaths."paperless.env";
       exporter = {
         enable = true;
         settings = {
@@ -68,8 +64,8 @@ in
         PAPERLESS_SCRATCH_DIR = "${cfg.dataDir}/tmp";
         PAPERLESS_CONVERT_TMPDIR = "${cfg.dataDir}/tmp";
 
-        PAPERLESS_URL = "https://paperless.cirriform.au";
-        PAPERLESS_ALLOWED_HOSTS = "paperless.cirriform.au";
+        PAPERLESS_URL = "https://${cfg.fqdn}";
+        PAPERLESS_ALLOWED_HOSTS = "${cfg.fqdn}";
         PAPERLESS_TRUSTED_PROXIES = "127.0.0.1,::1,localhost";
         PAPERLESS_USE_X_FORWARD_HOST = "true";
         PAPERLESS_PROXY_SSL_HEADER = [ "HTTP_X_FORWARDED_PROTO" "https"];
@@ -146,8 +142,9 @@ in
       '';
     };
 
+    services.gateway.enable = true;
     services.nginx = mkIf config.services.nginx.enable {
-      virtualHosts."paperless.cirriform.au" = {
+      virtualHosts."${cfg.fqdn}" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:28981";
           recommendedProxySettings = true;

@@ -1,0 +1,335 @@
+{
+  lib,
+  nodes,
+  services,
+}:
+
+let
+  mod = ../modules/nixos;
+  sec = ../secrets;
+
+  # Map services to their corresponding modules and options
+  serviceModuleMap = {
+    # Default monitoring clients (applied to all hosts)
+    monitoring-rsyslog = {
+      modules = [ "${mod}/monitoring/rsyslog" ];
+      getOptions =
+        hostname:
+        let
+          # Find all hosts that run the monitoring service
+          monitoringHosts = lib.filter (host: services.lib.hasService host "monitoring") (
+            lib.attrNames nodes
+          );
+        in
+        {
+          enable = true;
+          servers = monitoringHosts;
+        };
+    };
+
+    monitoring-node = {
+      modules = [ "${mod}/monitoring/node-exporter" ];
+      getOptions = hostname: {
+        enable = true;
+        port = 9100;
+        # Use the node's IP if available, otherwise listen on all interfaces
+        listenAddress = nodes.${hostname}.ip or "0.0.0.0";
+        openFirewall = true;
+      };
+    };
+
+    # Main monitoring server
+    monitoring = {
+      modules = [ "${mod}/monitoring" ];
+      getSecrets =
+        hostname:
+        let
+          monitoringService = services.services.monitoring or { };
+        in
+        {
+          snmp_env = {
+            file = "${sec}/snmp.env.age";
+          };
+          grafana_pass = {
+            file = "${sec}/grafana_pass.age";
+            owner = "grafana";
+            group = "grafana";
+          };
+          grafana_key = {
+            file = "${sec}/grafana_key.age";
+            owner = "grafana";
+            group = "grafana";
+          };
+          unifipoller_pass = {
+            file = "${sec}/unifipoller_pass.age";
+            owner = "unifi-poller";
+          };
+        };
+      # TODO: inherit options like ports from services.<service>.config?
+      # TODO: inherit options like ports from services.<service>.<host>.config - support overriding?
+      getOptions =
+        hostname:
+        let
+          monitoringService = services.services.monitoring or { };
+          webServices = lib.filterAttrs (name: svc: svc ? fqdn) services.services;
+
+          # Generate node-exporter targets for all hosts
+          allHosts = lib.attrNames nodes;
+          nodeExporterTargets = map (host: {
+            hostname = host;
+            ip = nodes.${host}.ip;
+            port = 9100;
+          }) allHosts;
+
+          # Legacy hosts list for backward compatibility
+          legacyHosts = lib.unique (
+            lib.flatten (lib.mapAttrsToList (name: svc: svc.hosts or [ ]) services.services)
+          );
+        in
+        {
+          enable = true;
+          inherit (monitoringService) fqdn;
+          targets = {
+            # Node exporter targets for all hosts
+            nodes = nodeExporterTargets;
+
+            # Legacy targets for backward compatibility
+            legacyNodes = map (host: {
+              name = host;
+              ip = nodes.${host}.ip;
+            }) legacyHosts;
+
+            web = lib.mapAttrsToList (name: svc: {
+              inherit name;
+              hosts = map (host: {
+                name = host;
+                ip = nodes.${host}.ip;
+                port = (svc.config or { }).prometheusPort or 8080;
+              }) (svc.hosts or [ ]);
+            }) webServices;
+            snmp = lib.optional (nodes ? opnsense) {
+              name = "opnsense";
+              ip = nodes.opnsense.ip;
+            };
+          };
+        }
+        // lib.optionalAttrs ((monitoringService.config or { }) ? ports) {
+          ports = monitoringService.config.ports;
+        };
+    };
+
+    cloud = {
+      modules = [ "${mod}/cloud.nix" ];
+      getOptions =
+        hostname:
+        let
+          cloudService = services.services.cloud or { };
+        in
+        {
+          enable = true;
+          inherit (cloudService) fqdn;
+          enableOffice = true;
+          dataPath = services.lib.getServiceDataPath hostname "nextcloud";
+        };
+      getSecrets = hostname: {
+        nextcloud-admin-passwd = {
+          file = "${sec}/admin-passwd.age";
+          owner = "nextcloud";
+          group = "nextcloud";
+        };
+
+        "nextcloud-secrets.json" = {
+          file = "${sec}/nextcloud-secrets.json.age";
+          owner = "nextcloud";
+          group = "nextcloud";
+        };
+      };
+    };
+
+    auth = {
+      modules = [ "${mod}/auth.nix" ];
+      getOptions =
+        hostname:
+        let
+          authService = services.services.auth or { };
+        in
+        {
+          enable = true;
+          inherit (authService) fqdn;
+        };
+      getSecrets = hostname: {
+        keycloak-db-passwd = {
+          file = "${sec}/keycloak-db-passwd.age";
+        };
+      };
+    };
+
+    photos = {
+      modules = [ "${mod}/photos.nix" ];
+      getOptions =
+        hostname:
+        let
+          immichService = services.services.photos or { };
+        in
+        {
+          enable = true;
+          inherit (immichService) fqdn;
+          dataPath = services.lib.getServiceDataPath hostname "immich";
+        };
+      getSecrets = hostname: {
+        "immich.json" = {
+          file = "${sec}/immich.json.age";
+          owner = "immich";
+          group = "immich";
+        };
+      };
+    };
+
+    paperless-ngx = {
+      modules = [ "${mod}/paperless" ];
+      getOptions =
+        hostname:
+        let
+          paperlessService = services.services.paperless-ngx or { };
+        in
+        {
+          enable = true;
+          inherit (paperlessService) fqdn;
+          dataDir = services.lib.getServiceDataPath hostname "paperless";
+        };
+      getSecrets = hostname: {
+        paperless-admin-passwd = {
+          file = "${sec}/admin-passwd.age";
+          owner = "paperless";
+          group = "paperless";
+        };
+
+        "paperless.env" = {
+          file = "${sec}/paperless.env.age";
+          #owner = "paperless";
+          #group = "paperless";
+        };
+
+        paperless-api-token = {
+          file = "${sec}/paperless-api-token.age";
+          owner = "paperless";
+          group = "paperless";
+        };
+      };
+
+    };
+
+    backup = {
+      modules = [ "${mod}/backup.nix" ];
+      getOptions = hostname: 
+        let
+          backupTargetRepos = services.lib.getBackupTargetConfig hostname;
+          # Resolve node references and compute SSH keys here
+          resolvedRepos = lib.mapAttrs (repoName: repoConfig:
+            let
+              sourceNode = nodes.${repoConfig.source} or {};
+              authorizedKeys = lib.optional (sourceNode ? backupSshKey) sourceNode.backupSshKey;
+            in
+            repoConfig // { inherit authorizedKeys; }
+          ) backupTargetRepos;
+        in
+        {
+          enable = services.lib.isBackupTarget hostname;
+          repos = resolvedRepos;
+        };
+    };
+
+    hass = {
+      modules = [ "${mod}/hass" ];
+      getOptions =
+        hostname:
+        let
+          hassService = services.services.hass or { };
+        in
+        {
+          enable = true;
+          inherit (hassService) fqdn;
+        };
+    };
+  };
+
+  # Factory function that takes hostname and returns modules + service options
+  createModulesForHost =
+    hostname:
+    let
+      # Get services based on hosts arrays in services.nix
+      regularServices = lib.filter (serviceName: services.lib.hasService hostname serviceName) (
+        lib.attrNames serviceModuleMap
+      );
+
+      # Default monitoring clients for all hosts
+      defaultClients = [
+        "monitoring-rsyslog"
+        "monitoring-node"
+      ];
+
+      # Combine regular services with default clients
+      hostServices = lib.unique (regularServices ++ defaultClients);
+
+      # Get modules and options for each service
+      serviceResults = map (
+        serviceName:
+        let
+          serviceConfig = serviceModuleMap.${serviceName};
+        in
+        {
+          modules = serviceConfig.modules;
+          options = serviceConfig.getOptions hostname;
+          secrets =
+            if serviceConfig ? getSecrets then
+              serviceConfig.getSecrets hostname
+            else
+              (serviceConfig.secrets or { });
+          serviceName = serviceName;
+        }
+      ) hostServices;
+
+      # Flatten modules
+      allModules = lib.flatten (map (result: result.modules) serviceResults);
+
+      # Create services.* configuration
+      serviceOptions = lib.foldl' (
+        acc: result: acc // { ${result.serviceName} = result.options; }
+      ) { } serviceResults;
+
+      # Collect all secrets from all services
+      # nix eval --json '.#nixosConfigurations.eurydice.config.age.secrets' --apply 'secrets: builtins.mapAttrs (name: cfg: { file = cfg.file; owner = cfg.owner or "root"; }) secrets' | jq
+      allSecrets = lib.foldl' (acc: result: acc // result.secrets) { } serviceResults;
+
+    in
+    {
+      modules = allModules;
+      inherit serviceOptions;
+
+      # Create a module that configures services.* and age.secrets
+      optionsModule =
+        { config, ... }:
+        {
+          services = lib.mapAttrs (
+            serviceName: serviceConfig:
+            let
+              # Get secrets for this specific service
+              serviceResult = lib.findFirst (r: r.serviceName == serviceName) null serviceResults;
+              serviceSecrets = if serviceResult != null then serviceResult.secrets else { };
+              hasSecrets = serviceSecrets != { };
+
+              # Generate secretPaths from the service's secrets
+              secretPaths = lib.mapAttrs (
+                secretName: secretConfig: config.age.secrets.${secretName}.path
+              ) serviceSecrets;
+            in
+            if hasSecrets then serviceConfig // { inherit secretPaths; } else serviceConfig
+          ) serviceOptions;
+          age.secrets = allSecrets;
+        };
+    };
+
+in
+{
+  inherit createModulesForHost serviceModuleMap;
+}
