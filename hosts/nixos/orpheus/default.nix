@@ -11,7 +11,6 @@
   ...
 }:
 let
-  hostname = "orpheus";
   thisNode = nodes.${hostname};
   shouldBackup = services.lib.shouldBackup hostname;
   backupSourceRepos = services.lib.getBackupSourceConfig hostname;
@@ -23,6 +22,8 @@ in
     ../cloud.nix
     ../desktop.nix
   ];
+
+  system.stateVersion = "23.05";
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

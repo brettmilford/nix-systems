@@ -14,7 +14,8 @@ in
   options.services.nginx.virtualHosts = mkOption {
     type = types.attrsOf (types.submodule {
       config = {
-        forceSSL = mkDefault true;
+        # TODO: forceSLL after deprecating ./deployments
+        addSSL = mkDefault true;
         enableACME = mkDefault true;
       };
     });
@@ -50,7 +51,8 @@ in
       {
       acceptTerms = true;
       defaults = {
-        email = "certs@cirriform.au";
+        # TODO: remove mkForce this after deprecating ./deployments
+        email = lib.mkForce "certs@cirriform.au";
         dnsProvider = "cloudflare";
         environmentFile = config.age.secrets."acme-cf.env".path;
       };

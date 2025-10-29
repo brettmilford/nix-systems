@@ -6,11 +6,9 @@
   hostname,
   nodes,
   services,
-  users,
   ...
 }:
 let
-  thisNode = nodes.${hostname};
   shouldBackup = services.lib.shouldBackup hostname;
   backupSourceRepos = services.lib.getBackupSourceConfig hostname;
 in

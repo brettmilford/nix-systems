@@ -36,7 +36,6 @@ in
   };
 
   services.fluentd = {
-    enable = true;
     package = fluentdWithPlugins;
 
     config = ''

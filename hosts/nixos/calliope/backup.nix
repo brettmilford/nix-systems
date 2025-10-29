@@ -4,18 +4,19 @@
   pkgs,
   self,
   hostname,
-  nodes,
   services,
   ...
 }:
 let
-  thisNode = nodes.${hostname};
   shouldBackup = services.lib.shouldBackup hostname;
   backupSourceRepos = services.lib.getBackupSourceConfig hostname;
   backupRWPath = "/var/lib/postgresql/backups/";
 in
 {
   age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${hostname}-ssh-key.age";
+  systemd.tmpfiles.rules = [
+    "d /var/lib/postgresql/backups 0750 postgres postgres -"
+  ];
   services.borgbackup.jobs = lib.mkIf shouldBackup (
     lib.concatMapAttrs (
       repoName: repoConfig:

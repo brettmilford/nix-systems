@@ -4,32 +4,38 @@ let
   cfg = config.services.cloud;
 in
 {
+  imports = [
+    ./gateway.nix
+  ];
+
   options.services.cloud = {
     enable = mkEnableOption "Nextcloud";
     enableOffice = mkEnableOption "Collabora";
     enableFlow = mkEnableOption "Nextcloud flow/windmill";
+    dataPath = mkOption {
+      type = types.str;
+      default = "/srv/data/nextcloud";
+      description = "Directory where paperless data are stored";
+    };
+    fqdn = mkOption {
+      type = types.str;
+      example = "cloud.example.com";
+      description = "Domain name for Nextcloud instance";
+    };
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      description = "Secret file paths";
+    };
   };
 
   config = mkIf cfg.enable {
-    age.secrets.nextcloud-admin-passwd = {
-      file = "${self}/secrets/admin-passwd.age";
-      owner = "nextcloud";
-      group = "nextcloud";
-    };
-
-    age.secrets."nextcloud-secrets.json" = {
-      file = "${self}/secrets/nextcloud-secrets.json.age";
-      owner = "nextcloud";
-      group = "nextcloud";
-    };
-
     services.nextcloud = {
       enable = true;
       package = pkgs.nextcloud31;
-      hostName = "cloud.cirriform.au";
+      hostName = "${cfg.fqdn}";
       config = {
         dbtype = "pgsql";
-        adminpassFile = config.age.secrets.nextcloud-admin-passwd.path;
+        adminpassFile = cfg.secretPaths.nextcloud-admin-passwd;
         dbhost = "/run/postgresql";
       };
       database.createLocally = true;
@@ -48,7 +54,7 @@ in
       enableImagemagick = true;
       configureRedis = true;
       https = true;
-      datadir = "/srv/data/nextcloud";
+      datadir = "${cfg.dataPath}";
       settings = {
         mail_smtpmode = "sendmail";
         mail_sendmailmode = "pipe";
@@ -78,14 +84,15 @@ in
         overwriteprotocol = "https";
         default_phone_region = "AU";
         "overwrite.cli.url" = "https://cloud.cirriform.au";
-        overwritehost = "cloud.cirriform.au";
+        overwritehost = "${cfg.fqdn}";
         forwarded_for_headers = [ "X-Forwarded-For" ];
         oidc_login_client_id = "nextcloud";
+        # TODO: get from catalog
         oidc_login_provider_url = "https://auth.cirriform.au/realms/master";
         oidc_login_auto_redirect = true;
         oidc_login_redir_fallback = true;
         oidc_login_end_session_redirect = true;
-        oidc_login_logout_url = "https://cloud.cirriform.au/apps/oidc_login/oidc";
+        oidc_login_logout_url = "https://${cfg.fqdn}/apps/oidc_login/oidc";
         oidc_login_attributes = {
           id = "preferred_username";
           mail = "email";
@@ -93,7 +100,7 @@ in
         oidc_login_code_challenge_method = "S256";
         oidc_login_hide_password_form = true;
       };
-      secretFile = config.age.secrets."nextcloud-secrets.json".path;
+      secretFile = cfg.secretPaths."nextcloud-secrets.json";
       phpOptions = {
         catch_workers_output = "yes";
         display_errors = "stderr";
@@ -109,6 +116,8 @@ in
         short_open_tag = "Off";
       };
     };
+
+    services.gateway.enable = true;
 
     services.fail2ban.jails.nextcloud-auth.settings = {
       enabled = true;
@@ -209,6 +218,7 @@ in
       };
     };
 
+    # TODO: get from catalog
     services.nginx.virtualHosts."collabora.cirriform.au" = mkIf cfg.enableOffice {
       locations."/" = {
         proxyPass = "http://localhost:${toString config.services.collabora-online.port}";

@@ -23,8 +23,8 @@ in {
   "nextcloud-secrets.json.age".publicKeys = [calliope brett];
   "mealie.env.age".publicKeys = [calliope brett];
   "immich.json.age".publicKeys = [calliope brett];
-  "acme-cf.env.age".publicKeys = [calliope terpsichore brett];
-  "fail2ban-cf.conf.age".publicKeys = [calliope terpsichore brett];
+  "acme-cf.env.age".publicKeys = [calliope terpsichore eurydice brett];
+  "fail2ban-cf.conf.age".publicKeys = [calliope terpsichore eurydice brett];
   "paperless-api-token.age".publicKeys = [calliope brett];
   "borg-calliope-ssh-key.age".publicKeys = [calliope brett];
   "borg-orpheus-ssh-key.age".publicKeys = [orpheus brett];

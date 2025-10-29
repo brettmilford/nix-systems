@@ -20,9 +20,9 @@ in
     (modulesPath + "/profiles/headless.nix")
     ../common.nix
     ../cloud.nix
-    "${self}/modules/gateway.nix"
-    "${self}/modules/monitoring"
   ];
+
+  system.stateVersion = "25.05";
 
   networking.hostName = hostname;
   networking.hostId = "37393231";
@@ -43,28 +43,5 @@ in
     smartmontools
     nvme-cli
   ];
-
-  services.gateway.enable = true;
-  services.monitoring = {
-    enable = true;
-    domain = "metrics.cirriform.au";
-    enableUnpoller = true;
-  };
-
-  # Check with nix eval .#nixosConfigurations.terpsichore.config.services.borgbackup.repos --json | jq
-  services.borgbackup.repos = lib.mkIf isBackupTarget (
-    lib.mapAttrs' (
-      repoName: repoConfig:
-      lib.nameValuePair repoName {
-        path = repoConfig.repoPath;
-        authorizedKeys =
-          let
-            sourceNode = nodes.${repoConfig.source};
-          in
-          lib.optional (sourceNode ? backupSshKey) sourceNode .backupSshKey;
-      }
-    ) backupTargetRepos
-  );
-  services.openssh.settings.AllowUsers = lib.mkIf isBackupTarget (lib.mkAfter [ "borg" ]);
 
 }

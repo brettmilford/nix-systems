@@ -6,22 +6,26 @@ let
   cfg = config.services.auth;
 in
 {
+  imports = [
+    ./gateway.nix
+  ];
+
   options.services.auth = {
     enable = mkEnableOption "Custom Keycloak setup";
 
-    domain = mkOption {
+    fqdn = mkOption {
       type = types.str;
       example = "auth.example.com";
       description = "Domain name for Keycloak instance";
+    };
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      description = "Secret file paths";
     };
   };
 
   config = mkIf cfg.enable {
     services.postgresql.enable = true;
-
-    age.secrets.keycloak-db-passwd = {
-      file = "${self}/secrets/keycloak-db-passwd.age";
-    };
 
     # Configure Keycloak service
     services.keycloak = {
@@ -32,11 +36,12 @@ in
         type = "postgresql";
         createLocally = true;
         username = "keycloak";
-        passwordFile = config.age.secrets.keycloak-db-passwd.path;
+        passwordFile = cfg.secretPaths.keycloak-db-passwd;
       };
 
       settings = {
-        hostname = "https://auth.cirriform.au";
+        hostname = "https://${cfg.fqdn}";
+        # TODO: get from catalog
         hostname-admin = "https://keycloak.cirriform.au";
         http-enabled = true;
         http-port = 8080;
@@ -50,8 +55,9 @@ in
       };
     };
 
+    services.gateway.enable = true;
     services.nginx = {
-      virtualHosts."auth.cirriform.au" = {
+      virtualHosts."${cfg.fqdn}" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.services.keycloak.settings.http-port}";
           proxyWebsockets = true;

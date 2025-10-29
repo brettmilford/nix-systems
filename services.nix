@@ -3,10 +3,6 @@ let
 in
 {
   inherit domain;
-  rsyslog = {
-    hosts = [ "eurydice" "terpsichore" ];
-  };
-
   auth = {
     hosts = [ "calliope" ];
     fqdn = "auth.${domain}";
@@ -20,7 +16,7 @@ in
     };
   };
 
-  immich = {
+  photos = {
     hosts = [ "calliope" ];
     fqdn = "immich.${domain}";
     config = {
@@ -28,7 +24,7 @@ in
     };
   };
 
-  paperless = {
+  paperless-ngx = {
     hosts = [ "calliope" ];
     fqdn = "paperless.${domain}";
     config = {
@@ -37,7 +33,9 @@ in
   };
 
   monitoring = {
-    hosts = [ "eurydice" ];
+    hosts = [
+      "terpsichore"
+    ];
     fqdn = "metrics.${domain}";
   };
 
@@ -46,29 +44,36 @@ in
     fqdn = "hass.${domain}";
   };
 
-  nixBuildMachines = [ "calliope" "orpheus" "terpsichore" ];
+  nixBuildMachines = [
+    "calliope"
+    "orpheus"
+    "terpsichore"
+  ];
 
   backup = {
+    # Repo servers
+    hosts = [
+      "terpsichore"
+      "calliope"
+    ];
     config = {
       repos = {
-        # Eurydice's data backed up to terpsichore and calliope
+        # Eurydice's data is backed up to terpsichore and calliope
         eurydice = {
-          targets = [ "terpsichore" "calliope" ];
+          targets = [
+            "terpsichore"
+            "calliope"
+          ];
         };
-
         calliope = {
           targets = [ "terpsichore" ];
         };
-
-        # Terpsichore's data backed up to calliope
         terpsichore = {
           targets = [ "calliope" ];
         };
-
         orpheus = {
           targets = [ "terpsichore" ];
         };
-
         thamrys = {
           targets = [ "terpsichore" ];
         };
