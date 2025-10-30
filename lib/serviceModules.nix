@@ -64,6 +64,11 @@ let
             file = "${sec}/unifipoller_pass.age";
             owner = "unifi-poller";
           };
+          hass_prometheus_token = {
+            file = "${sec}/hass_prometheus_token.age";
+            owner = "prometheus";
+            group = "prometheus";
+          };
         };
       # TODO: inherit options like ports from services.<service>.config?
       # TODO: inherit options like ports from services.<service>.<host>.config - support overriding?
@@ -81,6 +86,15 @@ let
             port = 9100;
           }) allHosts;
 
+          # Generate Home Assistant monitoring targets
+          hassHosts = services.services.hass.hosts or [];
+          hassTargets = map (host: {
+            hostname = host;
+            ip = nodes.${host}.ip;
+            home_assistant_port = 8123;
+            mqtt_exporter_port = 9641;
+          }) hassHosts;
+
           # Legacy hosts list for backward compatibility
           legacyHosts = lib.unique (
             lib.flatten (lib.mapAttrsToList (name: svc: svc.hosts or [ ]) services.services)
@@ -92,6 +106,9 @@ let
           targets = {
             # Node exporter targets for all hosts
             nodes = nodeExporterTargets;
+
+            # Home Assistant monitoring targets
+            hass = hassTargets;
 
             # Legacy targets for backward compatibility
             legacyNodes = map (host: {
@@ -250,6 +267,19 @@ let
           enable = true;
           inherit (hassService) fqdn;
         };
+      getSecrets = hostname: {
+        cfdCredentialsFile = {
+          file = "${sec}/cfd_tunnel_config.json.age";
+        };
+      };
+    };
+
+    # Home Assistant monitoring (MQTT exporter + Prometheus endpoint)
+    monitoring-hass = {
+      modules = [ "${mod}/monitoring/mqtt-exporter" ];
+      getOptions = hostname: {
+        enable = services.lib.hasService hostname "hass";
+      };
     };
   };
 
@@ -268,8 +298,13 @@ let
         "monitoring-node"
       ];
 
-      # Combine regular services with default clients
-      hostServices = lib.unique (regularServices ++ defaultClients);
+      # Conditional clients based on services
+      conditionalClients = lib.optionals (services.lib.hasService hostname "hass") [
+        "monitoring-hass"
+      ];
+
+      # Combine regular services with default and conditional clients
+      hostServices = lib.unique (regularServices ++ defaultClients ++ conditionalClients);
 
       # Get modules and options for each service
       serviceResults = map (

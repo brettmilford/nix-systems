@@ -31,4 +31,5 @@ in {
   "borg-thamrys-ssh-key.age".publicKeys = [thamrys brett];
   "borg-eurydice-ssh-key.age".publicKeys = [eurydice brett];
   "borg-terpsichore-ssh-key.age".publicKeys = [terpsichore brett];
+  "hass_prometheus_token.age".publicKeys = [terpsichore brett];
 }

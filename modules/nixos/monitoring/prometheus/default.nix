@@ -9,6 +9,8 @@ in
       listenAddress = "localhost";
       webExternalUrl = "http://${cfg.fqdn}/prometheus";
       extraFlags = [ "--web.route-prefix=/" ];
+      # NOTE: configCheck breaks passing secret paths for authorization if they don't exist before activation
+      checkConfig = "syntax-only";
 
       globalConfig = {
         scrape_interval = "15s";
@@ -112,6 +114,32 @@ in
               targets = [ "localhost:${toString cfg.ports.unifiPoller}" ];
             }
           ];
+        }
+      ]
+      ++ lib.optionals (cfg.targets ? hass && cfg.targets.hass != []) [
+        {
+          job_name = "home-assistant";
+          static_configs = map (target: {
+            targets = [ "${target.ip}:${toString target.home_assistant_port}" ];
+            labels = {
+              hostname = target.hostname;
+            };
+          }) cfg.targets.hass;
+          metrics_path = "/api/prometheus";
+          scrape_interval = "60s";
+          authorization = {
+            credentials_file = cfg.secretPaths.hass_prometheus_token;
+          };
+        }
+        {
+          job_name = "mqtt-exporter";
+          static_configs = map (target: {
+            targets = [ "${target.ip}:${toString target.mqtt_exporter_port}" ];
+            labels = {
+              hostname = target.hostname;
+            };
+          }) cfg.targets.hass;
+          scrape_interval = "30s";
         }
       ]
       ++ lib.optional config.services.prometheus.alertmanager.enable [
