@@ -297,6 +297,8 @@
                     sshUser = "nix";
                     remoteBuild = true;
                     fastConnection = true;
+                    activationTimeout = 600;
+                    confirmTimeout = 60;
                   };
                 }
                 // userProfiles;

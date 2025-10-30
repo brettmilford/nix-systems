@@ -54,7 +54,6 @@
   };
 
   services.deployments = {
-    homeAssistant.enable = true;
     unifi.enable = true;
   };
 }
