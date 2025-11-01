@@ -13,13 +13,13 @@
     ./backup.nix
     ../common.nix
     ../cloud.nix
-    ../../../deployments
   ];
 
   system.stateVersion = "24.05";
 
   networking.hostName = "eurydice";
   networking.hostId = "04ca88ad";
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -53,7 +53,4 @@
     X11Forwarding = true;
   };
 
-  services.deployments = {
-    unifi.enable = true;
-  };
 }

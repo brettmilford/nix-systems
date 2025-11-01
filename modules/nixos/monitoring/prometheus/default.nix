@@ -106,15 +106,6 @@ in
             }
           ];
         }
-        # TODO: generate/discover
-        {
-          job_name = "unifi-poller";
-          static_configs = [
-            {
-              targets = [ "localhost:${toString cfg.ports.unifiPoller}" ];
-            }
-          ];
-        }
       ]
       ++ lib.optionals (cfg.targets ? hass && cfg.targets.hass != []) [
         {
@@ -139,6 +130,18 @@ in
               hostname = target.hostname;
             };
           }) cfg.targets.hass;
+          scrape_interval = "30s";
+        }
+      ]
+      ++ lib.optionals (cfg.targets ? unifi && cfg.targets.unifi != []) [
+        {
+          job_name = "unifi-poller";
+          static_configs = map (target: {
+            targets = [ "${target.ip}:${toString target.unifi_poller_port}" ];
+            labels = {
+              hostname = target.hostname;
+            };
+          }) cfg.targets.unifi;
           scrape_interval = "30s";
         }
       ]

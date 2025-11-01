@@ -244,9 +244,9 @@ in
           ingress = {
             "${cfg.fqdn}" = {
               service = "https://${cfg.fqdn}";
-              #originRequest = {
-              #  noTLSVerify = true;
-              #};
+              originRequest = {
+                noTLSVerify = true;
+              };
             };
           };
         };

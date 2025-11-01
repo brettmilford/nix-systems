@@ -60,10 +60,6 @@ let
             owner = "grafana";
             group = "grafana";
           };
-          unifipoller_pass = {
-            file = "${sec}/unifipoller_pass.age";
-            owner = "unifi-poller";
-          };
           hass_prometheus_token = {
             file = "${sec}/hass_prometheus_token.age";
             owner = "prometheus";
@@ -95,6 +91,14 @@ let
             mqtt_exporter_port = 9641;
           }) hassHosts;
 
+          # Generate UniFi monitoring targets
+          unifiHosts = services.services.unifi-controller.hosts or [];
+          unifiTargets = map (host: {
+            hostname = host;
+            ip = nodes.${host}.ip;
+            unifi_poller_port = 9130;
+          }) unifiHosts;
+
           # Legacy hosts list for backward compatibility
           legacyHosts = lib.unique (
             lib.flatten (lib.mapAttrsToList (name: svc: svc.hosts or [ ]) services.services)
@@ -109,6 +113,9 @@ let
 
             # Home Assistant monitoring targets
             hass = hassTargets;
+
+            # UniFi monitoring targets
+            unifi = unifiTargets;
 
             # Legacy targets for backward compatibility
             legacyNodes = map (host: {
@@ -281,6 +288,34 @@ let
         enable = services.lib.hasService hostname "hass";
       };
     };
+
+    # UniFi monitoring (unifi-poller)
+    monitoring-unifi = {
+      modules = [ "${mod}/monitoring/unpoller" ];
+      getOptions = hostname: {
+        enable = services.lib.hasService hostname "unifi-controller";
+      };
+      getSecrets = hostname: {
+        unifipoller_pass = {
+          file = "${sec}/unifipoller_pass.age";
+          owner = "unifi-poller";
+        };
+      };
+    };
+
+    unifi-controller = {
+      modules = [ "${mod}/unifi-controller" ];
+      getOptions =
+        hostname:
+        let
+          unifiService = services.services.unifi-controller or { };
+        in
+        {
+          enable = true;
+          docker-compose = true;
+          inherit (unifiService) fqdn;
+        };
+    };
   };
 
   # Factory function that takes hostname and returns modules + service options
@@ -301,6 +336,8 @@ let
       # Conditional clients based on services
       conditionalClients = lib.optionals (services.lib.hasService hostname "hass") [
         "monitoring-hass"
+      ] ++ lib.optionals (services.lib.hasService hostname "unifi-controller") [
+        "monitoring-unifi"
       ];
 
       # Combine regular services with default and conditional clients
