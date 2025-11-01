@@ -44,10 +44,15 @@ in
     fqdn = "hass.${domain}";
   };
 
+  unifi-controller = {
+    hosts = [ "eurydice" ];
+    fqdn = "unifi.${domain}";
+  };
+
   nixBuildMachines = [
     "calliope"
-    "orpheus"
     "terpsichore"
+    "orpheus"
   ];
 
   backup = {

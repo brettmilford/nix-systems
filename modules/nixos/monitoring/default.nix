@@ -35,7 +35,6 @@ in
         nodeExporter = 9100;
         loki = 3100;
         alertmanager = 9093;
-        unifiPoller = 9130;
         grafana = 3000;
       };
       description = "Port configuration for monitoring services";
@@ -65,6 +64,5 @@ in
     services.fluentd.enable = true;
     # Exporters
     services.prometheus.exporters.snmp.enable = true;
-    services.unpoller.enable = true;
   };
 }

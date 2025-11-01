@@ -5,6 +5,7 @@
     self.submodules = true;
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-24-11.url = "github:NixOS/nixpkgs/nixos-24.11";
     nix-darwin.url = "github:lnl7/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.05";
@@ -25,6 +26,7 @@
       self,
       nixpkgs,
       nixpkgs-unstable,
+      nixpkgs-24-11,
       nix-darwin,
       home-manager,
       agenix,
@@ -84,6 +86,11 @@
               };
           in
           {
+            _module.args.pkgs = import inputs.nixpkgs {
+              inherit system;
+              overlays = builtins.attrValues self.overlays;
+            };
+
             legacyPackages.homeConfigurations = builtins.mapAttrs (username: user: mkHome username user) users;
 
             devShells.default =
@@ -101,11 +108,31 @@
                       sudo nixos-rebuild switch --flake "''${FLAKE}" "$@"
                     ''
                 );
+                deploy-diff = pkgs.writeShellScriptBin "deploy-diff" ''
+                  #!${pkgs.bash}/bin/bash
+                  host=$2
+                  if [ -z "$host" ]; then
+                    host=$1
+                  fi
+                  set -eou pipefail
+
+                  trap 'rm wait.fifo' EXIT
+                  mkfifo wait.fifo
+
+                  deploy --debug-logs --dry-activate ".#$1" 2>&1 \
+                    | tee >(grep -v DEBUG) >(grep 'activate-rs --debug-logs activate' | \
+                        sed -e 's/^.*activate-rs --debug-logs activate \(.*\) --profile-user.*$/\1/' | \
+                        xargs -I% bash -xc "ssh $host 'nix store diff-closures /run/current-system %'" ; echo >wait.fifo) \
+                    >/dev/null
+
+                  read <wait.fifo
+                '';
               in
               pkgs.mkShell {
                 packages = with pkgs; [
                   nixBin
                   nrs
+                  deploy-diff
                   inputs'.agenix.packages.default
                   inputs'.home-manager.packages.default
                   inputs'.deploy-rs.packages.default
@@ -157,6 +184,7 @@
             # Standard arguments passed to all configurations
             commonSpecialArgs = {
               inherit
+                inputs
                 self
                 users
                 nodes
@@ -193,7 +221,9 @@
                 modules = [
                   commonModuleArgs
                   self.nixosModules.default
-                  self.nixosModules.nixpkgsUnstable
+                  {
+                    nixpkgs.overlays = [ self.overlays.default ];
+                  }
                   ./hosts/nixos/${hostname}
                 ]
                 ++ hostModules.modules
@@ -219,6 +249,8 @@
               };
           in
           {
+            overlays.default = import ./overlays { inherit inputs; };
+
             homeModules.default = {
               imports = [
                 ./modules/home
@@ -249,16 +281,6 @@
               secureBoot = {
                 imports = [
                   lanzaboote.nixosModules.lanzaboote
-                ];
-              };
-
-              nixpkgsUnstable = {
-                nixpkgs.overlays = [
-                  (final: prev: {
-                    unstable = import inputs.nixpkgs-unstable {
-                      system = prev.system;
-                    };
-                  })
                 ];
               };
             };
