@@ -66,7 +66,6 @@ in
         "unifiprotect"
         "zha"
         "homekit_controller"
-        "homeassistant_hardware"
         "enphase_envoy"
         "ecovacs"
         "radio_browser"
@@ -122,25 +121,20 @@ in
     ];
 
     # MQTT Broker (Mosquitto)
+    # mosquitto_sub -h 127.0.0.1 -v -t "homeassistant/#"
+    # mosquitto_pub -h 127.0.0.1 -t homeassistant/switch/1/on -m "Switch is ON"
     services.mosquitto = {
       enable = true;
+      persistence = false;
+      # https://github.com/NixOS/nixpkgs/issues/27130#issuecomment-986075006
       listeners = [
         {
-          address = "0.0.0.0";
           port = 1883;
+          address = "localhost";
           omitPasswordAuth = true;
-          settings = {
-            allow_anonymous = true;
-          };
-        }
-        {
-          address = "0.0.0.0";
-          port = 9001;
-          omitPasswordAuth = true;
-          settings = {
-            allow_anonymous = true;
-            protocol = "websockets";
-          };
+          settings.allow_anonymous = true;
+          users = { };
+          acl = [ "topic readwrite #" "pattern readwrite #" ];
         }
       ];
     };
@@ -149,15 +143,17 @@ in
     services.zigbee2mqtt = {
       enable = true;
       settings = {
-        homeassistant = true;
-        frontend = {
-          port = 8081;
+        homeassistant = {
+          enable = true;
+          discovery_topic = "homeassistant";
+          status_topic = "homeassistant/status";
         };
+        frontend.port = 8081;
         mqtt = {
           base_topic = "zigbee2mqtt";
-          server = "mqtt://127.0.0.1:1883";
+          server = "mqtt://localhost";
         };
-        availability = true;
+        availability.enable = true;
         serial = {
           port = "/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_d80fe62d653aef11a73c321455516304-if00-port0";
           baudrate = 115200;
@@ -169,9 +165,7 @@ in
           legacy_api = false;
           legacy_availability_payload = false;
         };
-        device_options = {
-          legacy = false;
-        };
+        device_options.legacy = false;
         devices = {
           "0x70c59cfffee75325" = {
             friendly_name = "Dryer";
