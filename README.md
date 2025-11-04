@@ -1,21 +1,30 @@
 ## Nix-darwin
 
-1) Install nix
+1) Install nix & homebrew
 
 ```
+xcode-select --install
 curl -L https://nixos.org/nix/install | sh -s -- --daemon
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 2) Build Flake
 
 ```
 nix build "git+https://github.com/brettmilford/nix-systems.git?ref=devel#darwinConfigurations.thamrys.system" --extra-experimental-features "nix-command flakes"
+# OR
+git clone --recursive https://github.com/brettmilford/nix-systems.git ~/.config/nix
+cd ~/.config/nix
+nix develop --extra-experimental-features "nix-command flakes"
+nix build ".#darwinConfigurations.${HOSTNAME}.system"
 ```
 
 3) Switch
 
 ```
-./result/sw/bin/darwin-rebuild switch --flake "git+https://github.com/brettmilford/nix-systems.git?ref=devel#thamrys"
+sudo ./result/sw/bin/darwin-rebuild switch --flake "git+https://github.com/brettmilford/nix-systems.git?ref=devel#thamrys"
+# OR
+sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${HOSTNAME}"
 ```
 
 

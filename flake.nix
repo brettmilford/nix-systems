@@ -50,6 +50,7 @@
         systems = [
           "x86_64-linux"
           "aarch64-linux"
+          "x86_64-darwin"
           "aarch64-darwin"
         ];
 
@@ -138,6 +139,7 @@
                   inputs'.deploy-rs.packages.default
                   nixfmt-tree
                   jq
+                  git
                 ];
                 shellHook = ''
                   export PS1='\[\033[1;32m\](nix-systems)[\u@\h:\w]\$\[\033[0m\] '
