@@ -7,7 +7,6 @@
 
   homebrew = {
     enable = true;
-    onActivation.cleanup = "zap";
 
     casks = [
       "rectangle"
@@ -15,13 +14,8 @@
       "firefox"
       "google-chrome"
       "nextcloud"
-      "anki"
       "xquartz"
-      "gimp"
-      "krita"
-      "inkscape"
-      "obsidian"
-      "iTerm2"
+      "zerotier-one"
       "font-iosevka"
       "font-iosevka-aile"
       "proton-pass"
