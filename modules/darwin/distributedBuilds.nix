@@ -8,7 +8,7 @@ in
     system = nodes.${nodeName}.system;
     maxJobs = 4;
     sshUser = "nix";
-    sshKey = "/Users/${primaryUser}/.ssh/id_ed25519";
+    sshKey = "/Users/${primaryUser}/.ssh/id_nix";
   }) services.services.nixBuildMachines;
 
   nix.distributedBuilds = true;
