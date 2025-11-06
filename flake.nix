@@ -77,7 +77,6 @@
                     home.username = username;
                     home.homeDirectory = homeDirectory;
                     home.stateVersion = "22.11";
-                    programs.home-manager.enable = true;
                     _module.args.userConfig = user // {
                       username = username;
                     };

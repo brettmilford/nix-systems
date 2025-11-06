@@ -10,16 +10,13 @@
 
     casks = [
       "rectangle"
-      "notion"
+      "proton-pass"
+      "zerotier-one"
+      "nextcloud"
       "firefox"
       "google-chrome"
-      "nextcloud"
       "xquartz"
-      "zerotier-one"
-      "font-iosevka"
-      "font-iosevka-aile"
-      "proton-pass"
-      "protonvpn"
+      "notion"
     ];
   };
 }

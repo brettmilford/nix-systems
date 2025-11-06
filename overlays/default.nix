@@ -29,6 +29,10 @@ let
     (mkOverlay inputs.nixpkgs-24-11 [
       "unifi8"
     ])
+
+    (mkOverlay inputs.nixpkgs-unstable [
+      "emacs-macport"
+    ])
   ];
 in
 # Combine all overlays into a single overlay function
