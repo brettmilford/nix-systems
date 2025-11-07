@@ -19,7 +19,6 @@ in
     };
     dataPath = mkOption {
       type = types.str;
-      default = "/srv/data/immich";
       description = "Immich media dir";
     };
     secretPaths = lib.mkOption {
@@ -30,15 +29,20 @@ in
 
   config = mkIf cfg.enable {
 
+    # TODO: Add ${dataPath}/backups to backup script
+
     environment.systemPackages = with pkgs; [ exiftool ];
 
     services.immich = {
       enable = true;
       package = pkgs.unstable.immich;
       accelerationDevices = null;
-      mediaLocation = "/srv/data/immich";
+      mediaLocation = "${cfg.dataPath}";
       database.enable = true;
+      # Isn't used in newer versions, and isn't supported with postgresql_17
+      database.enableVectors = false;
       redis.enable = true;
+      # NOTE: externalDomain, smtp, oauth and machineLearning urls are hardcoded in here
       environment = {
         IMMICH_CONFIG_FILE = lib.mkForce cfg.secretPaths."immich.json";
       };
@@ -94,6 +98,7 @@ in
       "d ${config.services.immich.mediaLocation} 0755 immich immich -"
     ];
 
+    # TODO: mkIf nextcloud is on the same node
     systemd.services.immich-library-setup = {
       description = "Setup Immich library for external use";
       after = [ "systemd-tmpfiles-setup.service" ];
