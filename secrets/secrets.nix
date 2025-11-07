@@ -23,7 +23,7 @@ in {
   "keycloak-db-passwd.age".publicKeys = [nix calliope brett];
   "nextcloud-secrets.json.age".publicKeys = [nix calliope brett];
   "mealie.env.age".publicKeys = [nix calliope brett];
-  "immich.json.age".publicKeys = [nix calliope brett];
+  "immich.json.age".publicKeys = [nix terpsichore calliope brett];
   "acme-cf.env.age".publicKeys = [nix calliope terpsichore eurydice brett];
   "fail2ban-cf.conf.age".publicKeys = [nix calliope terpsichore eurydice brett];
   "paperless-api-token.age".publicKeys = [nix calliope brett];
