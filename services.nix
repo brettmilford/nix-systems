@@ -17,7 +17,7 @@ in
   };
 
   photos = {
-    hosts = [ "calliope" ];
+    hosts = [ "terpsichore" ];
     fqdn = "immich.${domain}";
     config = {
       dataPath = "/immich";
