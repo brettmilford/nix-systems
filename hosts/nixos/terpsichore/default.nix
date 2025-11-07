@@ -33,6 +33,7 @@ in
     80
     443
   ];
+
   environment.systemPackages = with pkgs; [
     wpa_supplicant
     iw
@@ -44,4 +45,5 @@ in
     nvme-cli
   ];
 
+  services.postgresql.package = pkgs.postgresql_16;
 }
