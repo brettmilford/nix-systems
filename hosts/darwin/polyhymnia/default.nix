@@ -12,7 +12,7 @@
     ../homebrew.nix
   ];
 
-  system.stateVersion = 4;
+  system.stateVersion = 5;
   system.primaryUser = "brett";
 
   users.users =
