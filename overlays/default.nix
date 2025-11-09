@@ -23,6 +23,10 @@ let
             system = prev.system;
             inherit (prev) config;
           }).immich;
+        podman = (import inputs.nixpkgs-unstable {
+          system = prev.system;
+          inherit (prev) config;
+        }).podman;
       };
     })
 

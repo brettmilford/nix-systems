@@ -53,6 +53,4 @@
     computerName = hostname;
     localHostName = hostname;
   };
-
-  services.podman.enable = true;
 }

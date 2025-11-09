@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   cfg = config.services.podman;
@@ -11,21 +16,20 @@ in
   };
 
   config = mkIf cfg.enable {
-     environment.systemPackages =
-      [
-        pkgs.podman
-        pkgs.podman-compose
-        pkgs.qemu
-        pkgs.xz
-      ];
+    environment.systemPackages = [
+      (if pkgs.stdenv.hostPlatform.system == "x86_64-darwin" then pkgs.unstable.podman else pkgs.podman)
+      pkgs.podman-compose
+      pkgs.qemu
+      pkgs.xz
+    ];
 
     # https://github.com/containers/podman/issues/17026
     environment.pathsToLink = [ "/share/qemu" ];
 
     # https://github.com/LnL7/nix-darwin/issues/432#issuecomment-1024951660
     environment.etc."containers/containers.conf".text = ''
-            [engine]
-            helper_binaries_dir = ["${pkgs.gvproxy}/bin"]
-          '';
-    };
+      [engine]
+      helper_binaries_dir = ["${pkgs.gvproxy}/bin"]
+    '';
+  };
 }

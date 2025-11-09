@@ -245,6 +245,9 @@
                 modules = [
                   commonModuleArgs
                   self.darwinModules.default
+                  {
+                    nixpkgs.overlays = [ self.overlays.default ];
+                  }
                   ./hosts/darwin/${hostname}
                 ];
               };
