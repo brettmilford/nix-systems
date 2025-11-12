@@ -89,7 +89,7 @@ in
         # HTTP configuration for reverse proxy
         http = {
           use_x_forwarded_for = true;
-          trusted_proxies = [ "127.0.0.1" ];
+          trusted_proxies = [ "127.0.0.1" "::1" ];
         };
 
         # UI-generated configuration includes
@@ -205,10 +205,11 @@ in
     };
 
     # Nginx virtual hosts
-    services.nginx.virtualHosts."${cfg.fqdn}" = {
-      addSSL = true;
+    services.nginx.virtualHosts."hass.internal" = {
+      enableACME = false;
+      addSSL = false;
       locations."/" = {
-        proxyPass = "http://127.0.0.1:8123/";
+        proxyPass = "http://localhost:8123/";
         extraConfig = ''
           proxy_set_header    Upgrade     $http_upgrade;
           proxy_set_header    Connection  "upgrade";
@@ -218,7 +219,6 @@ in
     };
 
     services.nginx.virtualHosts."z2m.${cfg.fqdn}" = {
-      addSSL = true;
       locations."/" = {
         proxyPass = "http://127.0.0.1:8081/";
         extraConfig = ''
@@ -237,10 +237,7 @@ in
           default = "http_status:404";
           ingress = {
             "${cfg.fqdn}" = {
-              service = "https://${cfg.fqdn}";
-              originRequest = {
-                noTLSVerify = true;
-              };
+              service = "http://localhost:8123";
             };
           };
         };
