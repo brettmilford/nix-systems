@@ -188,6 +188,30 @@ let
       };
     };
 
+    wg-gateway = {
+      modules = [ "${mod}/wg-gateway" ];
+      getOptions =
+        hostname:
+        let
+          wgService = services.services.wg-gateway or { };
+          wgConfig = wgService.config or { };
+        in
+        {
+          enable = true;
+          inherit (wgConfig) peers externalIP;
+          externalInterface = wgConfig.externalInterface or "eth0";
+          listenPort = wgConfig.listenPort or 51820;
+          serverAddress = wgConfig.serverAddress or "172.16.0.1/16";
+        };
+      getSecrets = hostname: {
+        wg_server_private = {
+          file = "${sec}/wg_server_private.age";
+          owner = "systemd-network";
+          group = "systemd-network";
+        };
+      };
+    };
+
     photos = {
       modules = [ "${mod}/photos.nix" ];
       getOptions =
