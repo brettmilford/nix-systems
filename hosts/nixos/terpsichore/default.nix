@@ -18,6 +18,7 @@ in
   imports = [
     ./hardware-configuration.nix
     (modulesPath + "/profiles/headless.nix")
+    ./localBackup.nix
     ../common.nix
     ../cloud.nix
   ];
