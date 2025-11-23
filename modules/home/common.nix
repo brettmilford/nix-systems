@@ -10,6 +10,7 @@
   home.packages =
     with pkgs;
     [
+      firefox
       claude-code
       direnv
       qemu
@@ -30,7 +31,16 @@
     ++ lib.optionals pkgs.stdenv.isLinux [
       nextcloud-client
       ncdu # BUG: on aarch64-darwin nixpkgs/issues/290512
+      gnomeExtensions.paperwm
     ];
+
+  dconf.settings = {
+    "org/gnome/shell" = {
+      enabled-extensions = [
+        pkgs.gnomeExtensions.paperwm.extensionUuid
+      ];
+    };
+  };
 
   nixpkgs.config.allowUnfreePredicate =
     pkg:
@@ -241,6 +251,6 @@
 
   services.gpg-agent = {
     enable = pkgs.stdenv.isLinux;
+    pinentry.package = pkgs.pinentry-gnome3;
   };
-
 }

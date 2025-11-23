@@ -4,49 +4,40 @@
   pkgs,
   options,
   ...
-}: {
+}:
+{
 
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome = {
     enable = true;
     favoriteAppsOverride = ''
       [org.gnome.shell]
-      favorite-apps=[ 'firefox.desktop', 'org.gnome.Console.desktop', 'org.gnome.Nautilus.desktop' ]
+      favorite-apps=[ 'firefox.desktop', 'emacsclient.desktop', 'org.gnome.Console.desktop', 'org.gnome.Nautilus.desktop' ]
     '';
   };
 
-  environment.gnome.excludePackages =
-    (with pkgs; [
-      gnome-photos
-      gnome-tour
-      snapshot
-      gedit # text editor
-      cheese # webcam tool
-      gnome-music
-      gnome-terminal
-      epiphany # web browser
-      geary # email reader
-      #evince # document viewer
-      gnome-characters
-      totem # video player
-      tali # poker game
-      iagno # go game
-      hitori # sudoku game
-      atomix # puzzle game
-      yelp # Help view
-      gnome-contacts
-      gnome-initial-setup
-      gnome-maps
-    ])
-    ++ (with pkgs.gnome; [
-    ]);
-
-  environment.systemPackages = with pkgs; [
-    firefox
-    bitwarden
-    gnomeExtensions.appindicator
+  environment.systemPackages = with pkgs.gnomeExtensions; [
+    appindicator
   ];
 
-  services.udev.packages = with pkgs; [gnome-settings-daemon];
+  services.udev.packages = with pkgs; [ gnome-settings-daemon ];
 
+  programs.dconf.profiles.user.databases = [
+    {
+      settings = {
+        "org/gnome/mutter" = {
+          experimental-features = [
+            "scale-monitor-framebuffer" # Enables fractional scaling (125% 150% 175%)
+            "variable-refresh-rate" # Enables Variable Refresh Rate (VRR) on compatible displays
+            "xwayland-native-scaling" # Scales Xwayland applications to look crisp on HiDPI screens
+          ];
+        };
+        "org/gnome/shell" = {
+          enabled-extensions = [
+            pkgs.gnomeExtensions.appindicator.extensionUuid
+          ];
+        };
+      };
+    }
+  ];
 }

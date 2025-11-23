@@ -50,7 +50,10 @@
   polyhymnia = {
     ip = "192.168.10.39";
     domain = "internal";
-    system = "x86_64-darwin";
+    system = "x86_64-linux";
     backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICmHklwPLc8ZROcnqLRMRxRgKTXDs2oSANQKs8Qje9jt borg@polyhymnia";
+    extraModules = [
+      self.nixosModules.users
+    ];
   };
 }

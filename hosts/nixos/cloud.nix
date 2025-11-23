@@ -9,8 +9,9 @@
   users.groups.nix = {};
 
   users.users.nix = {
-    isNormalUser = true;
+    isSystemUser = true;
     home = "/home/nix";
+    createHome = true;
     description = "Nix User";
     group = "nix";
     extraGroups = ["wheel" "systemd-journal"];
