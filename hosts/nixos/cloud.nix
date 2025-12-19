@@ -9,7 +9,7 @@
   users.groups.nix = {};
 
   users.users.nix = {
-    isSystemUser = true;
+    isNormalUser = true;
     home = "/home/nix";
     createHome = true;
     description = "Nix User";
