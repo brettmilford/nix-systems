@@ -19,10 +19,14 @@
     sensibleOnTop = false;
     extraConfig = builtins.readFile "${self}/config/tmux/tmux-extra.conf";
     plugins = with pkgs; [
+      # prefix + Ctrl-s  # Save
+      # prefix + Ctrl-r  # Restore
+      # rm -r ~/.tmux/resurrect  # Clear saved sessions
       {
         plugin = tmuxPlugins.resurrect;
         extraConfig = "set -g @resurrect-strategy-nvim 'session'";
       }
+      # Automatically resurrect save
       {
         plugin = tmuxPlugins.continuum;
         extraConfig = ''
