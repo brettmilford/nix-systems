@@ -93,11 +93,11 @@ in
       peers = [
         {
           publicKey = "EDy72uHnnxYQhiiwjSo2ZQa05QsUHcbGWc2IuXo0Qmg=";
-          allowedIPs = [ "172.16.0.2/32" "172.22.0.0/16" "192.168.0.0/16" ];
+          allowedIPs = [ "172.16.0.2/32" ];
         }
         {
           publicKey = "vYRA5xUEocCBlB2LlUP5EHRzriUdCzwWsU3idpXZuRM=";
-          allowedIPs = [ "172.16.0.3/32" "172.22.0.0/16" "192.168.0.0/16" ];
+          allowedIPs = [ "172.16.0.3/32" ];
         }
       ];
     };

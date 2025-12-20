@@ -187,7 +187,7 @@ in
         echo "Running nextcloud files scan"
         # see nextcloud-occ files_external:list
         # Immich Library - brett
-        ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 8 -v
+        # ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 8 -v
         # Paperless export - brett
         ${config.services.nextcloud.occ}/bin/nextcloud-occ files_external:scan 9 -v
         # Paperless export - kate

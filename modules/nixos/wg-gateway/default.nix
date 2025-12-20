@@ -89,6 +89,7 @@ in
     networking.firewall = {
       enable = true;
       allowedUDPPorts = [ cfg.listenPort ];
+      trustedInterfaces = [ "wg0" ];
       extraCommands = ''
         # Allow WireGuard clients to access ZeroTier network
         iptables -I FORWARD 1 -s 172.16.0.0/16 -d 172.22.0.0/16 -j ACCEPT
