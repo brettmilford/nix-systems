@@ -76,9 +76,10 @@ in
         terpsichore = {
           targets = [ "calliope" ];
         };
-        orpheus = {
-          targets = [ "terpsichore" ];
-        };
+        # 2026-02-20: Offline
+        # orpheus = {
+        #   targets = [ "terpsichore" ];
+        # };
         thamrys = {
           targets = [ "terpsichore" ];
         };

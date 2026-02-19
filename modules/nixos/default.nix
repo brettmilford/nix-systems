@@ -17,6 +17,7 @@
       experimental-features = nix-command flakes
     '';
     settings.auto-optimise-store = true;
+    settings.download-buffer-size = 524288000;
     gc = {
       automatic = true;
       dates = "weekly";

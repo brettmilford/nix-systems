@@ -14,8 +14,8 @@
     agenix.inputs.nixpkgs.follows = "nixpkgs";
     nixos-generators.url = "github:nix-community/nixos-generators";
     nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
-    lanzaboote.url = "github:nix-community/lanzaboote/v0.4.2";
-    lanzaboote.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    lanzaboote.url = "github:nix-community/lanzaboote/v1.0.0";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
     deploy-rs.url = "github:serokell/deploy-rs";
     deploy-rs.inputs.nixpkgs.follows = "nixpkgs";

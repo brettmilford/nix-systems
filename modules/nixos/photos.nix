@@ -35,7 +35,6 @@ in
 
     services.immich = {
       enable = true;
-      package = pkgs.unstable.immich;
       accelerationDevices = null;
       mediaLocation = "${cfg.dataPath}";
       database.enable = true;

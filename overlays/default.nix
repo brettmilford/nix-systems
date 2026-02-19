@@ -19,11 +19,6 @@ let
     (final: prev: {
       # available as pkgs.unstable....
       unstable = (prev.unstable or { }) // {
-        immich =
-          (import inputs.nixpkgs-unstable {
-            system = prev.system;
-            inherit (prev) config;
-          }).immich;
         podman = (import inputs.nixpkgs-unstable {
           system = prev.system;
           inherit (prev) config;
