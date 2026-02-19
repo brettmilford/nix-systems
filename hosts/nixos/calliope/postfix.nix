@@ -6,7 +6,7 @@
   };
 
   # systemctl --user start protonmail-bridge
-  # and enable linger
+  # loginctl enable-linger nix
   services.protonmail-bridge = {
     enable = true;
     path = [ pkgs.pass ];
