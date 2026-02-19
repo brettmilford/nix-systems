@@ -52,7 +52,7 @@ in
   nixBuildMachines = [
     "calliope"
     "terpsichore"
-    "orpheus"
+    # "orpheus" # 2026-02-20: Offline
   ];
 
   backup = {

@@ -17,6 +17,7 @@ let
 
   overlayList = [
     (final: prev: {
+      # available as pkgs.unstable....
       unstable = (prev.unstable or { }) // {
         immich =
           (import inputs.nixpkgs-unstable {
@@ -30,6 +31,7 @@ let
       };
     })
 
+    # Overlay directly
     (mkOverlay inputs.nixpkgs-24-11 [
       "unifi8"
     ])

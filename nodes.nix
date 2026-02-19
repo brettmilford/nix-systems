@@ -36,7 +36,7 @@
     backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvYLvNsnBmVqrC9IUZIEeaGElcUcHR2w1yOQXaOC9LV borg@thamrys";
   };
 
-  ## Offline
+  ## 2026-02-20: Offline
   #orpheus = {
   #  ip = "192.168.10.31";
   #  domain = "internal";
@@ -48,7 +48,7 @@
   #  ];
   #};
 
-  ## Retired
+  ## 2026-02-20 Retired
   #polyhymnia = {
   #  ip = "192.168.10.39";
   #  domain = "internal";
