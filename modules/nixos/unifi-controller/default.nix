@@ -27,6 +27,11 @@ in
       default = false;
       description = "Use Docker Compose instead of native NixOS service";
     };
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      default = {};
+      description = "Secret file paths";
+    };
   };
 
   config = lib.mkIf (cfg.enable && !cfg.docker-compose) {

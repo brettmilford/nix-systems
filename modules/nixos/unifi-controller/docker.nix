@@ -39,7 +39,7 @@ in
       serviceConfig = {
         Environment = "PATH=${pkgs.podman}/bin:${pkgs.podman-compose}/bin:/run/wrappers/bin:/usr/bin:/bin";
         Type = "simple";
-        ExecStart = "${pkgs.podman-compose}/bin/podman-compose -f ${composeStack}/compose.yaml up";
+        ExecStart = "${pkgs.podman-compose}/bin/podman-compose --env-file ${cfg.secretPaths.dockerEnv} -f ${composeStack}/compose.yaml up";
         ExecStop = "${pkgs.podman-compose}/bin/podman-compose -f ${composeStack}/compose.yaml down";
         Restart = "always";
         User = "root";

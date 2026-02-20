@@ -33,5 +33,6 @@ in {
   "borg-eurydice-ssh-key.age".publicKeys = [nix eurydice brett];
   "borg-terpsichore-ssh-key.age".publicKeys = [nix terpsichore brett];
   "hass_prometheus_token.age".publicKeys = [nix terpsichore brett];
+  "unifi-controller.env.age".publicKeys = [nix eurydice brett];
   "wg_server_private.age".publicKeys = [nix calliope];
 }

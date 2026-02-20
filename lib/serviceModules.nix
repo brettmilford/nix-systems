@@ -339,6 +339,11 @@ let
           docker-compose = true;
           inherit (unifiService) fqdn;
         };
+      getSecrets = hostname: {
+        dockerEnv = {
+          file = "${sec}/unifi-controller.env.age";
+        };
+      };
     };
   };
 
