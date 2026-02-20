@@ -31,7 +31,7 @@ in
   config = mkIf cfg.enable {
     services.nextcloud = {
       enable = true;
-      package = pkgs.nextcloud31;
+      package = pkgs.nextcloud32;
       hostName = "${cfg.fqdn}";
       config = {
         dbtype = "pgsql";
@@ -47,7 +47,6 @@ in
           calendar
           contacts
           richdocuments
-          app_api
           ;
       };
       extraAppsEnable = true;
@@ -166,10 +165,12 @@ in
 
     systemd.services.nextcloud-file-scan = {
       description = "Scan nextcloud external storage";
+      requires = [ "nextcloud-setup.service" ];
       after = [ 
         "systemd-tmpfiles-setup.service" 
         "paperless-exporter.service"
         "nextcloud-acl-setup.service"
+        "nextcloud-setup.service"
       ];
       wants = [ 
         "systemd-tmpfiles-setup.service" 

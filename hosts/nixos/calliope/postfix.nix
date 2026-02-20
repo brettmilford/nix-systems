@@ -17,8 +17,7 @@
     enable = true;
     setSendmail = true;
 
-    relayHost = "127.0.0.1";
-    relayPort = 1025;
+    settings.main.relayhost = [ "127.0.0.1:1025" ];
 
     config = {
       myhostname = "mail.cirriform.au";
