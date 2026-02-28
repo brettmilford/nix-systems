@@ -254,8 +254,8 @@ let
 
         "paperless.env" = {
           file = "${sec}/paperless.env.age";
-          #owner = "paperless";
-          #group = "paperless";
+          owner = "paperless";
+          group = "paperless";
         };
 
         paperless-api-token = {

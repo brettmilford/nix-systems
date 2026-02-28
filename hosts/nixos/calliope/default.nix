@@ -30,6 +30,9 @@
     enable = true;
     # Removing this will triger the install of a newer version of postgresql without migrating the data
     package = pkgs.postgresql_14;
+    extensions = with pkgs.postgresql_14.pkgs; [
+      pgvector
+    ];
   };
 
   services.kubo = {
