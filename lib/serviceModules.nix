@@ -2,6 +2,7 @@
   lib,
   nodes,
   services,
+  users,
 }:
 
 let
@@ -344,6 +345,27 @@ let
           file = "${sec}/unifi-controller.env.age";
         };
       };
+    };
+
+    git-server = {
+      modules = [ "${mod}/gitServer.nix" ];
+      getOptions =
+        hostname:
+        let
+          dataPath = services.lib.getServiceDataPath hostname "git";
+          # Collect SSH public keys from all nodes and users
+          authorizedKeys =
+            lib.mapAttrsToList (_name: node: node.backupSshKey) (
+              lib.filterAttrs (_name: node: node ? backupSshKey) nodes
+            )
+            ++ lib.mapAttrsToList (_name: user: user.sshKey) (
+              lib.filterAttrs (_name: user: user ? sshKey) users
+            );
+        in
+        {
+          enable = true;
+          inherit dataPath authorizedKeys;
+        };
     };
   };
 

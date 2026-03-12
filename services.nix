@@ -103,4 +103,11 @@ in
       ];
     };
   };
+
+  git-server = {
+    hosts = [ "calliope" ];
+    config = {
+      dataPath = "/git";
+    };
+  };
 }

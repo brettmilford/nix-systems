@@ -35,7 +35,7 @@
         shell = pkgs.bash;
         openssh.authorizedKeys.keys = [
           user.sshKey
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBy5tD71f2uRLQvbZL0wwyZNUmximBOM19KuENx791Rl nix"
+          users.nix.sshKey
         ];
       };
     };

@@ -24,6 +24,7 @@ let
   # Individual test derivations
   serviceMapTests = mkTestDrv "serviceMap" (import ./serviceMap.nix { inherit lib; });
   validateServiceTests = mkTestDrv "validateServices" (import ./validateServices.nix { inherit lib; });
+  gitServerTests = mkTestDrv "gitServer" (import ./gitServer.nix { inherit lib; });
 
 in
 # Aggregate all tests into a single derivation
@@ -31,5 +32,6 @@ pkgs.symlinkJoin {
   name = "lib-tests";
   paths = [
     serviceMapTests
+    gitServerTests
   ];
 }

@@ -108,6 +108,27 @@
                       sudo nixos-rebuild switch --flake "''${FLAKE}" "$@"
                     ''
                 );
+              in
+              pkgs.mkShell {
+                packages = with pkgs; [
+                  nixBin
+                  nrs
+                  inputs'.agenix.packages.default
+                  inputs'.home-manager.packages.default
+                  nixfmt-tree
+                  jq
+                  git
+                ];
+                shellHook = ''
+                  export PS1='\[\033[1;32m\](nix-systems)[\u@\h:\w]\$\[\033[0m\] '
+                  export FLAKE="$(pwd)"
+                  alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
+                  alias nup='nix flake update --flake "''${FLAKE}" && nrs'
+                  alias nvm='nix run ".#nixosConfigurations.$(hostname -s).config.system.build.vmWithBootLoader"'
+                '';
+              };
+            devShells.deploy =
+              let
                 deploy-diff = pkgs.writeShellScriptBin "deploy-diff" ''
                   #!${pkgs.bash}/bin/bash
                   host=$2
@@ -130,22 +151,11 @@
               in
               pkgs.mkShell {
                 packages = with pkgs; [
-                  nixBin
-                  nrs
-                  deploy-diff
-                  inputs'.agenix.packages.default
-                  inputs'.home-manager.packages.default
                   inputs'.deploy-rs.packages.default
-                  nixfmt-tree
-                  jq
-                  git
+                  deploy-diff
                 ];
                 shellHook = ''
-                  export PS1='\[\033[1;32m\](nix-systems)[\u@\h:\w]\$\[\033[0m\] '
-                  export FLAKE="$(pwd)"
-                  alias hms='home-manager switch --flake "''${FLAKE}?submodules=1#''${USER}"'
-                  alias nup='nix flake update --flake "''${FLAKE}" && nrs'
-                  alias nvm='nix run ".#nixosConfigurations.$(hostname -s).config.system.build.vmWithBootLoader"'
+                  export PS1='\[\033[1;32m\](nix-systems-deploy)[\u@\h:\w]\$\[\033[0m\] '
                 '';
               };
             formatter = pkgs.nixfmt-rfc-style;
@@ -179,7 +189,7 @@
             # Import the service modules factory
             serviceModulesLib = import ./lib/serviceModules.nix {
               inherit (nixpkgs) lib;
-              inherit nodes services;
+              inherit nodes services users;
             };
 
             # Standard arguments passed to all configurations
