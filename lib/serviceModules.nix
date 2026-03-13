@@ -347,6 +347,28 @@ let
       };
     };
 
+    account-service = {
+      modules = [ "${mod}/account-service" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.account-service or { };
+        in
+        {
+          enable = true;
+          fqdn = svc.fqdn;
+          rev = svc.config.rev;
+        }
+        // lib.optionalAttrs ((svc.config or { }) ? port) { port = svc.config.port; };
+      getSecrets = hostname: {
+        "account-service.env" = {
+          file = "${sec}/account-service.env.age";
+          owner = "accsvc";
+          group = "accsvc";
+        };
+      };
+    };
+
     git-server = {
       modules = [ "${mod}/gitServer.nix" ];
       getOptions =

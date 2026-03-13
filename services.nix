@@ -104,6 +104,12 @@ in
     };
   };
 
+  account-service = {
+    hosts = [ "terpsichore" ];
+    fqdn = "account.${domain}";
+    config.rev = "ddc18c53e8ff0f5089acf852b5b97382bf69f1aa";
+  };
+
   git-server = {
     hosts = [ "calliope" ];
     config = {

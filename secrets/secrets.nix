@@ -35,4 +35,5 @@ in {
   "hass_prometheus_token.age".publicKeys = [nix terpsichore brett];
   "unifi-controller.env.age".publicKeys = [nix eurydice brett];
   "wg_server_private.age".publicKeys = [nix calliope];
+  "account-service.env.age".publicKeys = [nix terpsichore brett];
 }
