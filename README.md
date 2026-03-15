@@ -1,4 +1,5 @@
-## Nix-darwin
+# Nix-systems
+## Nix-darwin setup
 
 1) Install nix & homebrew
 
@@ -45,3 +46,14 @@ Testing configurations in a VM
 ``` sh
 nix run '.#nixosConfigurations.orpheus.config.system.build.vm'
 ```
+
+- Build Darwin configuration from remote: `nix build "git+https://github.com/brettmilford/nix-systems.git?ref=devel#darwinConfigurations.thamrys.system"`
+
+## Development Shell
+- Available in default develop shell:
+  - `nrs` - Rebuild and switch system configuration
+  - `hms` - Home manager switch
+  - `nup` - Update flake inputs and rebuild
+  - `nvm` - Run VM for testing
+- `nix develop .#deploy` - Provides deploy-rs for remote node deployments.
+  - `deploy .#<host> --auto-rollback false`

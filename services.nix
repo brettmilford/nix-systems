@@ -107,7 +107,13 @@ in
   account-service = {
     hosts = [ "terpsichore" ];
     fqdn = "account.${domain}";
-    config.rev = "ddc18c53e8ff0f5089acf852b5b97382bf69f1aa";
+    config.rev = "a8a85b0743969dea9080e4bb075d33ed3365902f";
+  };
+
+  realestate-calculators = {
+    hosts = [ "terpsichore" ];
+    fqdn = "recalc.${domain}";
+    config.rev = "9ac5661f499d2116d453422f93774d9dc20d1da7";
   };
 
   git-server = {

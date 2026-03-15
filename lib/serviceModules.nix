@@ -347,6 +347,20 @@ let
       };
     };
 
+    realestate-calculators = {
+      modules = [ "${mod}/realestate-calculators.nix" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.realestate-calculators or { };
+        in
+        {
+          enable = true;
+          fqdn = svc.fqdn;
+          rev = svc.config.rev;
+        };
+    };
+
     account-service = {
       modules = [ "${mod}/account-service" ];
       getOptions =
@@ -359,7 +373,8 @@ let
           fqdn = svc.fqdn;
           rev = svc.config.rev;
         }
-        // lib.optionalAttrs ((svc.config or { }) ? port) { port = svc.config.port; };
+        // lib.optionalAttrs ((svc.config or { }) ? port) { port = svc.config.port; }
+        // lib.optionalAttrs ((svc.config or { }) ? webhookPort) { webhookPort = svc.config.webhookPort; };
       getSecrets = hostname: {
         "account-service.env" = {
           file = "${sec}/account-service.env.age";

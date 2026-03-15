@@ -54,6 +54,8 @@
     "devdoc"
   ];
 
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
   home.shellAliases = {
     em = "emacs -nw";
     emc = "emacsclient -tcq -a \"\"";
@@ -119,7 +121,7 @@
     };
     attributes = [ "*.pdf diff=pdf" ];
     extraConfig = {
-      init.defaultBranch = "devel";
+      init.defaultBranch = "main";
       pull = {
         rebase = false;
         autoSetupRemote = true;

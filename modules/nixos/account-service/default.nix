@@ -10,10 +10,10 @@ with lib;
 let
   cfg = config.services.account-service;
   flake = builtins.getFlake "git+ssh://git@calliope/~/account-service.git?rev=${cfg.rev}";
-  api-server-pkg = flake.packages.${pkgs.system}.api-server;
-  webhook-server-pkg = flake.packages.${pkgs.system}.webhook-server;
-  categoriser-pkg = flake.packages.${pkgs.system}.categoriser;
-  webhook-server-cfg = pkgs.writeTextDir "config.toml" (builtins.readFile ./webhook-config.toml);
+  api-service-pkg = flake.packages.${pkgs.system}.api-service;
+  parser-service-pkg = flake.packages.${pkgs.system}.parser-service;
+  labeler-service-pkg = flake.packages.${pkgs.system}.labeler-service;
+  parser-service-cfg = pkgs.writeTextDir "config.toml" (builtins.readFile ./parser-config.toml);
 in
 {
   imports = [
@@ -33,17 +33,17 @@ in
     port = mkOption {
       type = types.port;
       default = 8080;
-      description = "Port the api-server listens on";
+      description = "Port the api-service listens on";
     };
-    webhookPort = mkOption {
+    parserPort = mkOption {
+      type = types.port;
+      default = 8081;
+      description = "Port the parser-service listens on";
+    };
+    labelerPort = mkOption {
       type = types.port;
       default = 8082;
-      description = "Port the webhook-server listens on";
-    };
-    categoriserPort = mkOption {
-      type = types.port;
-      default = 8083;
-      description = "Port the categoriser listens on";
+      description = "Port the labeler-service listens on";
     };
     secretPaths = mkOption {
       type = types.attrs;
@@ -64,8 +64,8 @@ in
       ];
     };
 
-    systemd.services.account-api-server = {
-      description = "Account Service API Server";
+    systemd.services.account-api = {
+      description = "Account Service API";
       wantedBy = [ "multi-user.target" ];
       after = [
         "network.target"
@@ -81,17 +81,18 @@ in
           "DB_USER=accsvc"
           "DB_NAME=accsvc"
           "DB_SSLMODE=disable"
-          "CATEGORISER_URL=http://127.0.0.1:${toString cfg.categoriserPort}"
+          "LABELER_URL=http://127.0.0.1:${toString cfg.labelerPort}"
+          "PAPERLESS_URL=https://paperless.cirriform.au"
         ];
-        WorkingDirectory = "${api-server-pkg}/share/api-server";
-        ExecStart = "${api-server-pkg}/bin/api-server --web.listen-address 127.0.0.1:${toString cfg.port} --web.external-url https://${cfg.fqdn}";
+        WorkingDirectory = "${api-service-pkg}/share/api-service";
+        ExecStart = "${api-service-pkg}/bin/api-service --web.listen-address 127.0.0.1:${toString cfg.port} --web.external-url https://${cfg.fqdn}";
         Restart = "on-failure";
         RestartSec = "5s";
       };
     };
 
-    systemd.services.account-webhook-server = {
-      description = "Account Service Webhook Server";
+    systemd.services.account-parser = {
+      description = "Account Service Parser";
       wantedBy = [ "multi-user.target" ];
       after = [
         "network.target"
@@ -108,19 +109,19 @@ in
           "DB_NAME=accsvc"
           "DB_SSLMODE=disable"
         ];
-        ExecStart = "${webhook-server-pkg}/bin/webhook-server --verbose --web.listen-address 127.0.0.1:${toString cfg.webhookPort} --web.external-url https://${cfg.fqdn} --config ${webhook-server-cfg}/config.toml";
+        ExecStart = "${parser-service-pkg}/bin/parser-service --verbose --web.listen-address 127.0.0.1:${toString cfg.parserPort} --web.external-url https://${cfg.fqdn} --config ${parser-service-cfg}/config.toml";
         Restart = "on-failure";
         RestartSec = "5s";
       };
     };
 
-    systemd.services.account-categoriser-server = {
-      description = "Account Service Categoriser";
+    systemd.services.account-labeler = {
+      description = "Account Service Labeler";
       wantedBy = [ "multi-user.target" ];
       after = [
         "network.target"
         "postgresql.service"
-        "account-api-server.service"
+        "account-api.service"
       ];
       wants = [ "postgresql.service" ];
       serviceConfig = {
@@ -133,7 +134,7 @@ in
           "DB_NAME=accsvc"
           "DB_SSLMODE=disable"
         ];
-        ExecStart = "${categoriser-pkg}/bin/categoriser --verbose --web.listen-address 127.0.0.1:${toString cfg.categoriserPort} --config ${webhook-server-cfg}/config.toml";
+        ExecStart = "${labeler-service-pkg}/bin/labeler-service --verbose --web.listen-address 127.0.0.1:${toString cfg.labelerPort} --config ${parser-service-cfg}/config.toml";
         Restart = "on-failure";
         RestartSec = "5s";
       };
@@ -152,7 +153,7 @@ in
         proxyWebsockets = true;
       };
       locations."/webhook/" = {
-        proxyPass = "http://127.0.0.1:${toString cfg.webhookPort}";
+        proxyPass = "http://127.0.0.1:${toString cfg.parserPort}";
       };
     };
   };

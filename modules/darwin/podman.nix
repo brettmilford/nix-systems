@@ -23,6 +23,14 @@ in
       pkgs.xz
     ];
 
+    homebrew = {
+      enable = true;
+      casks = [
+        # Until: https://github.com/nixos/nixpkgs/issues/487166
+        "podman-desktop"
+      ];
+    };
+
     # https://github.com/containers/podman/issues/17026
     environment.pathsToLink = [ "/share/qemu" ];
 

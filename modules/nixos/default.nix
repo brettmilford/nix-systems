@@ -30,7 +30,6 @@
       safe.directory = [
         "/etc/nixos"
         "/etc/nixos/config"
-        "/etc/nixos/deployments"
       ];
     };
   };
