@@ -5,11 +5,17 @@
   userConfig,
   ...
 }:
+let
+  litFlakeRev = "8466922ac47ef1a19ce0af21f650d3e86e9f4930";
+  litFlake = builtins.getFlake "git+ssh://git@calliope/~/lit.git?rev=${litFlakeRev}";
+  lit = litFlake.packages.${pkgs.stdenv.hostPlatform.system}.default;
+in
 {
 
   home.packages =
     with pkgs;
     [
+      lit
       firefox
       claude-code
       direnv
@@ -83,47 +89,52 @@
   programs.git = {
     enable = true;
     lfs.enable = true;
-    userEmail = userConfig.email;
-    userName = userConfig.name;
-    aliases = {
-      lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
-      lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
-      hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short";
-      type = "cat-file -t";
-      dump = "cat-file -p";
-      s = "status";
-      a = "add -p";
-      co = "checkout";
-      cob = "checkout -b";
-      f = "fetch -p";
-      c = "commit";
-      caa = "commit --amend -C HEAD -a";
-      p = "push";
-      ba = "branch -a";
-      bd = "branch -d";
-      bD = "branch -D";
-      d = "diff";
-      dc = "diff --cached";
-      ds = "diff --staged";
-      r = "restore";
-      rs = "restore --staged";
-      st = "status -sb";
-      soft = "reset --soft";
-      hard = "reset --hard";
-      s1ft = "soft HEAD~1";
-      h1rd = "hard HEAD~1";
-      lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-      plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
-      tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
-      rank = "shortlog -sn --no-merges";
-      bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
-      stls = "stash list";
-    };
     attributes = [ "*.pdf diff=pdf" ];
-    extraConfig = {
+    settings = {
+      user = {
+        email = userConfig.email;
+        name = userConfig.name;
+      };
+      alias = {
+        lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
+        lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
+        hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short";
+        type = "cat-file -t";
+        dump = "cat-file -p";
+        s = "status";
+        a = "add -p";
+        co = "checkout";
+        cob = "checkout -b";
+        f = "fetch -p";
+        c = "commit";
+        caa = "commit --amend -C HEAD -a";
+        p = "push";
+        ba = "branch -a";
+        bd = "branch -d";
+        bD = "branch -D";
+        d = "diff";
+        dc = "diff --cached";
+        ds = "diff --staged";
+        r = "restore";
+        rs = "restore --staged";
+        st = "status -sb";
+        soft = "reset --soft";
+        hard = "reset --hard";
+        s1ft = "soft HEAD~1";
+        h1rd = "hard HEAD~1";
+        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
+        tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
+        rank = "shortlog -sn --no-merges";
+        bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
+        stls = "stash list";
+      };
       init.defaultBranch = "main";
       pull = {
         rebase = false;
+        autoSetupRemote = true;
+      };
+      push = {
         autoSetupRemote = true;
       };
       credential.helper = "cache";
