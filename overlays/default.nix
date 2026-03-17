@@ -32,6 +32,7 @@ let
     ])
 
     (mkOverlay inputs.nixpkgs-unstable [
+      "claude-code"
       "emacs-macport"
     ])
   ];
