@@ -106,7 +106,7 @@ in
 
   garmin-collect = {
     hosts = [ "terpsichore" ];
-    config.rev = "8a9d815386ebd8372ff532c75e0be4a934990952";
+    config.rev = "84d737b6cd696025bb68fd918f7888237289c3a7";
   };
 
   account-service = {

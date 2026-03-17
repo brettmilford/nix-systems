@@ -113,7 +113,8 @@ in
     services.grafana.provision.datasources.settings.datasources = [
       {
         name = "Garmin";
-        type = "postgres";
+        uid = "garmin-postgres";
+        type = "grafana-postgresql-datasource";
         access = "proxy";
         url = "/run/postgresql";
         database = "garmin";
