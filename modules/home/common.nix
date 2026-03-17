@@ -40,7 +40,8 @@ in
       gnomeExtensions.paperwm
     ];
 
-  dconf.settings = {
+  # TODO: only enable this when gnome desktop is installed
+  dconf.settings = lib.mkIf false {
     "org/gnome/shell" = {
       enabled-extensions = [
         pkgs.gnomeExtensions.paperwm.extensionUuid
