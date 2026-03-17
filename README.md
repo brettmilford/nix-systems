@@ -57,3 +57,10 @@ nix run '.#nixosConfigurations.orpheus.config.system.build.vm'
   - `nvm` - Run VM for testing
 - `nix develop .#deploy` - Provides deploy-rs for remote node deployments.
   - `deploy .#<host> --auto-rollback false`
+
+- Run a package from unstable
+
+```bash
+nix shell github:NixOS/nixpkgs/nixos-unstable#<package_name>
+```
+
