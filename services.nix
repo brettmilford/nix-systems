@@ -118,7 +118,7 @@ in
   realestate-calculators = {
     hosts = [ "terpsichore" ];
     fqdn = "recalc.${domain}";
-    config.rev = "9ac5661f499d2116d453422f93774d9dc20d1da7";
+    config.rev = "cf2a5a03c01b3932e99075cbeb429a792bd7faf6";
   };
 
   git-server = {
