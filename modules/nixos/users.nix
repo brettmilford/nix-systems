@@ -26,4 +26,4 @@ let
     services.openssh.settings.AllowUsers = lib.mkAfter [ username ];
   };
 in
-mkMerge (builtins.attrValues (builtins.mapAttrs mkUser users))
+mkMerge (builtins.attrValues (builtins.mapAttrs mkUser (lib.filterAttrs (_: u: u ? name) users)))

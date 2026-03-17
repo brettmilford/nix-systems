@@ -26,6 +26,7 @@
     backupSshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMbevo0T1bXdD4uD8x/33IhXfP2alhpnswYn7DDdeWgI borg@terpsichore";
     extraModules = [
       self.nixosModules.secureBoot
+      self.nixosModules.users
     ];
   };
 

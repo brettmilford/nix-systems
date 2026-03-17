@@ -317,7 +317,7 @@
                       sshUser = username;
                       remoteBuild = true;
                       fastConnection = true;
-                    }) users
+                    }) (nixpkgs.lib.filterAttrs (_: u: u ? name) users)
                   else
                     { };
                 systemType = if nixpkgs.lib.hasInfix "linux" node.system then "nixos" else "darwin";
