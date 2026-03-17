@@ -104,6 +104,11 @@ in
     };
   };
 
+  garmin-collect = {
+    hosts = [ "terpsichore" ];
+    config.rev = "8a9d815386ebd8372ff532c75e0be4a934990952";
+  };
+
   account-service = {
     hosts = [ "terpsichore" ];
     fqdn = "account.${domain}";

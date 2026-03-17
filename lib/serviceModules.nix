@@ -361,6 +361,26 @@ let
         };
     };
 
+    garmin-collect = {
+      modules = [ "${mod}/garmin-collect" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.garmin-collect or { };
+        in
+        {
+          enable = true;
+          rev = svc.config.rev;
+        };
+      getSecrets = hostname: {
+        "garmin-collect.env" = {
+          file = "${sec}/garmin-collect.env.age";
+          owner = "garmin";
+          group = "garmin";
+        };
+      };
+    };
+
     account-service = {
       modules = [ "${mod}/account-service" ];
       getOptions =
