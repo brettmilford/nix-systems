@@ -4,3 +4,4 @@ result
 *.fd
 .claude
 CLAUDE.md
+.gcroot-*

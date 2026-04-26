@@ -133,6 +133,10 @@ in
     };
   };
 
+  nfs-server = {
+    hosts = [ "terpsichore" ];
+  };
+
   git-server = {
     hosts = [ "calliope" ];
     config = {

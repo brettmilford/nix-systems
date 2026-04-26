@@ -21,6 +21,29 @@ in
       description = "FQDN for Home Assistant";
     };
 
+    nfsMounts = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.submodule {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "Mount name (used as media subdirectory)";
+            };
+            server = lib.mkOption {
+              type = lib.types.str;
+              description = "NFS server IP address";
+            };
+            remotePath = lib.mkOption {
+              type = lib.types.str;
+              description = "Remote NFS export path";
+            };
+          };
+        }
+      );
+      default = [ ];
+      description = "NFS shares to mount as media directories";
+    };
+
     secretPaths = lib.mkOption {
       type = lib.types.attrs;
       default = { };
@@ -89,7 +112,10 @@ in
         # HTTP configuration for reverse proxy
         http = {
           use_x_forwarded_for = true;
-          trusted_proxies = [ "127.0.0.1" "::1" ];
+          trusted_proxies = [
+            "127.0.0.1"
+            "::1"
+          ];
         };
 
         # UI-generated configuration includes
@@ -109,7 +135,31 @@ in
       };
 
       configDir = "/var/lib/hass";
+
+      config.homeassistant.media_dirs = lib.listToAttrs (
+        map (mount: {
+          name = mount.name;
+          value = "/var/lib/hass/media/${mount.name}";
+        }) cfg.nfsMounts
+      );
     };
+
+    # NFS media mounts
+    fileSystems = lib.listToAttrs (
+      map (mount: {
+        name = "/var/lib/hass/media/${mount.name}";
+        value = {
+          device = "${mount.server}:${mount.remotePath}";
+          fsType = "nfs";
+          options = [
+            "ro"
+            "soft"
+            "timeo=30"
+            "_netdev"
+          ];
+        };
+      }) cfg.nfsMounts
+    );
 
     # Create UI automation files if they don't exist
     systemd.tmpfiles.rules = [
@@ -134,7 +184,10 @@ in
           omitPasswordAuth = true;
           settings.allow_anonymous = true;
           users = { };
-          acl = [ "topic readwrite #" "pattern readwrite #" ];
+          acl = [
+            "topic readwrite #"
+            "pattern readwrite #"
+          ];
         }
       ];
     };

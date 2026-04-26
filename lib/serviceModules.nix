@@ -296,10 +296,20 @@ let
         hostname:
         let
           hassService = services.services.hass or { };
+          ftpHost = services.lib.primaryNode "ftp";
+          ftpDataPath = services.lib.getServiceDataPath ftpHost "ftp";
+          ftpIp = nodes.${ftpHost}.ip;
         in
         {
           enable = true;
           inherit (hassService) fqdn;
+          nfsMounts = [
+            {
+              name = "reolink";
+              server = ftpIp;
+              remotePath = "${ftpDataPath}/reolink";
+            }
+          ];
         };
       getSecrets = hostname: {
         cfdCredentialsFile = {
@@ -420,6 +430,27 @@ let
           fqdn = svc.fqdn;
           dataPath = services.lib.getServiceDataPath hostname "ftp";
           lanAddress = nodes.${hostname}.ip;
+        };
+    };
+
+    nfs-server = {
+      modules = [ "${mod}/nfs-server" ];
+      getOptions =
+        hostname:
+        let
+          ftpHost = services.lib.primaryNode "ftp";
+          ftpDataPath = services.lib.getServiceDataPath ftpHost "ftp";
+          hassHost = services.lib.primaryNode "hass";
+          hassIp = nodes.${hassHost}.ip;
+        in
+        {
+          enable = true;
+          exports = [
+            {
+              path = "${ftpDataPath}/reolink";
+              clients = [ hassIp ];
+            }
+          ];
         };
     };
 

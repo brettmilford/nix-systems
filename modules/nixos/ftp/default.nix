@@ -73,12 +73,13 @@ in
         pasv_address=${cfg.lanAddress}
         local_root=${cfg.dataPath}
         require_ssl_reuse=NO
+        local_umask=022
       '';
     };
 
     systemd.tmpfiles.rules = [
       "d ${cfg.dataPath} 0755 root root -"
-      "d ${cfg.dataPath}/reolink 0750 reolink reolink -"
+      "d ${cfg.dataPath}/reolink 0755 reolink reolink -"
     ];
 
     networking.firewall.allowedTCPPorts = [ 21 ];
