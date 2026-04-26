@@ -106,7 +106,11 @@ in
 
   garmin-collect = {
     hosts = [ "terpsichore" ];
-    config.rev = "84d737b6cd696025bb68fd918f7888237289c3a7";
+    fqdn = "measure.${domain}";
+    config = {
+      rev = "40957d00c426d3a05d7d411858f1fe3663f30cff";
+      measurePort = 8642;
+    };
   };
 
   account-service = {
@@ -119,6 +123,14 @@ in
     hosts = [ "terpsichore" ];
     fqdn = "recalc.${domain}";
     config.rev = "cf2a5a03c01b3932e99075cbeb429a792bd7faf6";
+  };
+
+  ftp = {
+    hosts = [ "terpsichore" ];
+    fqdn = "ftp.${domain}";
+    config = {
+      dataPath = "ftp";
+    };
   };
 
   git-server = {

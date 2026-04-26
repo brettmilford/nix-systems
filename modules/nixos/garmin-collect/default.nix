@@ -17,11 +17,24 @@ let
   '';
 in
 {
+  imports = [
+    ../gateway.nix
+  ];
+
   options.services.garmin-collect = {
     enable = mkEnableOption "garmin-collect";
     rev = mkOption {
       type = types.str;
       description = "Pinned git revision of garmin-collect flake";
+    };
+    fqdn = mkOption {
+      type = types.str;
+      description = "FQDN for the manual health entry nginx virtualHost";
+    };
+    measurePort = mkOption {
+      type = types.port;
+      default = 8642;
+      description = "Port the manual-health-serve listens on";
     };
     secretPaths = mkOption {
       type = types.attrs;
@@ -138,5 +151,35 @@ in
         options.path = "${dashboardsDir}";
       }
     ];
+
+    # Manual health data entry web service
+    systemd.services.garmin-collect-web = {
+      description = "Manual Health Data Entry";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "network.target"
+        "postgresql.service"
+      ];
+      wants = [ "postgresql.service" ];
+      serviceConfig = {
+        User = "garmin";
+        Group = "garmin";
+        EnvironmentFile = cfg.secretPaths."garmin-collect.env";
+        Environment = [
+          "DATABASE_URL=postgresql:///garmin?host=/run/postgresql"
+          "MANUAL_HEALTH_PORT=${toString cfg.measurePort}"
+        ];
+        ExecStart = "${garmin-collect-pkg}/bin/manual-health-serve";
+        Restart = "on-failure";
+        RestartSec = "5s";
+      };
+    };
+
+    services.gateway.enable = true;
+    services.nginx.virtualHosts.${cfg.fqdn} = {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${toString cfg.measurePort}";
+      };
+    };
   };
 }

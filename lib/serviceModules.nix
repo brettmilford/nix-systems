@@ -84,7 +84,7 @@ let
           }) allHosts;
 
           # Generate Home Assistant monitoring targets
-          hassHosts = services.services.hass.hosts or [];
+          hassHosts = services.services.hass.hosts or [ ];
           hassTargets = map (host: {
             hostname = host;
             ip = nodes.${host}.ip;
@@ -93,7 +93,7 @@ let
           }) hassHosts;
 
           # Generate UniFi monitoring targets
-          unifiHosts = services.services.unifi-controller.hosts or [];
+          unifiHosts = services.services.unifi-controller.hosts or [ ];
           unifiTargets = map (host: {
             hostname = host;
             ip = nodes.${host}.ip;
@@ -270,13 +270,15 @@ let
 
     backup = {
       modules = [ "${mod}/backup.nix" ];
-      getOptions = hostname: 
+      getOptions =
+        hostname:
         let
           backupTargetRepos = services.lib.getBackupTargetConfig hostname;
           # Resolve node references and compute SSH keys here
-          resolvedRepos = lib.mapAttrs (repoName: repoConfig:
+          resolvedRepos = lib.mapAttrs (
+            repoName: repoConfig:
             let
-              sourceNode = nodes.${repoConfig.source} or {};
+              sourceNode = nodes.${repoConfig.source} or { };
               authorizedKeys = lib.optional (sourceNode ? backupSshKey) sourceNode.backupSshKey;
             in
             repoConfig // { inherit authorizedKeys; }
@@ -370,8 +372,10 @@ let
         in
         {
           enable = true;
+          fqdn = svc.fqdn;
           rev = svc.config.rev;
-        };
+        }
+        // lib.optionalAttrs ((svc.config or { }) ? measurePort) { measurePort = svc.config.measurePort; };
       getSecrets = hostname: {
         "garmin-collect.env" = {
           file = "${sec}/garmin-collect.env.age";
@@ -402,6 +406,21 @@ let
           group = "accsvc";
         };
       };
+    };
+
+    ftp = {
+      modules = [ "${mod}/ftp" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.ftp or { };
+        in
+        {
+          enable = true;
+          fqdn = svc.fqdn;
+          dataPath = services.lib.getServiceDataPath hostname "ftp";
+          lanAddress = nodes.${hostname}.ip;
+        };
     };
 
     git-server = {
@@ -442,11 +461,13 @@ let
       ];
 
       # Conditional clients based on services
-      conditionalClients = lib.optionals (services.lib.hasService hostname "hass") [
-        "monitoring-hass"
-      ] ++ lib.optionals (services.lib.hasService hostname "unifi-controller") [
-        "monitoring-unifi"
-      ];
+      conditionalClients =
+        lib.optionals (services.lib.hasService hostname "hass") [
+          "monitoring-hass"
+        ]
+        ++ lib.optionals (services.lib.hasService hostname "unifi-controller") [
+          "monitoring-unifi"
+        ];
 
       # Combine regular services with default and conditional clients
       hostServices = lib.unique (regularServices ++ defaultClients ++ conditionalClients);
