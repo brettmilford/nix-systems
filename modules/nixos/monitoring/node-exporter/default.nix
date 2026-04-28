@@ -46,6 +46,7 @@ in
         "stat"
         "processes"
         "interrupts"
+        "nfs"
       ];
     };
   };

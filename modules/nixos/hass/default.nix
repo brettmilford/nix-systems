@@ -144,10 +144,11 @@ in
       );
     };
 
-    # NFS media mounts
+    # NFS media mounts — mount outside /var/lib/hass so HA backups
+    # don't traverse them; symlink into media dir for HA access.
     fileSystems = lib.listToAttrs (
       map (mount: {
-        name = "/var/lib/hass/media/${mount.name}";
+        name = "/srv/media/${mount.name}";
         value = {
           device = "${mount.server}:${mount.remotePath}";
           fsType = "nfs";
@@ -161,14 +162,17 @@ in
       }) cfg.nfsMounts
     );
 
-    # Create UI automation files if they don't exist
-    systemd.tmpfiles.rules = [
-      "f /var/lib/hass/automations.yaml 0644 hass hass - []"
-      "f /var/lib/hass/scripts.yaml 0644 hass hass - []"
-      "f /var/lib/hass/scenes.yaml 0644 hass hass - []"
-      "f /var/lib/hass/input_boolean.yaml 0644 hass hass - {}"
-      "d /var/lib/hass/themes 0755 hass hass - -"
-    ];
+    # Create UI automation files if they don't exist, and symlink
+    # NFS media mounts into the hass media directory.
+    systemd.tmpfiles.rules =
+      [
+        "f /var/lib/hass/automations.yaml 0644 hass hass - []"
+        "f /var/lib/hass/scripts.yaml 0644 hass hass - []"
+        "f /var/lib/hass/scenes.yaml 0644 hass hass - []"
+        "f /var/lib/hass/input_boolean.yaml 0644 hass hass - {}"
+        "d /var/lib/hass/themes 0755 hass hass - -"
+      ]
+      ++ map (mount: "L /var/lib/hass/media/${mount.name} - - - - /srv/media/${mount.name}") cfg.nfsMounts;
 
     # MQTT Broker (Mosquitto)
     # mosquitto_sub -h 127.0.0.1 -v -t "homeassistant/#"
