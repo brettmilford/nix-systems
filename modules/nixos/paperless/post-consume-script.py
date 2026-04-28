@@ -55,11 +55,16 @@ def parse_document_date(date_string):
 
         # Remove microseconds if present (anything after the last dot in seconds)
         if '.' in date_part:
-            # Split on the last dot and take everything before it
             date_part = date_part.rsplit('.', 1)[0]
 
-        # Parse the cleaned date string
-        return datetime.strptime(date_part, '%Y-%m-%d %H:%M:%S')
+        # Try datetime first, then date-only
+        for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(date_part, fmt)
+            except ValueError:
+                continue
+
+        raise ValueError(f"does not match any expected format")
 
     except ValueError as e:
         print(f"ERROR: Error parsing date '{date_string}': {e}", file=sys.stderr)
