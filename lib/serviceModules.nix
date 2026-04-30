@@ -107,6 +107,7 @@ let
         in
         {
           enable = true;
+          enableAlertManager = true;
           inherit (monitoringService) fqdn;
           targets = {
             # Node exporter targets for all hosts

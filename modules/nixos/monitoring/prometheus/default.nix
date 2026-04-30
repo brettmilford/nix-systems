@@ -145,7 +145,7 @@ in
           scrape_interval = "30s";
         }
       ]
-      ++ lib.optional config.services.prometheus.alertmanager.enable [
+      ++ lib.optionals config.services.prometheus.alertmanager.enable [
         {
           job_name = "alertmanager";
           static_configs = [
