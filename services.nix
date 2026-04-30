@@ -149,6 +149,9 @@ in
     hosts = [ "calliope" ];
     config = {
       dataPath = "/git";
+      extraAuthorizedKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdBecv6oeIpHd2kYJw0qVDKbAC1ydBybnVO3VJgbu7M git@opnsense"
+      ];
     };
   };
 }

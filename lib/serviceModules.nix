@@ -467,7 +467,8 @@ let
             )
             ++ lib.mapAttrsToList (_name: user: user.sshKey) (
               lib.filterAttrs (_name: user: user ? sshKey) users
-            );
+            )
+            ++ (services.services."git-server".config.extraAuthorizedKeys or []);
         in
         {
           enable = true;
