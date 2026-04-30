@@ -19,6 +19,7 @@ in
     ./hardware-configuration.nix
     (modulesPath + "/profiles/headless.nix")
     ./localBackup.nix
+    ./backup.nix
     ../common.nix
     ../cloud.nix
   ];
