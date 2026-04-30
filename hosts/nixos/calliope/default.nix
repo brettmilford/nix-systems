@@ -20,6 +20,8 @@
 
   networking.hostName = "calliope";
   networking.hostId = "25f4937c";
+  networking.nameservers = [ "172.16.1.1" ];
+  networking.search = [ "cirriform.au" ];
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   services.openssh.openFirewall = false;
