@@ -13,7 +13,7 @@
     ../common.nix
     ../cloud.nix
     ../virt.nix
-    ./postfix.nix
+    ./bridge.nix
   ];
 
   system.stateVersion = "23.05";
