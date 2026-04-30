@@ -475,6 +475,49 @@ let
           inherit dataPath authorizedKeys;
         };
     };
+
+    mail-relay = {
+      modules = [ "${mod}/mail-relay" ];
+      getSecrets =
+        hostname:
+        lib.optionalAttrs (hostname == "calliope") {
+          postfix-sasl-passwd = {
+            file = "${sec}/postfix-sasl-passwd.age";
+          };
+        };
+      getOptions =
+        hostname:
+        let
+          domain = services.services.domain;
+        in
+        if hostname == "calliope" then
+          {
+            enable = true;
+            relayhost = "127.0.0.1:1025";
+            inherit domain;
+            hostname = hostname + "." + domain;
+            saslAuth = {
+              enable = true;
+              secretPath = "/run/agenix/postfix-sasl-passwd";
+            };
+            listenInterfaces = [
+              "localhost"
+              "172.16.0.1"
+            ];
+            mynetworks = [
+              "127.0.0.0/8"
+              "172.16.0.0/16"
+            ];
+          }
+        else
+          {
+            enable = true;
+            relayhost = "172.16.0.1:25";
+            inherit domain;
+            hostname = hostname + "." + domain;
+            saslAuth.enable = false;
+          };
+    };
   };
 
   # Factory function that takes hostname and returns modules + service options

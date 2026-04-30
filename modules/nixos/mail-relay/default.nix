@@ -51,27 +51,33 @@ in
       default = [ "127.0.0.0/8" ];
       description = "Networks allowed to relay";
     };
+
+    secretPaths = lib.mkOption {
+      type = lib.types.attrs;
+      default = { };
+      description = "Agenix secret file paths";
+    };
   };
 
   config = mkIf cfg.enable {
     services.postfix = {
       enable = true;
       setSendmail = true;
-      relayHost = cfg.relayhost;
-      config =
+      settings.main =
         {
           myhostname = cfg.hostname;
           mydomain = cfg.domain;
+          relayhost = [ cfg.relayhost ];
           myorigin = "$mydomain";
           inet_protocols = "all";
-          inet_interfaces = concatStringsSep ", " cfg.listenInterfaces;
-          mynetworks = concatStringsSep ", " cfg.mynetworks;
-          mydestination = "";
+          inet_interfaces = cfg.listenInterfaces;
+          mynetworks = cfg.mynetworks;
+          mydestination = [];
           bounce_sender = "admin@${cfg.domain}";
           smtp_tls_security_level = "may";
         }
         // optionalAttrs cfg.saslAuth.enable {
-          smtp_sasl_auth_enable = "yes";
+          smtp_sasl_auth_enable = true;
           smtp_sasl_security_options = "noanonymous";
           smtp_sasl_password_maps = "texthash:${cfg.saslAuth.secretPath}";
           smtp_sasl_mechanism_filter = "plain,login";
