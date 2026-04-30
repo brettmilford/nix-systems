@@ -12,7 +12,6 @@
     ./backup.nix
     ../common.nix
     ../cloud.nix
-    ../zerotierone.nix
     ../virt.nix
     ./postfix.nix
   ];
