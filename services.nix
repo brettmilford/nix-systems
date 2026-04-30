@@ -103,7 +103,10 @@ in
         {
           # opnsense
           publicKey = "m+e6WbpDrsbwUPc88Q3ZESt+qfawUxkAzC/02jeV0G8=";
-          allowedIPs = [ "172.16.1.1/32" ];
+          allowedIPs = [
+            "172.16.1.1/32"
+            "192.168.0.0/16"
+          ];
         }
       ];
     };
