@@ -80,6 +80,9 @@ in
       nerd-fonts.symbols-only
       graphviz
 
+      # agent-shell dependencies
+      claude-agent-acp
+
       # development tools
       nodejs
       gnumake
