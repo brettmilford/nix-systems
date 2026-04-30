@@ -24,7 +24,6 @@
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   services.openssh.openFirewall = false;
-  networking.firewall.interfaces."zth6rkq2c5".allowedTCPPorts = [ 22 80 443 ];
 
   services.postgresql = {
     enable = true;

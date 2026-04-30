@@ -10,7 +10,7 @@
   };
 
   networking = lib.mkIf config.services.zerotierone.enable {
-    nameservers = [ "172.22.0.1" ];
+    nameservers = [ "172.16.1.1" ];
     search = [ "cirriform.au" ];
   };
 }

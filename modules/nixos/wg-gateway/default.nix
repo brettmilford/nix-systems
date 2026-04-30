@@ -91,31 +91,18 @@ in
       allowedUDPPorts = [ cfg.listenPort ];
       trustedInterfaces = [ "wg0" ];
       extraCommands = ''
-        # Allow WireGuard clients to access ZeroTier network
-        iptables -I FORWARD 1 -s 172.16.0.0/16 -d 172.22.0.0/16 -j ACCEPT
-        iptables -I FORWARD 1 -s 172.22.0.0/16 -d 172.16.0.0/16 -j ACCEPT
-
-        # Allow WireGuard clients to access 192.168.0.0/16 via ZeroTier
+        # Allow WireGuard clients to access 192.168.0.0/16
         iptables -I FORWARD 1 -s 172.16.0.0/16 -d 192.168.0.0/16 -j ACCEPT
         iptables -I FORWARD 1 -s 192.168.0.0/16 -d 172.16.0.0/16 -j ACCEPT
 
         # Allow inter-peer traffic through the WireGuard hub
         iptables -I FORWARD 1 -i wg0 -o wg0 -j ACCEPT
-
-        # Allow DNS queries from WireGuard clients to ZeroTier DNS
-        iptables -I FORWARD 1 -s 172.16.0.0/16 -d 172.22.0.1 -p udp --dport 53 -j ACCEPT
-        iptables -I FORWARD 1 -s 172.16.0.0/16 -d 172.22.0.1 -p tcp --dport 53 -j ACCEPT
       '';
 
       extraStopCommands = ''
-        # Clean up forward rules
-        iptables -D FORWARD -s 172.16.0.0/16 -d 172.22.0.0/16 -j ACCEPT 2>/dev/null || true
-        iptables -D FORWARD -s 172.22.0.0/16 -d 172.16.0.0/16 -j ACCEPT 2>/dev/null || true
         iptables -D FORWARD -s 172.16.0.0/16 -d 192.168.0.0/16 -j ACCEPT 2>/dev/null || true
         iptables -D FORWARD -s 192.168.0.0/16 -d 172.16.0.0/16 -j ACCEPT 2>/dev/null || true
         iptables -D FORWARD -i wg0 -o wg0 -j ACCEPT 2>/dev/null || true
-        iptables -D FORWARD -s 172.16.0.0/16 -d 172.22.0.1 -p udp --dport 53 -j ACCEPT 2>/dev/null || true
-        iptables -D FORWARD -s 172.16.0.0/16 -d 172.22.0.1 -p tcp --dport 53 -j ACCEPT 2>/dev/null || true
       '';
     };
 
