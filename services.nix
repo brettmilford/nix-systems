@@ -100,6 +100,11 @@ in
           publicKey = "vYRA5xUEocCBlB2LlUP5EHRzriUdCzwWsU3idpXZuRM=";
           allowedIPs = [ "172.16.0.3/32" ];
         }
+        {
+          # opnsense
+          publicKey = "m+e6WbpDrsbwUPc88Q3ZESt+qfawUxkAzC/02jeV0G8=";
+          allowedIPs = [ "172.16.1.1/32" ];
+        }
       ];
     };
   };
