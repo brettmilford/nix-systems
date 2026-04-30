@@ -11,7 +11,7 @@
   };
 
   calliope = {
-    ip = "172.22.70.58";
+    ip = "172.16.0.1";
     domain = "internal";
     system = "aarch64-linux";
     dataPath = "/srv/data";
