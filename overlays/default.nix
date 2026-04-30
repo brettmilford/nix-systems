@@ -24,6 +24,8 @@ let
           inherit (prev) config;
         }).podman;
       };
+
+      claude-agent-acp = prev.callPackage ../packages/claude-agent-acp.nix { };
     })
 
     # Overlay directly
