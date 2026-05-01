@@ -15,7 +15,7 @@ let
       - name: paperless
         rules:
           - alert: PaperlessConsumeError
-            expr: 'count_over_time({app="celery", host="calliope"} |~ "ERROR" [15m]) > 0'
+            expr: 'count_over_time({app="celery", host="calliope"} |~ "ERROR" |~ "post-consume-script|ConsumerError" [15m]) > 0'
             for: 0s
             labels:
               severity: warning
