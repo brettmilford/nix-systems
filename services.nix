@@ -9,7 +9,7 @@ in
   };
 
   cloud = {
-    hosts = [ "calliope" ];
+    hosts = [ "terpsichore" ];
     fqdn = "cloud.${domain}";
     config = {
       dataPath = "/nextcloud";
@@ -25,7 +25,7 @@ in
   };
 
   paperless-ngx = {
-    hosts = [ "calliope" ];
+    hosts = [ "terpsichore" ];
     fqdn = "paperless.${domain}";
     config = {
       dataPath = "/paperless";
