@@ -1,14 +1,10 @@
 { self, config, lib, pkgs, ... }:
 
 {
-  environment.systemPackages = with pkgs;[
+  environment.systemPackages = with pkgs; [
     qemu
     OVMF
-    (writeShellApplication {
-      name = "qemu-snapshot";
-      runtimeInputs = with pkgs; [socat];
-      text = builtins.readFile ./qemu-snapshot.sh;
-    })
+    qemu-snapshot
   ];
 
   systemd.tmpfiles.rules = [

@@ -31,6 +31,9 @@ in
               "- /var/lib/containers"
               "- /var/lib/fail2ban"
               "- /var/lib/systemd"
+              "- /var/lib/hass/home-assistant_v2.db"
+              "- /var/lib/hass/home-assistant_v2.db-wal"
+              "- /var/lib/hass/home-assistant_v2.db-shm"
               "- /var/lib/loki"
               "- /var/lib/prometheus2"
             ];
@@ -53,10 +56,12 @@ in
               monthly = 6;
             };
 
+            readWritePaths = [ "/var/lib/qemu/snapshots" ];
+
             preHook = ''
               echo "Creating OPNsense VM snapshot before backup..."
               SNAPSHOT_NAME="backup_$(date +%Y%m%d_%H%M%S)"
-              qemu-snapshot opnsense create "$SNAPSHOT_NAME" || echo "Warning: VM snapshot failed"
+              ${pkgs.qemu-snapshot}/bin/qemu-snapshot opnsense create "$SNAPSHOT_NAME" || echo "Warning: VM snapshot failed"
             '';
           }
         ) repoConfig.targetNodes

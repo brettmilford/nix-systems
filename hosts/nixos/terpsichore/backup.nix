@@ -34,6 +34,8 @@ in
               "- /var/lib/redis-immich"
               "- /var/lib/redis-nextcloud"
               "- /var/lib/redis-paperless"
+              "- /var/lib/loki"
+              "- /var/lib/prometheus2"
               "- /var/lib/systemd"
             ];
 

@@ -26,6 +26,7 @@ let
       };
 
       claude-agent-acp = prev.callPackage ../packages/claude-agent-acp.nix { };
+      qemu-snapshot = prev.callPackage ../packages/qemu-snapshot.nix { };
     })
 
     # Overlay directly
