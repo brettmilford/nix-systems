@@ -481,7 +481,7 @@ let
       modules = [ "${mod}/mail-relay" ];
       getSecrets =
         hostname:
-        {
+        lib.optionalAttrs (hostname == "calliope") {
           postfix-sasl-passwd = {
             file = "${sec}/postfix-sasl-passwd.age";
           };
@@ -490,6 +490,7 @@ let
         hostname:
         let
           domain = services.services.domain;
+          svcConfig = services.services.mail-relay.config or { };
         in
         {
           enable = true;
@@ -497,8 +498,8 @@ let
           inherit domain;
           hostname = hostname + "." + domain;
           saslAuth = {
-            enable = true;
-            secretPath = "/run/agenix/postfix-sasl-passwd";
+            enable = lib.mkDefault true;
+            secretPath = lib.mkDefault "/run/agenix/postfix-sasl-passwd";
           };
         };
     };
