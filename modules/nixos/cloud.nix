@@ -82,7 +82,7 @@ in
         trusted_proxies = [ "127.0.0.1" "::1" ];
         overwriteprotocol = "https";
         default_phone_region = "AU";
-        "overwrite.cli.url" = "https://cloud.cirriform.au";
+        "overwrite.cli.url" = "https://${cfg.fqdn}";
         overwritehost = "${cfg.fqdn}";
         forwarded_for_headers = [ "X-Forwarded-For" ];
         oidc_login_client_id = "nextcloud";
@@ -212,15 +212,14 @@ in
 
         sotrage.wopi = {
           "@allow" = true;
-          host = ["cloud.cirriform.au"];
+          host = [cfg.fqdn];
         };
 
-        server_name = "collabora.cirriform.au";
+        server_name = "collabora.${cfg.fqdn}";
       };
     };
 
-    # TODO: get from catalog
-    services.nginx.virtualHosts."collabora.cirriform.au" = mkIf cfg.enableOffice {
+    services.nginx.virtualHosts."collabora.${cfg.fqdn}" = mkIf cfg.enableOffice {
       locations."/" = {
         proxyPass = "http://localhost:${toString config.services.collabora-online.port}";
         proxyWebsockets = true;
