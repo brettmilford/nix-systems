@@ -31,6 +31,9 @@ in
             {
               to = "brettmilford@gmail.com";
               send_resolved = true;
+              headers = {
+                From = "Alertmanager <admin@cirriform.au>";
+              };
             }
           ];
         }
