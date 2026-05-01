@@ -7,6 +7,23 @@
 
 let
   cfg = config.services.monitoring;
+
+  lokiRulesDir = pkgs.runCommand "loki-rules" { } ''
+    mkdir -p $out/fake
+    cat > $out/fake/paperless.yaml << 'EOF'
+    groups:
+      - name: paperless
+        rules:
+          - alert: PaperlessConsumeError
+            expr: 'count_over_time({app=~"paperless.*", host="calliope"} |~ "ERROR" [15m]) > 0'
+            for: 0s
+            labels:
+              severity: warning
+            annotations:
+              summary: "Paperless consume error on calliope"
+              description: "Paperless consumer logged errors in the last 15 minutes."
+    EOF
+  '';
 in
 {
   services.loki = {
@@ -21,39 +38,37 @@ in
       server = {
         http_listen_port = cfg.ports.loki;
         http_listen_address = "localhost";
-        # Server-side gRPC limits
-        grpc_server_max_recv_msg_size = 52428800; # 50MB
-        grpc_server_max_send_msg_size = 52428800; # 50MB
+        grpc_server_max_recv_msg_size = 52428800;
+        grpc_server_max_send_msg_size = 52428800;
       };
 
-      # Query scheduler gRPC client config
       query_scheduler = {
         grpc_client_config = {
-          max_recv_msg_size = 52428800; # 50MB
-          max_send_msg_size = 52428800; # 50MB
+          max_recv_msg_size = 52428800;
+          max_send_msg_size = 52428800;
         };
       };
 
-      # Frontend worker gRPC client config
       frontend_worker = {
         grpc_client_config = {
-          max_recv_msg_size = 52428800; # 50MB
-          max_send_msg_size = 52428800; # 50MB
+          max_recv_msg_size = 52428800;
+          max_send_msg_size = 52428800;
         };
       };
 
-      # Ingester client gRPC config
       ingester_client = {
         grpc_client_config = {
-          max_recv_msg_size = 52428800; # 50MB
-          max_send_msg_size = 52428800; # 50MB
+          max_recv_msg_size = 52428800;
+          max_send_msg_size = 52428800;
         };
       };
 
-      # Other recommended settings for large log handling
       limits_config = {
         max_entries_limit_per_query = 1000000;
-        max_query_length = "12000h"; # Allow longer time ranges
+        max_query_length = "12000h";
+        reject_old_samples = true;
+        reject_old_samples_max_age = "168h";
+        allow_structured_metadata = true;
       };
 
       common = {
@@ -67,15 +82,13 @@ in
         path_prefix = "/var/lib/loki";
       };
 
-      # Modern schema configuration with TSDB
-      # Based on current Loki documentation
       schema_config = {
         configs = [
           {
             from = "2024-01-01";
             store = "tsdb";
             object_store = "filesystem";
-            schema = "v13"; # Latest recommended schema version
+            schema = "v13";
             index = {
               prefix = "index_";
               period = "24h";
@@ -94,24 +107,27 @@ in
         };
       };
 
-      limits_config = {
-        reject_old_samples = true;
-        reject_old_samples_max_age = "168h";
-        allow_structured_metadata = true; # Required for Loki 3.0+
-      };
-
       compactor = {
         working_directory = "/var/lib/loki/compactor";
         compaction_interval = "5m";
       };
+
+      ruler = {
+        storage = {
+          type = "local";
+          local = {
+            directory = "${lokiRulesDir}";
+          };
+        };
+        rule_path = "/var/lib/loki/rules-temp";
+        alertmanager_url = "http://localhost:${toString cfg.ports.alertmanager}";
+        ring = {
+          kvstore = {
+            store = "inmemory";
+          };
+        };
+        enable_api = true;
+      };
     };
   };
-  # Ensure data directories exist with proper permissions
-  #systemd.tmpfiles.rules = [
-  #  "d /var/lib/loki 0755 loki loki -"
-  #  "d /var/lib/loki/chunks 0755 loki loki -"
-  #  "d /var/lib/loki/tsdb-index 0755 loki loki -"
-  #  "d /var/lib/loki/tsdb-cache 0755 loki loki -"
-  #  "d /var/lib/loki/compactor 0755 loki loki -"
-  #];
 }

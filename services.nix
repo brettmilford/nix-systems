@@ -154,4 +154,11 @@ in
       ];
     };
   };
+
+  mail-relay = {
+    hosts = [
+      "calliope"
+      "terpsichore"
+    ];
+  };
 }

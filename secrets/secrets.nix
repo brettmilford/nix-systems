@@ -19,7 +19,7 @@ in {
   "unifipoller_pass.age".publicKeys = [nix eurydice terpsichore brett];
   "snmp.env.age".publicKeys = [nix eurydice terpsichore brett];
   "paperless.env.age".publicKeys = [nix calliope brett];
-  "postfix-sasl-passwd.age".publicKeys = [nix calliope brett];
+  "postfix-sasl-passwd.age".publicKeys = [nix calliope terpsichore brett];
   "keycloak-db-passwd.age".publicKeys = [nix calliope brett];
   "nextcloud-secrets.json.age".publicKeys = [nix calliope brett];
   "mealie.env.age".publicKeys = [nix calliope brett];

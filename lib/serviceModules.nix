@@ -107,6 +107,7 @@ let
         in
         {
           enable = true;
+          enableAlertManager = true;
           inherit (monitoringService) fqdn;
           targets = {
             # Node exporter targets for all hosts
@@ -473,6 +474,29 @@ let
         {
           enable = true;
           inherit dataPath authorizedKeys;
+        };
+    };
+
+    mail-relay = {
+      modules = [ "${mod}/mail-relay" ];
+      getSecrets =
+        hostname:
+        {
+          postfix-sasl-passwd = {
+            file = "${sec}/postfix-sasl-passwd.age";
+          };
+        };
+      getOptions =
+        hostname:
+        let
+          domain = services.services.domain;
+        in
+        {
+          enable = true;
+          relayhost = "127.0.0.1:1025";
+          inherit domain;
+          hostname = hostname + "." + domain;
+          saslAuth.enable = lib.mkDefault true;
         };
     };
   };

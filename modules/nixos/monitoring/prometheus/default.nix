@@ -12,6 +12,16 @@ in
       # NOTE: configCheck breaks passing secret paths for authorization if they don't exist before activation
       checkConfig = "syntax-only";
 
+      alertmanagers = lib.optionals config.services.prometheus.alertmanager.enable [
+        {
+          static_configs = [
+            {
+              targets = [ "localhost:${toString cfg.ports.alertmanager}" ];
+            }
+          ];
+        }
+      ];
+
       globalConfig = {
         scrape_interval = "15s";
         evaluation_interval = "15s";
@@ -52,6 +62,36 @@ in
                   annotations = {
                     summary = "High memory usage on {{ $labels.instance }}";
                     description = "Memory usage is above 85% for more than 5 minutes.";
+                  };
+                }
+                {
+                  alert = "BorgBackupFailed";
+                  expr = ''node_systemd_unit_state{name=~"borgbackup-job-.*", state="failed"} == 1'';
+                  for = "5m";
+                  labels.severity = "critical";
+                  annotations = {
+                    summary = "Borg backup failed on {{ $labels.instance }}";
+                    description = "{{ $labels.name }} has been in failed state for more than 5 minutes.";
+                  };
+                }
+                {
+                  alert = "DiskSpaceWarning";
+                  expr = ''(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|iso9660|efivarfs|nsfs"} / node_filesystem_size_bytes) < 0.1'';
+                  for = "10m";
+                  labels.severity = "warning";
+                  annotations = {
+                    summary = "Disk space low on {{ $labels.instance }}";
+                    description = "{{ $labels.mountpoint }} has less than 10% free space.";
+                  };
+                }
+                {
+                  alert = "DiskSpaceCritical";
+                  expr = ''(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|iso9660|efivarfs|nsfs"} / node_filesystem_size_bytes) < 0.05'';
+                  for = "10m";
+                  labels.severity = "critical";
+                  annotations = {
+                    summary = "Disk space critically low on {{ $labels.instance }}";
+                    description = "{{ $labels.mountpoint }} has less than 5% free space.";
                   };
                 }
               ];
@@ -145,7 +185,7 @@ in
           scrape_interval = "30s";
         }
       ]
-      ++ lib.optional config.services.prometheus.alertmanager.enable [
+      ++ lib.optionals config.services.prometheus.alertmanager.enable [
         {
           job_name = "alertmanager";
           static_configs = [
