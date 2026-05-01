@@ -44,7 +44,7 @@ in
 
     mynetworks = mkOption {
       type = types.listOf types.str;
-      default = [ "127.0.0.0/8" ];
+      default = [ "127.0.0.0/8" "[::1]/128" ];
       description = "Networks allowed to relay";
     };
 
@@ -56,6 +56,9 @@ in
   };
 
   config = mkIf cfg.enable {
+    # systemctl --user start protonmail-bridge
+    # loginctl enable-linger nix
+
     services.protonmail-bridge = {
       enable = true;
       path = [ pkgs.pass ];
