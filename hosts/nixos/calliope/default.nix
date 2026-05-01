@@ -13,7 +13,6 @@
     ../common.nix
     ../cloud.nix
     ../virt.nix
-    ./bridge.nix
   ];
 
   system.stateVersion = "23.05";

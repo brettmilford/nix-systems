@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
@@ -60,6 +61,12 @@ in
   };
 
   config = mkIf cfg.enable {
+    services.protonmail-bridge = {
+      enable = true;
+      path = [ pkgs.pass ];
+      logLevel = "info";
+    };
+
     services.postfix = {
       enable = true;
       setSendmail = true;
