@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   cfg = config.services.cloud;
@@ -41,8 +47,7 @@ in
       database.createLocally = true;
       appstoreEnable = false;
       extraApps = {
-        inherit
-          (config.services.nextcloud.package.packages.apps)
+        inherit (config.services.nextcloud.package.packages.apps)
           oidc_login
           calendar
           contacts
@@ -79,7 +84,10 @@ in
           "OC\\Preview\\AVI"
           "OC\\Preview\\MSOfficeDoc"
         ];
-        trusted_proxies = [ "127.0.0.1" "::1" ];
+        trusted_proxies = [
+          "127.0.0.1"
+          "::1"
+        ];
         overwriteprotocol = "https";
         default_phone_region = "AU";
         "overwrite.cli.url" = "https://cloud.cirriform.au";
@@ -123,8 +131,9 @@ in
       filter = "nextcloud-auth";
       backend = "systemd";
       journalmatch = "SYSLOG_IDENTIFIER=Nextcloud + PRIORITY=4";
-      action = ''cf
-                 iptables-allports'';
+      action = ''
+        cf
+                         iptables-allports'';
     };
 
     environment.etc."fail2ban/filter.d/nextcloud-auth.local" = {
@@ -166,14 +175,14 @@ in
     systemd.services.nextcloud-file-scan = {
       description = "Scan nextcloud external storage";
       requires = [ "nextcloud-setup.service" ];
-      after = [ 
-        "systemd-tmpfiles-setup.service" 
+      after = [
+        "systemd-tmpfiles-setup.service"
         "paperless-exporter.service"
         "nextcloud-acl-setup.service"
         "nextcloud-setup.service"
       ];
-      wants = [ 
-        "systemd-tmpfiles-setup.service" 
+      wants = [
+        "systemd-tmpfiles-setup.service"
         "paperless-exporter.service"
         "nextcloud-acl-setup.service"
       ];
@@ -207,12 +216,15 @@ in
 
         net = {
           listen = "lookback";
-          post_allow.host = ["127.0.0.1" "::1"];
+          post_allow.host = [
+            "127.0.0.1"
+            "::1"
+          ];
         };
 
         sotrage.wopi = {
           "@allow" = true;
-          host = ["cloud.cirriform.au"];
+          host = [ "cloud.cirriform.au" ];
         };
 
         server_name = "collabora.cirriform.au";
