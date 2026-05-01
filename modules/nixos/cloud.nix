@@ -1,4 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{
+  self,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   cfg = config.services.cloud;
@@ -41,8 +47,7 @@ in
       database.createLocally = true;
       appstoreEnable = false;
       extraApps = {
-        inherit
-          (config.services.nextcloud.package.packages.apps)
+        inherit (config.services.nextcloud.package.packages.apps)
           oidc_login
           calendar
           contacts
@@ -79,7 +84,10 @@ in
           "OC\\Preview\\AVI"
           "OC\\Preview\\MSOfficeDoc"
         ];
-        trusted_proxies = [ "127.0.0.1" "::1" ];
+        trusted_proxies = [
+          "127.0.0.1"
+          "::1"
+        ];
         overwriteprotocol = "https";
         default_phone_region = "AU";
         "overwrite.cli.url" = "https://${cfg.fqdn}";
@@ -123,8 +131,9 @@ in
       filter = "nextcloud-auth";
       backend = "systemd";
       journalmatch = "SYSLOG_IDENTIFIER=Nextcloud + PRIORITY=4";
-      action = ''cf
-                 iptables-allports'';
+      action = ''
+        cf
+                         iptables-allports'';
     };
 
     environment.etc."fail2ban/filter.d/nextcloud-auth.local" = {
@@ -144,36 +153,49 @@ in
       libheif
     ];
 
-    systemd.services.nextcloud-acl-setup = {
-      description = "Setup base nextcloud acls for external storage";
-      after = [ "systemd-tmpfiles-setup.service" ];
-      wants = [ "systemd-tmpfiles-setup.service" ];
-      before = [ "nextcloud-file-scan.service" ];
-      wantedBy = [ "nextcloud-file-scan.service" ];
+    systemd.services.nextcloud-acl-setup =
+      let
+        # Walk parent directories of dataPath to set execute ACLs
+        # e.g. "/srv/nextcloud" -> ["/srv" "/srv/nextcloud"]
+        # e.g. "/srv/data/nextcloud" -> ["/srv" "/srv/data" "/srv/data/nextcloud"]
+        pathParts = lib.splitString "/" cfg.dataPath;
+        nonEmptyParts = lib.filter (p: p != "") pathParts;
+        parentPaths = lib.genList (i: "/" + lib.concatStringsSep "/" (lib.take (i + 1) nonEmptyParts)) (
+          lib.length nonEmptyParts
+        );
+        aclCommands = lib.concatMapStringsSep "\n" (
+          path: "${pkgs.acl}/bin/setfacl -m u:nextcloud:x ${path}"
+        ) parentPaths;
+      in
+      {
+        description = "Setup base nextcloud acls for external storage";
+        after = [ "systemd-tmpfiles-setup.service" ];
+        wants = [ "systemd-tmpfiles-setup.service" ];
+        before = [ "nextcloud-file-scan.service" ];
+        wantedBy = [ "nextcloud-file-scan.service" ];
 
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = false;
+        };
+
+        script = ''
+          echo "Setting nextcloud base ACLs"
+          ${aclCommands}
+        '';
       };
-
-      script = ''
-        echo "Setting nextcloud base ACLs"
-        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv
-        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv/data
-      '';
-    };
 
     systemd.services.nextcloud-file-scan = {
       description = "Scan nextcloud external storage";
       requires = [ "nextcloud-setup.service" ];
-      after = [ 
-        "systemd-tmpfiles-setup.service" 
+      after = [
+        "systemd-tmpfiles-setup.service"
         "paperless-exporter.service"
         "nextcloud-acl-setup.service"
         "nextcloud-setup.service"
       ];
-      wants = [ 
-        "systemd-tmpfiles-setup.service" 
+      wants = [
+        "systemd-tmpfiles-setup.service"
         "paperless-exporter.service"
         "nextcloud-acl-setup.service"
       ];
@@ -207,12 +229,15 @@ in
 
         net = {
           listen = "lookback";
-          post_allow.host = ["127.0.0.1" "::1"];
+          post_allow.host = [
+            "127.0.0.1"
+            "::1"
+          ];
         };
 
         sotrage.wopi = {
           "@allow" = true;
-          host = [cfg.fqdn];
+          host = [ cfg.fqdn ];
         };
 
         server_name = "collabora.${cfg.fqdn}";
