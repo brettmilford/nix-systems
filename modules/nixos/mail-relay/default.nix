@@ -34,11 +34,6 @@ in
 
     saslAuth = {
       enable = mkEnableOption "SASL authentication to relay";
-
-      secretPath = mkOption {
-        type = types.str;
-        description = "Path to agenix secret containing SASL credentials";
-      };
     };
 
     listenInterfaces = mkOption {
@@ -86,7 +81,7 @@ in
         // optionalAttrs cfg.saslAuth.enable {
           smtp_sasl_auth_enable = true;
           smtp_sasl_security_options = "noanonymous";
-          smtp_sasl_password_maps = "texthash:${cfg.saslAuth.secretPath}";
+          smtp_sasl_password_maps = "texthash:${cfg.secretPaths.postfix-sasl-passwd}";
           smtp_sasl_mechanism_filter = "plain,login";
         };
     };

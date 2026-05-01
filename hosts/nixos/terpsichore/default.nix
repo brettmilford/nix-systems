@@ -49,5 +49,5 @@ in
 
   services.postgresql.package = pkgs.postgresql_16;
 
-  services.mail-relay.saslAuth.secretPath = "/var/lib/postfix/conf/sasl_passwd";
+  services.mail-relay.secretPaths.postfix-sasl-passwd = "/var/lib/postfix/conf/sasl_passwd";
 }
