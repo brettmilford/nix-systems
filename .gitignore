@@ -6,3 +6,4 @@ result
 CLAUDE.md
 .gcroot-*
 /.agent-shell/
+.worktrees/
