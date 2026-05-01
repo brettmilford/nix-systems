@@ -90,7 +90,7 @@ in
         ];
         overwriteprotocol = "https";
         default_phone_region = "AU";
-        "overwrite.cli.url" = "https://cloud.cirriform.au";
+        "overwrite.cli.url" = "https://${cfg.fqdn}";
         overwritehost = "${cfg.fqdn}";
         forwarded_for_headers = [ "X-Forwarded-For" ];
         oidc_login_client_id = "nextcloud";
@@ -153,24 +153,37 @@ in
       libheif
     ];
 
-    systemd.services.nextcloud-acl-setup = {
-      description = "Setup base nextcloud acls for external storage";
-      after = [ "systemd-tmpfiles-setup.service" ];
-      wants = [ "systemd-tmpfiles-setup.service" ];
-      before = [ "nextcloud-file-scan.service" ];
-      wantedBy = [ "nextcloud-file-scan.service" ];
+    systemd.services.nextcloud-acl-setup =
+      let
+        # Walk parent directories of dataPath to set execute ACLs
+        # e.g. "/srv/nextcloud" -> ["/srv" "/srv/nextcloud"]
+        # e.g. "/srv/data/nextcloud" -> ["/srv" "/srv/data" "/srv/data/nextcloud"]
+        pathParts = lib.splitString "/" cfg.dataPath;
+        nonEmptyParts = lib.filter (p: p != "") pathParts;
+        parentPaths = lib.genList (i: "/" + lib.concatStringsSep "/" (lib.take (i + 1) nonEmptyParts)) (
+          lib.length nonEmptyParts
+        );
+        aclCommands = lib.concatMapStringsSep "\n" (
+          path: "${pkgs.acl}/bin/setfacl -m u:nextcloud:x ${path}"
+        ) parentPaths;
+      in
+      {
+        description = "Setup base nextcloud acls for external storage";
+        after = [ "systemd-tmpfiles-setup.service" ];
+        wants = [ "systemd-tmpfiles-setup.service" ];
+        before = [ "nextcloud-file-scan.service" ];
+        wantedBy = [ "nextcloud-file-scan.service" ];
 
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = false;
+        };
+
+        script = ''
+          echo "Setting nextcloud base ACLs"
+          ${aclCommands}
+        '';
       };
-
-      script = ''
-        echo "Setting nextcloud base ACLs"
-        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv
-        ${pkgs.acl}/bin/setfacl -m u:nextcloud:x /srv/data
-      '';
-    };
 
     systemd.services.nextcloud-file-scan = {
       description = "Scan nextcloud external storage";
@@ -224,15 +237,14 @@ in
 
         sotrage.wopi = {
           "@allow" = true;
-          host = [ "cloud.cirriform.au" ];
+          host = [ cfg.fqdn ];
         };
 
-        server_name = "collabora.cirriform.au";
+        server_name = "collabora.${cfg.fqdn}";
       };
     };
 
-    # TODO: get from catalog
-    services.nginx.virtualHosts."collabora.cirriform.au" = mkIf cfg.enableOffice {
+    services.nginx.virtualHosts."collabora.${cfg.fqdn}" = mkIf cfg.enableOffice {
       locations."/" = {
         proxyPass = "http://localhost:${toString config.services.collabora-online.port}";
         proxyWebsockets = true;

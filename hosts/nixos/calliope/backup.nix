@@ -10,16 +10,15 @@
 let
   shouldBackup = services.lib.shouldBackup hostname;
   backupSourceRepos = services.lib.getBackupSourceConfig hostname;
-  backupRWPath = "/var/lib/postgresql/backups/";
-  postgresWithExtensions = pkgs.postgresql_14.withPackages (p: [
-    p.pgvector
-  ]);
+  backupRWPath = "/var/lib/postgresql/backups";
+  pg = config.services.postgresql.package;
 in
 {
   age.secrets.borg-ssh-key.file = "${self}/secrets/borg-${hostname}-ssh-key.age";
   systemd.tmpfiles.rules = [
     "d /var/lib/postgresql/backups 0750 postgres postgres -"
   ];
+
   services.borgbackup.jobs = lib.mkIf shouldBackup (
     lib.concatMapAttrs (
       repoName: repoConfig:
@@ -59,23 +58,16 @@ in
               monthly = 6;
             };
 
-            readWritePaths = [ "${backupRWPath}" ];
-            # TODO: Make sure postgresql package used is the same as the one used for the service
+            readWritePaths = [ backupRWPath ];
+
             preHook = ''
               echo "Starting PostgreSQL backup..."
-
-              # Backup global objects (roles, tablespaces, etc.)
-              echo "Backing up PostgreSQL globals..."
-              ${pkgs.sudo}/bin/sudo -u postgres ${postgresWithExtensions}/bin/pg_dumpall --globals-only > ${backupRWPath}/postgres_globals.sql
-              ${pkgs.sudo}/bin/sudo -u postgres ${postgresWithExtensions}/bin/pg_dumpall > ${backupRWPath}/postgres_all.sql
-
-              # Get list of databases and backup each individually
-              echo "Backing up individual databases..."
-              for db in $(${pkgs.sudo}/bin/sudo -u postgres ${postgresWithExtensions}/bin/psql -t -c "select datname from pg_database where not datistemplate" | ${pkgs.gnugrep}/bin/grep '\S' | ${pkgs.gawk}/bin/awk '{$1=$1};1'); do
+              ${pkgs.sudo}/bin/sudo -u postgres ${pg}/bin/pg_dumpall --globals-only > ${backupRWPath}/postgres_globals.sql
+              ${pkgs.sudo}/bin/sudo -u postgres ${pg}/bin/pg_dumpall > ${backupRWPath}/postgres_all.sql
+              for db in $(${pkgs.sudo}/bin/sudo -u postgres ${pg}/bin/psql -t -c "select datname from pg_database where not datistemplate" | ${pkgs.gnugrep}/bin/grep '\S' | ${pkgs.gawk}/bin/awk '{$1=$1};1'); do
                 echo "  Backing up database: $db"
-                ${pkgs.sudo}/bin/sudo -u postgres ${postgresWithExtensions}/bin/pg_dump --create --format=custom "$db" > "${backupRWPath}/$db.pgdump"
+                ${pkgs.sudo}/bin/sudo -u postgres ${pg}/bin/pg_dump --create --format=custom "$db" > "${backupRWPath}/$db.pgdump"
               done
-
               echo "PostgreSQL backup completed"
             '';
 
