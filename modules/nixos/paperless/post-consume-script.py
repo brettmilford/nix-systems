@@ -390,15 +390,23 @@ def main():
             if script(document):
                 success_count += 1
             else:
-                print(f"WARNING: Script {script.__name__} failed", file=sys.stderr)
+                print(f"WARNING: Script {script.__name__} returned failure for document {document.get('id', '?')} (owner={document.get('owner', '?')})", file=sys.stderr)
         except Exception as e:
-            print(f"ERROR: Script {script.__name__} error: {e}", file=sys.stderr)
+            import traceback
+            print(f"ERROR: Script {script.__name__} raised exception for document {document.get('id', '?')}: {e}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
 
     if success_count != len(scripts):
-        print(f"ERROR: {len(scripts) - success_count} scripts failed", file=sys.stderr)
+        print(f"ERROR: {len(scripts) - success_count}/{len(scripts)} scripts failed for document {document.get('id', '?')} (owner={document.get('owner', '?')}, tags={document.get('tags', '')})", file=sys.stderr)
         sys.exit(1)
 
     print("All scripts completed successfully")
 
 if __name__ == "__main__":
-    main()
+    import traceback
+    try:
+        main()
+    except Exception as e:
+        print(f"FATAL: Unhandled exception in post-consume script: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
