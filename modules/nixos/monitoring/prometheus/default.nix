@@ -45,23 +45,23 @@ in
                   };
                 }
                 {
-                  alert = "HighCPUUsage";
-                  expr = "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80";
+                  alert = "HighLoadAverage";
+                  expr = "node_load5 / count without(cpu, mode) (node_cpu_seconds_total{mode=\"idle\"}) > 1.5";
                   for = "5m";
                   labels.severity = "warning";
                   annotations = {
-                    summary = "High CPU usage on {{ $labels.instance }}";
-                    description = "CPU usage is above 80% for more than 5 minutes.";
+                    summary = "High load average on {{ $labels.instance }}";
+                    description = "5-minute load average per CPU exceeds 1.5 for more than 5 minutes.";
                   };
                 }
                 {
                   alert = "HighMemoryUsage";
-                  expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85";
+                  expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95";
                   for = "5m";
                   labels.severity = "warning";
                   annotations = {
                     summary = "High memory usage on {{ $labels.instance }}";
-                    description = "Memory usage is above 85% for more than 5 minutes.";
+                    description = "Memory usage is above 95% for more than 5 minutes.";
                   };
                 }
                 {
