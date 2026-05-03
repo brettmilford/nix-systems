@@ -15,13 +15,13 @@ let
       - name: paperless
         rules:
           - alert: PaperlessConsumeError
-            expr: 'count_over_time({app="celery"} |~ "ERROR" |~ "post-consume-script|ConsumerError" [15m]) > 0'
+            expr: 'count_over_time({app="celery"} |~ "ERROR" |~ "post-consume-script|ConsumerError" !~ "It is a duplicate of" [8h]) > 0'
             for: 0s
             labels:
               severity: warning
             annotations:
               summary: "Paperless consume error"
-              description: "Paperless consumer logged errors in the last 15 minutes."
+              description: "Paperless consumer logged errors in the last 8 hours."
     EOF
   '';
 in

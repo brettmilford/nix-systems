@@ -36,7 +36,7 @@ in
     hosts = [
       "terpsichore"
     ];
-    fqdn = "metrics.${domain}";
+    fqdn = "dash.${domain}";
   };
 
   hass = {
