@@ -133,6 +133,14 @@ in
     config.rev = "cf2a5a03c01b3932e99075cbeb429a792bd7faf6";
   };
 
+  opencode-web = {
+    hosts = [ "terpsichore" ];
+    fqdn = "code.${domain}";
+    config = {
+      dataPath = "opencode-web";
+    };
+  };
+
   ftp = {
     hosts = [ "terpsichore" ];
     fqdn = "ftp.${domain}";

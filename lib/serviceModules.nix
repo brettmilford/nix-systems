@@ -419,6 +419,20 @@ let
       };
     };
 
+    opencode-web = {
+      modules = [ "${mod}/opencode-web" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.opencode-web or { };
+        in
+        {
+          enable = true;
+          inherit (svc) fqdn;
+          dataPath = services.lib.getServiceDataPath hostname "opencode-web";
+        };
+    };
+
     ftp = {
       modules = [ "${mod}/ftp" ];
       getOptions =
@@ -469,7 +483,7 @@ let
             ++ lib.mapAttrsToList (_name: user: user.sshKey) (
               lib.filterAttrs (_name: user: user ? sshKey) users
             )
-            ++ (services.services."git-server".config.extraAuthorizedKeys or []);
+            ++ (services.services."git-server".config.extraAuthorizedKeys or [ ]);
         in
         {
           enable = true;
@@ -479,13 +493,11 @@ let
 
     mail-relay = {
       modules = [ "${mod}/mail-relay" ];
-      getSecrets =
-        hostname:
-        {
-          postfix-sasl-passwd = {
-            file = "${sec}/postfix-sasl-passwd.age";
-          };
+      getSecrets = hostname: {
+        postfix-sasl-passwd = {
+          file = "${sec}/postfix-sasl-passwd.age";
         };
+      };
       getOptions =
         hostname:
         let
