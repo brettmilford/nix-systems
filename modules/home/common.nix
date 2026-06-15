@@ -17,6 +17,7 @@ in
     [
       lit
       firefox
+      opencode
       claude-code
       direnv
       qemu
