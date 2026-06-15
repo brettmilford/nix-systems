@@ -5,7 +5,7 @@ with lib;
 let
   cfg = config.services.paperless-ngx;
   pythonWithPackages = pkgs.python3.withPackages (ps: with ps; [
-    requests
+    httpx
   ]);
   postConsumeScript = pkgs.writeScriptBin "post-consume-script" ''
     #!${pythonWithPackages}/bin/python3

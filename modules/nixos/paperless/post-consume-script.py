@@ -5,7 +5,7 @@ Supports multiple post-consumption actions based on document owner.
 
 import os
 import sys
-import requests
+import httpx
 import json
 import re
 from datetime import datetime
@@ -80,14 +80,14 @@ def get_document_content(document_id):
     }
 
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = httpx.get(url, headers=headers, timeout=30)
         if response.status_code != 200:
             print(f"ERROR: Failed to get document content: {response.status_code}", file=sys.stderr)
             return None
 
         document_data = response.json()
         return document_data.get('content', '')
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         print(f"ERROR: Network error getting document content: {e}", file=sys.stderr)
         return None
 
@@ -149,7 +149,7 @@ def get_document_type_from_api(document_id):
     }
 
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = httpx.get(url, headers=headers, timeout=30)
         if response.status_code != 200:
             print(f"ERROR: Failed to get document type from API: {response.status_code}", file=sys.stderr)
             return None
@@ -162,7 +162,7 @@ def get_document_type_from_api(document_id):
 
         # Get document type name
         type_url = f"{PAPERLESS_URL}/api/document_types/{document_type_id}/"
-        type_response = requests.get(type_url, headers=headers, timeout=30)
+        type_response = httpx.get(type_url, headers=headers, timeout=30)
 
         if type_response.status_code != 200:
             print(f"ERROR: Failed to get document type name from API: {type_response.status_code}", file=sys.stderr)
@@ -171,7 +171,7 @@ def get_document_type_from_api(document_id):
         type_data = type_response.json()
         return type_data.get('name', '').strip()
 
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         print(f"ERROR: Network error getting document type: {e}", file=sys.stderr)
         return None
     except Exception as e:
@@ -232,7 +232,7 @@ def extract_document_amount(document):
 
     try:
         # Get current document data
-        response = requests.get(url, headers=headers, timeout=30)
+        response = httpx.get(url, headers=headers, timeout=30)
         if response.status_code != 200:
             print(f"ERROR: Failed to get document {document['id']}: {response.status_code}", file=sys.stderr)
             return False
@@ -256,7 +256,7 @@ def extract_document_amount(document):
 
         # Update document
         update_data = {'custom_fields': custom_fields}
-        response = requests.patch(url, headers=headers, json=update_data, timeout=30)
+        response = httpx.patch(url, headers=headers, json=update_data, timeout=30)
 
         if response.status_code == 200:
             print(f"Successfully updated document {document['id']} with amount ${total_amount}")
@@ -265,7 +265,7 @@ def extract_document_amount(document):
             print(f"ERROR: Failed to update document with amount: {response.status_code}", file=sys.stderr)
             return False
 
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         print(f"ERROR: Network error: {e}", file=sys.stderr)
         return False
     except Exception as e:
@@ -306,7 +306,7 @@ def update_financial_year(document):
 
     try:
         # Get current document data
-        response = requests.get(url, headers=headers, timeout=30)
+        response = httpx.get(url, headers=headers, timeout=30)
         if response.status_code != 200:
             print(f"ERROR: Failed to get document {document['id']}: {response.status_code}", file=sys.stderr)
             return False
@@ -330,7 +330,7 @@ def update_financial_year(document):
 
         # Update document
         update_data = {'custom_fields': custom_fields}
-        response = requests.patch(url, headers=headers, json=update_data, timeout=30)
+        response = httpx.patch(url, headers=headers, json=update_data, timeout=30)
 
         if response.status_code == 200:
             print(f"Successfully updated document {document['id']} with Financial Year {fy}")
@@ -339,7 +339,7 @@ def update_financial_year(document):
             print(f"ERROR: Failed to update document: {response.status_code}", file=sys.stderr)
             return False
 
-    except requests.exceptions.RequestException as e:
+    except httpx.HTTPError as e:
         print(f"ERROR: Network error: {e}", file=sys.stderr)
         return False
     except Exception as e:
