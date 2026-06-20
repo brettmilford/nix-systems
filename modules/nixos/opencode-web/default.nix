@@ -42,6 +42,7 @@ in
       group = "opencode";
       home = cfg.dataPath;
       shell = pkgs.bashInteractive;
+      packages = [ pkgs.nodejs ];
     };
     users.groups.opencode = { };
 
@@ -64,7 +65,7 @@ in
         Environment = [
           "HOME=${cfg.dataPath}"
           "SHELL=${pkgs.bashInteractive}/bin/bash"
-          "PATH=${pkgs.bashInteractive}/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin:${pythonEnv}/bin:/run/wrappers/bin:/usr/bin:/bin"
+          "PATH=${pkgs.bashInteractive}/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin:${pkgs.nodejs}/bin:${pythonEnv}/bin:/run/wrappers/bin:/usr/bin:/bin"
           "OPENCODE_ENABLE_EXA=1"
         ];
         ExecStart = "${pkgs.opencode}/bin/opencode web --port ${toString cfg.port} --hostname 127.0.0.1 --cors https://${cfg.fqdn}";
