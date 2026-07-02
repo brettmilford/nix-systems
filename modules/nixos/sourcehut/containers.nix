@@ -8,7 +8,7 @@
 with lib;
 
 let
-  cfg = config.services.sourcehut;
+  cfg = config.services.srht;
 
   mkContainerService =
     name: svc:

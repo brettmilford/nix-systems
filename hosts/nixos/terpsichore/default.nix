@@ -29,6 +29,7 @@ in
   networking.hostName = hostname;
   networking.hostId = "37393231";
 
+  networking.nftables.enable = true;
   networking.firewall.enable = true;
   networking.firewall.allowPing = true;
   networking.firewall.allowedTCPPorts = [

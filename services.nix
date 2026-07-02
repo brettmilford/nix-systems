@@ -141,7 +141,7 @@ in
     };
   };
 
-  sourcehut = {
+  srht = {
     hosts = [ "terpsichore" ];
     config = {
       dataPath = "sourcehut";

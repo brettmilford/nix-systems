@@ -9,7 +9,7 @@
 with lib;
 
 let
-  cfg = config.services.sourcehut;
+  cfg = config.services.srht;
 
   serviceDefs = {
     meta = {
@@ -58,7 +58,7 @@ in
     ./containers.nix
   ];
 
-  options.services.sourcehut = {
+  options.services.srht = {
     enable = mkEnableOption "SourceHut";
 
     domain = mkOption {

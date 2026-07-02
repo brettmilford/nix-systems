@@ -512,12 +512,12 @@ let
         };
     };
 
-    sourcehut = {
+    srht = {
       modules = [ "${mod}/sourcehut" ];
       getOptions =
         hostname:
         let
-          svc = services.services.sourcehut or { };
+          svc = services.services.srht or { };
         in
         {
           enable = true;
