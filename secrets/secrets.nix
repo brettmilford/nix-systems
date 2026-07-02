@@ -179,42 +179,7 @@ in
     terpsichore
     brett
   ];
-  "srht-meta-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-git-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-todo-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-hub-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-man-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-pages-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-builds-config.age".publicKeys = [
-    nix
-    terpsichore
-    brett
-  ];
-  "srht-shared-secret.age".publicKeys = [
+  "srht-secrets.env.age".publicKeys = [
     nix
     terpsichore
     brett

@@ -123,13 +123,32 @@ in
       enable = true;
       enableTCPIP = true;
       authentication = ''
-        host all all 10.0.100.0/24 scram-sha-256
+        host all srht 10.0.100.0/24 scram-sha-256
       '';
-      ensureDatabases = map (name: "${name}_srht") cfg.services;
-      ensureUsers = map (name: {
-        name = "${name}_srht";
-        ensureDBOwnership = true;
-      }) cfg.services;
+      ensureUsers = [
+        { name = "srht"; }
+      ];
+      initialScript = pkgs.writeText "srht-init-db.sql" (
+        lib.concatMapStringsSep "\n" (name: ''
+          CREATE DATABASE ${name}_srht OWNER srht;
+        '') cfg.services
+      );
+    };
+
+    systemd.services.srht-db-password = {
+      description = "Set SourceHut PostgreSQL password from secrets";
+      after = [ "postgresql.service" ];
+      requires = [ "postgresql.service" ];
+      wantedBy = [ "multi-user.target" ];
+      path = [ config.services.postgresql.package ];
+      script = ''
+        source ${cfg.secretPaths."srht-secrets-env"}
+        psql -c "ALTER ROLE srht WITH PASSWORD '$SRHT_DB_PASSWORD';"
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
     };
 
     services.redis.servers.sourcehut = {
