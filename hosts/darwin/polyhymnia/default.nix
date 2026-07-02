@@ -22,8 +22,12 @@
     in
     {
       ${primaryUser} = {
-        name = user.name;
+        description = user.name;
         home = "/Users/${primaryUser}";
+        openssh.authorizedKeys.keys = [
+          user.sshKey
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJne1Tfz++nVphhTLDHnF0qza2KH6hj9ROPmYN1aYEoZ opencode@terpsichore"
+        ];
       };
 
       nix = {
@@ -36,6 +40,7 @@
         openssh.authorizedKeys.keys = [
           user.sshKey
           users.nix.sshKey
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJne1Tfz++nVphhTLDHnF0qza2KH6hj9ROPmYN1aYEoZ opencode@terpsichore"
         ];
       };
     };

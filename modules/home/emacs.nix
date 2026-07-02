@@ -24,11 +24,11 @@ let
       ]
     );
 
-  doomemacs = pkgs.fetchFromGitHub {
-    owner = "doomemacs";
-    repo = "doomemacs";
-    rev = "f9664ae058d67b8d97cb8a9c40744fefc3e5479f";
-    hash = "sha256-voIvrHMgs2zFNtYDxVnyBpmSCE3NFZAhhcZsUneDMLw=";
+  doomemacs = pkgs.fetchgit {
+    url = "https://github.com/doomemacs/core";
+    rev = "46687e54eebb05f1477686fb996f1a8172b17f29";
+    sha256 = "sha256-vjsPtKS3gOAarwwD7M6hlZUwwKQFeZhx1K2ryuBfkp0=";
+    fetchSubmodules = true;
   };
 
   doom-cli = pkgs.writeShellScriptBin "doom" ''

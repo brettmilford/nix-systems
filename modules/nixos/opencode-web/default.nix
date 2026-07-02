@@ -43,6 +43,9 @@ in
       home = cfg.dataPath;
       shell = pkgs.bashInteractive;
       packages = [ pkgs.nodejs ];
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAlB/hd55JJCoIb8EDBvvwfrdGtTOli5H+d+3o0wqxYR brett@thamrys"
+      ];
     };
     users.groups.opencode = { };
 
@@ -63,16 +66,25 @@ in
         Group = "opencode";
         WorkingDirectory = cfg.dataPath;
         Environment = [
-          "HOME=${cfg.dataPath}"
-          "SHELL=${pkgs.bashInteractive}/bin/bash"
-          "PATH=${pkgs.bashInteractive}/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin:${pkgs.nodejs}/bin:${pythonEnv}/bin:/run/wrappers/bin:/usr/bin:/bin"
           "OPENCODE_ENABLE_EXA=1"
         ];
-        ExecStart = "${pkgs.opencode}/bin/opencode web --port ${toString cfg.port} --hostname 127.0.0.1 --cors https://${cfg.fqdn}";
+        ExecStart = "/run/current-system/sw/bin/bash -lc '${pkgs.opencode}/bin/opencode web --port ${toString cfg.port} --hostname 127.0.0.1 --cors https://${cfg.fqdn}'";
         Restart = "on-failure";
         RestartSec = "5s";
       };
     };
+
+    security.sudo.extraRules = [
+      {
+        users = [ "opencode" ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/systemctl restart opencode-web.service";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
 
     services.gateway.enable = true;
     services.nginx.virtualHosts.${cfg.fqdn} = {
@@ -84,6 +96,14 @@ in
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
+
+          proxy_buffering off;
+          proxy_cache off;
+          proxy_set_header X-Accel-Buffering no;
+          chunked_transfer_encoding off;
+
+          proxy_hide_header Content-Security-Policy;
+          add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; media-src 'self' data:; connect-src 'self' ws: wss: data: blob:; worker-src 'self' blob:;";
         '';
       };
     };
