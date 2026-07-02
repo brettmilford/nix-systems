@@ -141,6 +141,13 @@ in
     };
   };
 
+  sourcehut = {
+    hosts = [ "terpsichore" ];
+    config = {
+      dataPath = "sourcehut";
+    };
+  };
+
   ftp = {
     hosts = [ "terpsichore" ];
     fqdn = "ftp.${domain}";

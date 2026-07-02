@@ -6,35 +6,217 @@ let
   eurydice = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJfkZRQxQLgNZmGzSu9+XG3v3QoWhumJKzphxduT+5wI";
   terpsichore = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIShGK1lWBkHiW7bLh9gbEVfxNLEgylyHO5956+ehhYZ";
   orpheus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJD9JScMbvyixRtjd4zwrUmZNUndlMdbtkkvtPnFZ3Md";
-in {
-  "admin-passwd.age".publicKeys = [nix thamrys calliope terpsichore brett];
-  "cf_origin_cert.pem.age".publicKeys = [nix eurydice terpsichore calliope brett];
-  "cf_cert_2025.pem.age".publicKeys = [nix eurydice calliope brett];
-  "cf_origin_key.pem.age".publicKeys = [nix eurydice terpsichore calliope brett];
-  "cf_key_2025.pem.age".publicKeys = [nix eurydice calliope brett];
-  "cf-api-key.age".publicKeys = [nix eurydice calliope brett];
-  "cfd_tunnel_config.json.age".publicKeys = [nix eurydice brett];
-  "grafana_pass.age".publicKeys = [nix eurydice terpsichore brett];
-  "grafana_key.age".publicKeys = [nix eurydice terpsichore brett];
-  "unifipoller_pass.age".publicKeys = [nix eurydice terpsichore brett];
-  "snmp.env.age".publicKeys = [nix eurydice terpsichore brett];
-  "paperless.env.age".publicKeys = [nix calliope terpsichore brett];
-  "postfix-sasl-passwd.age".publicKeys = [nix calliope terpsichore brett];
-  "keycloak-db-passwd.age".publicKeys = [nix calliope brett];
-  "nextcloud-secrets.json.age".publicKeys = [nix calliope terpsichore brett];
-  "mealie.env.age".publicKeys = [nix calliope brett];
-  "immich.json.age".publicKeys = [nix terpsichore calliope brett];
-  "acme-cf.env.age".publicKeys = [nix calliope terpsichore eurydice brett];
-  "fail2ban-cf.conf.age".publicKeys = [nix calliope terpsichore eurydice brett];
-  "paperless-api-token.age".publicKeys = [nix calliope terpsichore brett];
-  "borg-calliope-ssh-key.age".publicKeys = [nix calliope brett];
-  "borg-orpheus-ssh-key.age".publicKeys = [nix orpheus brett];
-  "borg-thamrys-ssh-key.age".publicKeys = [nix thamrys brett];
-  "borg-eurydice-ssh-key.age".publicKeys = [nix eurydice brett];
-  "borg-terpsichore-ssh-key.age".publicKeys = [nix terpsichore brett];
-  "hass_prometheus_token.age".publicKeys = [nix terpsichore brett];
-  "unifi-controller.env.age".publicKeys = [nix eurydice brett];
-  "wg_server_private.age".publicKeys = [nix calliope];
-  "garmin-collect.env.age".publicKeys = [nix terpsichore brett];
-  "account-service.env.age".publicKeys = [nix terpsichore brett];
+in
+{
+  "admin-passwd.age".publicKeys = [
+    nix
+    thamrys
+    calliope
+    terpsichore
+    brett
+  ];
+  "cf_origin_cert.pem.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    calliope
+    brett
+  ];
+  "cf_cert_2025.pem.age".publicKeys = [
+    nix
+    eurydice
+    calliope
+    brett
+  ];
+  "cf_origin_key.pem.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    calliope
+    brett
+  ];
+  "cf_key_2025.pem.age".publicKeys = [
+    nix
+    eurydice
+    calliope
+    brett
+  ];
+  "cf-api-key.age".publicKeys = [
+    nix
+    eurydice
+    calliope
+    brett
+  ];
+  "cfd_tunnel_config.json.age".publicKeys = [
+    nix
+    eurydice
+    brett
+  ];
+  "grafana_pass.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    brett
+  ];
+  "grafana_key.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    brett
+  ];
+  "unifipoller_pass.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    brett
+  ];
+  "snmp.env.age".publicKeys = [
+    nix
+    eurydice
+    terpsichore
+    brett
+  ];
+  "paperless.env.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    brett
+  ];
+  "postfix-sasl-passwd.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    brett
+  ];
+  "keycloak-db-passwd.age".publicKeys = [
+    nix
+    calliope
+    brett
+  ];
+  "nextcloud-secrets.json.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    brett
+  ];
+  "mealie.env.age".publicKeys = [
+    nix
+    calliope
+    brett
+  ];
+  "immich.json.age".publicKeys = [
+    nix
+    terpsichore
+    calliope
+    brett
+  ];
+  "acme-cf.env.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    eurydice
+    brett
+  ];
+  "fail2ban-cf.conf.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    eurydice
+    brett
+  ];
+  "paperless-api-token.age".publicKeys = [
+    nix
+    calliope
+    terpsichore
+    brett
+  ];
+  "borg-calliope-ssh-key.age".publicKeys = [
+    nix
+    calliope
+    brett
+  ];
+  "borg-orpheus-ssh-key.age".publicKeys = [
+    nix
+    orpheus
+    brett
+  ];
+  "borg-thamrys-ssh-key.age".publicKeys = [
+    nix
+    thamrys
+    brett
+  ];
+  "borg-eurydice-ssh-key.age".publicKeys = [
+    nix
+    eurydice
+    brett
+  ];
+  "borg-terpsichore-ssh-key.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "hass_prometheus_token.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "unifi-controller.env.age".publicKeys = [
+    nix
+    eurydice
+    brett
+  ];
+  "wg_server_private.age".publicKeys = [
+    nix
+    calliope
+  ];
+  "garmin-collect.env.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "account-service.env.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-meta-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-git-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-todo-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-hub-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-man-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-pages-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-builds-config.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
+  "srht-shared-secret.age".publicKeys = [
+    nix
+    terpsichore
+    brett
+  ];
 }

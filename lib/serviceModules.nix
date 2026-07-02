@@ -511,6 +511,61 @@ let
           saslAuth.enable = lib.mkDefault true;
         };
     };
+
+    sourcehut = {
+      modules = [ "${mod}/sourcehut" ];
+      getOptions =
+        hostname:
+        let
+          svc = services.services.sourcehut or { };
+        in
+        {
+          enable = true;
+          dataPath = services.lib.getServiceDataPath hostname "sourcehut";
+        };
+      getSecrets = hostname: {
+        "srht-meta-config" = {
+          file = "${sec}/srht-meta-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-git-config" = {
+          file = "${sec}/srht-git-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-todo-config" = {
+          file = "${sec}/srht-todo-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-hub-config" = {
+          file = "${sec}/srht-hub-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-man-config" = {
+          file = "${sec}/srht-man-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-pages-config" = {
+          file = "${sec}/srht-pages-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-builds-config" = {
+          file = "${sec}/srht-builds-config.age";
+          owner = "root";
+          group = "root";
+        };
+        "srht-shared-secret" = {
+          file = "${sec}/srht-shared-secret.age";
+          owner = "root";
+          group = "root";
+        };
+      };
+    };
   };
 
   # Factory function that takes hostname and returns modules + service options
