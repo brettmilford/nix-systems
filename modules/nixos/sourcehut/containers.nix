@@ -30,7 +30,7 @@ let
         "incus.service"
         "incus-preseed.service"
         "postgresql.service"
-        "srht-db-password.service"
+        "srht-db-setup.service"
         "redis-sourcehut.service"
         "age-secrets.target"
       ];

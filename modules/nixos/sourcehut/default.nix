@@ -128,22 +128,23 @@ in
       ensureUsers = [
         { name = "srht"; }
       ];
-      initialScript = pkgs.writeText "srht-init-db.sql" (
-        lib.concatMapStringsSep "\n" (name: ''
-          CREATE DATABASE ${name}_srht OWNER srht;
-        '') cfg.services
-      );
     };
 
-    systemd.services.srht-db-password = {
-      description = "Set SourceHut PostgreSQL password from secrets";
+    systemd.services.srht-db-setup = {
+      description = "Create SourceHut databases and set password";
       after = [ "postgresql.service" ];
       requires = [ "postgresql.service" ];
       wantedBy = [ "multi-user.target" ];
       path = [ config.services.postgresql.package ];
       script = ''
         source ${cfg.secretPaths."srht-secrets-env"}
+
         psql -c "ALTER ROLE srht WITH PASSWORD '$SRHT_DB_PASSWORD';"
+
+        ${lib.concatMapStringsSep "\n" (name: ''
+          psql -tc "SELECT 1 FROM pg_database WHERE datname = '${name}_srht'" | grep -q 1 || \
+            psql -c "CREATE DATABASE ${name}_srht OWNER srht;"
+        '') cfg.services}
       '';
       serviceConfig = {
         Type = "oneshot";
