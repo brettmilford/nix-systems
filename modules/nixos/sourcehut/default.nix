@@ -11,7 +11,7 @@ with lib;
 let
   cfg = config.services.srht;
 
-  serviceDefs = {
+  incusServiceDefs = {
     meta = {
       ip = "10.0.100.10";
       webPort = 5000;
@@ -49,7 +49,7 @@ let
     };
   };
 
-  enabledServices = lib.filterAttrs (name: _: builtins.elem name cfg.services) serviceDefs;
+  enabledServices = lib.filterAttrs (name: _: builtins.elem name cfg.services) incusServiceDefs;
 in
 {
   imports = [
@@ -137,13 +137,15 @@ in
       wantedBy = [ "multi-user.target" ];
       path = [ config.services.postgresql.package ];
       script = ''
+        set -f
         source ${cfg.secretPaths."srht-secrets-env"}
+        set +f
 
-        psql -c "ALTER ROLE srht WITH PASSWORD '$SRHT_DB_PASSWORD';"
+        psql -U postgres -c "ALTER ROLE srht WITH PASSWORD '$SRHT_DB_PASSWORD';"
 
         ${lib.concatMapStringsSep "\n" (name: ''
-          psql -tc "SELECT 1 FROM pg_database WHERE datname = '${name}_srht'" | grep -q 1 || \
-            psql -c "CREATE DATABASE ${name}_srht OWNER srht;"
+          psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${name}_srht'" | grep -q 1 || \
+            psql -U postgres -c "CREATE DATABASE ${name}_srht OWNER srht;"
         '') cfg.services}
       '';
       serviceConfig = {
@@ -156,6 +158,11 @@ in
       enable = true;
       bind = "10.0.100.1";
       port = 6379;
+    };
+
+    systemd.services.redis-sourcehut = {
+      after = [ "incus-preseed.service" ];
+      requires = [ "incus-preseed.service" ];
     };
 
     services.nginx.virtualHosts = lib.mapAttrs' (
@@ -173,6 +180,8 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.dataPath} 0755 root root -"
       "d ${cfg.dataPath}/containers 0755 root root -"
+      "d ${cfg.dataPath}/containers/storage-pools 0755 root root -"
+      "d ${cfg.dataPath}/containers/storage-pools/default 0755 root root -"
     ];
   };
 }

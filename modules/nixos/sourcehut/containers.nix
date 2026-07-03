@@ -42,6 +42,10 @@ let
       ];
 
       script = ''
+                if ! incus profile show default 2>/dev/null | grep -q 'root:'; then
+                  incus profile device add default root disk path=/ pool=default size=10GiB
+                fi
+
                 if ! incus info ${containerName} &>/dev/null; then
                   incus launch images:alpine/edge ${containerName}
                   incus config set ${containerName} boot.autostart true
@@ -63,25 +67,34 @@ let
                   incus exec ${containerName} -- sourcehut-migrate ${name}.sr.ht init
                 fi
 
+                set -f
                 source ${cfg.secretPaths."srht-secrets-env"}
+                set +f
 
                 cat > /tmp/srht-${name}-config.ini <<SRHTCFG
         [sr.ht]
-        origin = meta.${cfg.domain}
-        connection-string = postgresql://srht:$SRHT_DB_PASSWORD@10.0.100.1/${name}_srht
+        site-name = sourcehut
+        site-info = https://${cfg.domain}
+        site-blurb = the hacker's forge
+        environment = production
+        owner-name = Brett
+        owner-email = brett@cirriform.au
+        source-url = https://sr.ht/~sircmpwn/sourcehut
+        service-key = $SRHT_SERVICE_KEY
+        network-key = $SRHT_NETWORK_KEY
         redis-host = 10.0.100.1
-        private-key-file = /etc/sr.ht/private-key
+
+        [webhooks]
+        private-key = $SRHT_WEBHOOK_KEY
 
         [${name}.sr.ht]
+        origin = https://${name}.${cfg.domain}
+        connection-string = postgresql://srht:$SRHT_DB_PASSWORD@10.0.100.1/${name}_srht
         SRHTCFG
 
-                echo "$SRHT_PRIVATE_KEY_B64" | base64 -d > /tmp/srht-private-key
-
                 incus file push /tmp/srht-${name}-config.ini ${containerName}/etc/sr.ht/config.ini
-                incus file push /tmp/srht-private-key ${containerName}/etc/sr.ht/private-key
-                incus exec ${containerName} -- chmod 600 /etc/sr.ht/private-key
 
-                rm -f /tmp/srht-${name}-config.ini /tmp/srht-private-key
+                rm -f /tmp/srht-${name}-config.ini
 
                 incus start ${containerName} || true
                 incus exec ${containerName} -- rc-service ${name}.sr.ht-api restart
