@@ -50,5 +50,10 @@ in
 
   services.postgresql.package = pkgs.postgresql_16;
 
+  # terpsichore reads its Proton Bridge SASL password from this manually managed
+  # file, bypassing the agenix `postfix-sasl-passwd` secret (which calliope still
+  # uses, so it can't be removed). The bridge password comes from
+  # `protonmail-bridge --cli` > info; to rotate, edit the file and
+  # `systemctl reload postfix`.
   services.mail-relay.secretPaths.postfix-sasl-passwd = "/var/lib/postfix/sasl_passwd";
 }

@@ -522,6 +522,7 @@ let
         {
           enable = true;
           dataPath = services.lib.getServiceDataPath hostname "sourcehut";
+          services = svc.config.services or [ ];
         };
       getSecrets = hostname: {
         "srht-secrets-env" = {

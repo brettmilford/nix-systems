@@ -34,6 +34,14 @@ in
   };
 
   config = mkIf cfg.enable {
+    networking.firewall.trustedInterfaces = [ "incusbr0" ];
+
+    systemd.tmpfiles.rules = [
+      "d ${cfg.dataPath} 0755 root root -"
+      "d ${cfg.dataPath}/storage-pools 0755 root root -"
+      "d ${cfg.dataPath}/storage-pools/default 0755 root root -"
+    ];
+
     virtualisation.incus = {
       enable = true;
       package = pkgs.incus;

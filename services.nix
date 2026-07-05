@@ -145,6 +145,7 @@ in
     hosts = [ "terpsichore" ];
     config = {
       dataPath = "sourcehut";
+      services = [ "builds" ];
     };
   };
 
