@@ -77,7 +77,7 @@ let
             SSHD
               grep -q "^Include /etc/ssh/sshd_config.d/\*.conf" /etc/ssh/sshd_config || echo "Include /etc/ssh/sshd_config.d/*.conf" >> /etc/ssh/sshd_config
               mkdir -p /var/log/git.sr.ht
-              chown git:git /var/log/git.sr.ht
+              chown -R git:git /var/log/git.sr.ht
               rc-update add sshd default
               rc-service sshd restart
             '
