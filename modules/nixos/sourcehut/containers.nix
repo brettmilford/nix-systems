@@ -22,6 +22,10 @@ let
             incus config set ${containerName} security.nesting=true
             incus config device add ${containerName} kvm unix-char path=/dev/kvm 2>/dev/null || true
           ''
+        else if name == "git" then
+          ''
+            incus config device add ${containerName} sshproxy proxy listen=tcp:0.0.0.0:2222 connect=tcp:127.0.0.1:22 2>/dev/null || true
+          ''
         else
           "";
 
@@ -140,6 +144,11 @@ let
                 fi
 
                 incus start ${containerName} 2>/dev/null || true
+
+                ${lib.optionalString (name == "git") ''
+                  incus config device get ${containerName} sshproxy listen >/dev/null 2>&1 \
+                    || incus config device add ${containerName} sshproxy proxy listen=tcp:0.0.0.0:2222 connect=tcp:127.0.0.1:22
+                ''}
 
                 incus exec ${containerName} -- sh -c '
                   set -e
