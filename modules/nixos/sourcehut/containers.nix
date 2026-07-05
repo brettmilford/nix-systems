@@ -51,6 +51,34 @@ let
         else
           "";
 
+      sshProvision =
+        if name == "git" then
+          ''
+            incus exec ${containerName} -- sh -c '
+              set -e
+              apk add --no-cache openssh
+              ssh-keygen -A
+              passwd -u git 2>/dev/null || true
+              git config --system --replace-all safe.directory "/var/lib/git/*"
+              mkdir -p /etc/ssh/sshd_config.d
+              cat > /etc/ssh/sshd_config.d/10-sourcehut.conf <<SSHD
+            AuthorizedKeysCommand /usr/bin/sourcehut-ssh "%u" "%h" "%t" "%k"
+            AuthorizedKeysCommandUser root
+            PermitUserEnvironment SRHT_*
+            PasswordAuthentication no
+            KbdInteractiveAuthentication no
+            AllowUsers git
+            SSHD
+              grep -q "^Include /etc/ssh/sshd_config.d/\*.conf" /etc/ssh/sshd_config || echo "Include /etc/ssh/sshd_config.d/*.conf" >> /etc/ssh/sshd_config
+              mkdir -p /var/log/git.sr.ht
+              chown git:git /var/log/git.sr.ht
+              rc-update add sshd default
+              rc-service sshd restart
+            '
+          ''
+        else
+          "";
+
       # Every service needs to resolve the origins of all other services (for
       # cross-service links and auth), but only connects to its own database.
       serviceSections = lib.concatStrings (
@@ -60,9 +88,9 @@ let
             [${sname}.sr.ht]
             origin = https://${sname}.${cfg.domain}
           ''
-          + lib.optionalString (
-            sname == name
-          ) "connection-string = postgresql://srht:$SRHT_DB_PASSWORD@10.0.100.1/${name}_srht?sslmode=disable\n"
+          +
+            lib.optionalString (sname == name)
+              "connection-string = postgresql://srht:$SRHT_DB_PASSWORD@10.0.100.1/${name}_srht?sslmode=disable\n"
           + lib.optionalString (sname == name) serviceExtraIni
         ) cfg.serviceDefs
       );
@@ -127,6 +155,8 @@ let
                   apk update
                   apk add ${name}.sr.ht
                 '
+
+                ${sshProvision}
 
                 set -f
                 source ${cfg.secretPaths."srht-secrets-env"}
