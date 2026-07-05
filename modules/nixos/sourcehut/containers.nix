@@ -45,6 +45,7 @@ let
             outgoing-domain = https://git.${cfg.domain}
             post-update-script = /usr/bin/git.sr.ht-update-hook
             repos = /var/lib/git
+            ssh-user = git
           ''
         else if name == "todo" then
           ''

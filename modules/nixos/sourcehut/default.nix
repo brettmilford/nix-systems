@@ -123,6 +123,10 @@ in
 
     services.gateway.enable = true;
 
+    # git-over-SSH: the srht-git container's sshd is exposed on this host port
+    # via an incus proxy device (see containers.nix).
+    networking.firewall.allowedTCPPorts = [ 2222 ];
+
     # SourceHut containers relay outbound mail through the host's postfix on the
     # incus bridge, so it must listen there and trust the container subnet.
     services.mail-relay.listenInterfaces = [
