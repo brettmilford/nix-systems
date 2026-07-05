@@ -46,6 +46,7 @@ let
             post-update-script = /usr/bin/git.sr.ht-update-hook
             repos = /var/lib/git
             ssh-user = git
+            enable-dispatch = yes
           ''
         else if name == "todo" then
           ''
