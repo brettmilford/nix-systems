@@ -45,7 +45,7 @@ let
     builds = {
       ip = "10.0.100.16";
       webPort = 5006;
-      apiPort = 5106;
+      apiPort = 5102;
     };
   };
 
@@ -192,6 +192,7 @@ in
       enable = true;
       bind = "10.0.100.1";
       port = 6379;
+      settings.protected-mode = false;
     };
 
     systemd.services.redis-sourcehut = {
